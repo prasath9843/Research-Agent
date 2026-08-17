@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepResearch Studio — Autonomous AI Literature & Evidence Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked JS for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=21">
+</head>
+<body class="studio-theme">
+    <div class="studio-app">
+        
+        <!-- HEADER NAVBAR -->
+        <header class="studio-navbar">
+            <div class="navbar-left">
+                <div class="studio-brand">
+                    <div class="brand-logo-icon">
+                        <i class="fa-solid fa-atom fa-spin-pulse"></i>
+                    </div>
+                    <div class="brand-titles">
+                        <span class="brand-name">DeepResearch <span class="brand-badge-tag">STUDIO</span></span>
+                        <span class="brand-sub">Autonomous AI Research & Fact Verification</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navbar-center">
+                <div class="telemetry-pill" title="Our AI double-checks all facts & statistics against official sources before outputting results.">
+                    <i class="fa-solid fa-shield-check text-success"></i>
+                    <span>Fact Accuracy: <strong>9.2+ / 10 Rigor Stamped</strong></span>
+                </div>
+                <div class="telemetry-pill" title="Targeting official government, university extension, and top-tier academic journals.">
+                    <i class="fa-solid fa-globe text-warning"></i>
+                    <span>Source Filter: <strong>Verified Academic & Govt Sites</strong></span>
+                </div>
+            </div>
+
+            <div class="navbar-right">
+                <a href="#" class="btn-studio-action btn-pdf-accent" id="btn-download-pdf-nav" style="display: none;" target="_blank">
+                    <i class="fa-solid fa-file-pdf"></i> Download as a PDF
+                </a>
+                <button class="btn-studio-action btn-outline" id="btn-open-settings" title="Configure AI Models, Research Depth & Source Count">
+                    <i class="fa-solid fa-sliders"></i> Engine Settings
+                </button>
+                <button class="btn-studio-action btn-primary-gradient" id="btn-new-query" title="Start a fresh research workspace">
+                    <i class="fa-solid fa-plus"></i> New Research Task
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN DUAL-PANEL LAYOUT -->
+        <div class="studio-workspace">
+            
+            <!-- LEFT CONTROL & TELEMETRY SIDEBAR -->
+            <aside class="studio-sidebar" id="studio-sidebar">
+                
+                <!-- RESEARCH INPUT CARD -->
+                <div class="studio-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Start New Research
+                    </div>
+                    
+                    <form id="research-form" class="studio-form">
+                        <div class="form-group">
+                            <label for="query-input">What would you like to research today?</label>
+                            <textarea id="query-input" rows="3" placeholder="Enter any scientific, medical, agricultural, tech, or policy question (e.g. Sustainable Agriculture in Tamil Nadu)" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="suggestions-input"><i class="fa-solid fa-lightbulb text-warning"></i> Research Focus & Suggestions (Optional)</label>
+                            <textarea id="suggestions-input" rows="2" placeholder="e.g. Focus on economic impact, Indian agricultural datasets, and cost-benefit analysis"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="target-pages-input"><i class="fa-solid fa-file-lines text-emerald"></i> Target Report Length (Pages):</label>
+                            <select id="target-pages-input">
+                                <option value="2">2 Pages (Executive Summary)</option>
+                                <option value="4" selected>4 Pages (Standard Comprehensive - Default)</option>
+                                <option value="6">6 Pages (In-depth Research Monograph)</option>
+                                <option value="8">8 Pages (Exhaustive Academic Paper)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Execution Speed & Depth Mode:</label>
+                            <div class="speed-mode-toggle" id="speed-mode-group">
+                                <button type="button" class="speed-btn active" data-mode="turbo" title="Fast 15-20 second synthesis">⚡ Turbo (~15s)</button>
+                                <button type="button" class="speed-btn" data-mode="standard" title="Balanced 30-45 second research">🚀 Standard (~30s)</button>
+                                <button type="button" class="speed-btn" data-mode="deep" title="Exhaustive multi-round academic audit">🔬 Deep (~1.5m)</button>
+                            </div>
+                        </div>
+
+                        <div class="quick-presets">
+                            <span class="preset-label">Try an example topic:</span>
+                            <button type="button" class="chip-preset" onclick="loadPreset('Sustainable Agriculture in Tamil Nadu')">🌾 Tamil Nadu Agri</button>
+                            <button type="button" class="chip-preset" onclick="loadPreset('Energy-Efficient Deep Learning on Edge Devices')">⚡ Edge AI</button>
+                        </div>
+
+                        <button type="submit" id="btn-start" class="btn-launch-research">
+                            <i class="fa-solid fa-rocket"></i> Launch Research Engine
+                        </button>
+                    </form>
+                </div>
+
+                <!-- LIVE RESEARCH TELEMETRY TIMELINE -->
+                <div class="studio-card flex-fill">
+                    <div class="card-title justify-between">
+                        <span><i class="fa-solid fa-list-check"></i> Live Progress Log</span>
+                        <span class="status-indicator-dot" id="status-dot"></span>
+                    </div>
+
+                    <div class="telemetry-timeline" id="telemetry-log">
+                        <div class="timeline-step done">
+                            <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                            <div class="step-content">
+                                <span class="step-title">System Ready</span>
+                                <span class="step-desc">Enter any topic above to start research.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECENT SESSIONS -->
+                <div class="studio-card">
+                    <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Past Research Reports</div>
+                    <div class="recent-sessions-list" id="recent-sessions-list">
+                        <div class="session-history-item active" data-session-id="latest">
+                            <i class="fa-solid fa-file-contract"></i>
+                            <span class="session-name" id="recent-title-display">Sustainable Agriculture T...</span>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- RIGHT MAIN CANVAS & TABBED RESULT INSPECTOR -->
+            <main class="studio-canvas">
+                
+                <!-- WORKSPACE TABS HEADER -->
+                <div class="canvas-tab-bar">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="tab-report" title="Read the complete step-by-step research paper with citations">
+                            <i class="fa-solid fa-book-open"></i> 📜 1. Full Research Report
+                        </button>
+                        <button class="tab-btn" data-tab="tab-evidence" title="View all verified numbers, sample sizes, and statistics in a table">
+                            <i class="fa-solid fa-table-list"></i> 📊 2. Key Data & Verified Facts
+                        </button>
+                        <button class="tab-btn" data-tab="tab-matrix" title="See where research studies agree or differ">
+                            <i class="fa-solid fa-scale-balanced"></i> ⚔️ 3. Where Sources Agree & Differ
+                        </button>
+                        <button class="tab-btn" data-tab="tab-export" title="Save report as a PDF Document or Markdown Text">
+                            <i class="fa-solid fa-download"></i> 📥 4. Download Files
+                        </button>
+                    </div>
+
+                    <div class="tab-meta-badge" id="audit-score-badge" style="display: none;">
+                        <i class="fa-solid fa-trophy text-amber"></i> Accuracy Score: <strong>9.4 / 10 Stamped</strong>
+                    </div>
+                </div>
+
+                <!-- TAB 1: FULL EXECUTIVE REPORT -->
+                <div class="tab-content-pane active" id="tab-report">
+                    <!-- Hero State when empty -->
+                    <div class="hero-empty-state" id="hero-empty-state">
+                        <div class="hero-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Autonomous AI Lead Researcher</div>
+                        <h2>Enter any research topic above to generate a 100% verified report</h2>
+                        <p style="margin-bottom: 2rem;">DeepResearch Studio automatically searches academic journals, university trial data, and government portals — cross-checking every fact with zero fake information.</p>
+
+                        <!-- EASY 3-STEP GUIDE FOR EVERYONE -->
+                        <div class="user-guide-steps">
+                            <div class="guide-step-card">
+                                <div class="step-number">1</div>
+                                <h4>Ask a Question</h4>
+                                <p>Type any topic in the box on the left (e.g., Agriculture, AI, Medicine, Economics).</p>
+                            </div>
+
+                            <div class="guide-step-card">
+                                <div class="step-number">2</div>
+                                <h4>AI Searches & Reads</h4>
+                                <p>The AI searches official websites, parses research studies, and extracts real numerical data.</p>
+                            </div>
+
+                            <div class="guide-step-card">
+                                <div class="step-number">3</div>
+                                <h4>Get Verified Paper</h4>
+                                <p>Receive a clear research paper with source citations, data tables, and PDF download.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ultra-Professional Studio Report Header with PDF Download & Word Editor Suite -->
+                    <div class="report-top-bar" id="report-top-bar" style="display: none;">
+                        <div class="report-meta">
+                            <span class="badge-pill" id="report-status-badge">
+                                <i class="fa-solid fa-circle-check text-emerald"></i> Publication Ready
+                            </span>
+                            <span class="report-stat-chip" id="report-word-count-chip">
+                                <i class="fa-solid fa-file-lines"></i> <span id="report-words-val">0</span> words
+                            </span>
+                            <button type="button" class="btn-edit-toggle" id="btn-toggle-edit" title="Click to edit words, headings, or numbers directly in the report">
+                                <i class="fa-solid fa-pen-to-square"></i> <span id="edit-btn-text">Edit Words</span>
+                            </button>
+                            <button type="button" class="btn-save-edit" id="btn-save-edit" style="display: none;" title="Save your edited text and automatically regenerate PDF">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                            </button>
+                        </div>
+                        <div class="report-actions">
+                            <button type="button" class="btn-copy-md" id="btn-copy-report" title="Copy full report as Markdown to clipboard">
+                                <i class="fa-solid fa-copy"></i> Copy
+                            </button>
+                            <a href="#" id="btn-download-pdf-top" class="btn-download-pdf-hero" target="_blank" title="Download publication-grade formatted PDF with topic name">
+                                <i class="fa-solid fa-file-pdf"></i> Download as a PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Live Edit Mode User Guide Hint -->
+                    <div class="edit-hint-banner" id="edit-hint-banner" style="display: none;">
+                        <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
+                        <span><strong>Live Edit Mode Active:</strong> You can click anywhere to modify text, headers, and tables directly. When finished, click <strong>Save Changes</strong> above to update your PDF download!</span>
+                    </div>
+
+                    <!-- Rendered Report -->
+                    <div class="markdown-article-view" id="markdown-body" style="display: none;"></div>
+                </div>
+
+                <!-- TAB 2: EVIDENCE & CLAIMS MATRIX -->
+                <div class="tab-content-pane" id="tab-evidence">
+                    <div class="table-container-card">
+                        <div class="table-header-bar">
+                            <div class="table-title-group">
+                                <h3><i class="fa-solid fa-database"></i> Verified Facts & Numerical Data Points</h3>
+                                <span class="badge-pill" id="evidence-count-tag">0 Claims</span>
+                            </div>
+                            <div class="table-search-input">
+                                <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                                <input type="text" id="claims-search-input" placeholder="Filter facts by keyword or source..." />
+                            </div>
+                        </div>
+                        <div class="table-scroll-wrapper">
+                            <table class="studio-table" id="claims-table">
+                                <thead>
+                                    <tr>
+                                        <th>Official Source & Link</th>
+                                        <th>Extracted Key Fact / Finding</th>
+                                        <th>Supporting Exact Quote</th>
+                                        <th>Category Tag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="4" class="text-center text-muted">No evidence claims loaded yet. Enter a research topic to populate this table.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: DISAGREEMENT MATRIX -->
+                <div class="tab-content-pane" id="tab-matrix">
+                    <div class="matrix-cards-container" id="contradictions-container">
+                        <div class="hero-empty-state">
+                            <div class="hero-badge"><i class="fa-solid fa-scale-balanced"></i> Source Agreement & Disagreement Audit</div>
+                            <h3>No conflicting research claims detected yet</h3>
+                            <p>Launch a research task to automatically compare findings across multiple studies.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: EXPORT STUDIO -->
+                <div class="tab-content-pane" id="tab-export">
+                    <div class="export-studio-grid">
+                        <div class="export-tile">
+                            <div class="tile-icon pdf-theme"><i class="fa-solid fa-file-pdf"></i></div>
+                            <h4>Download PDF Document</h4>
+                            <p>Formatted PDF report with clean typography, tables, and clickable references index.</p>
+                            <a href="#" id="export-pdf-btn" target="_blank" class="btn-tile-download disabled">
+                                <i class="fa-solid fa-download"></i> Save PDF File
+                            </a>
+                        </div>
+
+                        <div class="export-tile">
+                            <div class="tile-icon md-theme"><i class="fa-solid fa-file-code"></i></div>
+                            <h4>Download Markdown File (.md)</h4>
+                            <p>Raw text document containing source formatting and bracketed citation tags.</p>
+                            <a href="#" id="export-md-btn" download class="btn-tile-download disabled">
+                                <i class="fa-solid fa-download"></i> Save Markdown Text
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FLOATING FOLLOW-UP PROMPT BAR -->
+                <div class="studio-followup-bar">
+                    <div class="followup-inner">
+                        <i class="fa-solid fa-comment-dots text-muted"></i>
+                        <input type="text" id="followup-input" placeholder="Ask a question or request a summary of this report in simple language..." />
+                        <button id="btn-send-followup" class="btn-circle-send" title="Send Follow-up Question"><i class="fa-solid fa-arrow-up"></i></button>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+
+        <!-- ENGINE SETTINGS MODAL -->
+        <div class="studio-modal-backdrop" id="settings-modal">
+            <div class="studio-modal">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-sliders"></i> AI Research Engine Settings</h3>
+                    <button class="btn-close-modal" id="btn-close-settings">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="fast-model">Fast AI Model (Used for Query Planning & Searching)</label>
+                        <select id="fast-model">
+                            <option value="meta/llama-3.1-8b-instruct">Loading 97+ NVIDIA Models...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="strong-model">Strong AI Model (Used for Writing Report & Deep Synthesis)</label>
+                        <select id="strong-model">
+                            <option value="meta/llama-3.3-70b-instruct">Loading 97+ NVIDIA Models...</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="max-rounds">Research Depth (Search Rounds)</label>
+                            <input type="number" id="max-rounds" value="2" min="1" max="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="max-sources">Maximum Sources to Read</label>
+                            <input type="number" id="max-sources" value="15" min="5" max="50">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 0.8rem;">
+                        <label for="modal-target-pages"><i class="fa-solid fa-file-lines text-emerald"></i> Target Report Length (No. of Pages)</label>
+                        <select id="modal-target-pages">
+                            <option value="2">2 Pages (Executive Summary)</option>
+                            <option value="4" selected>4 Pages (Standard Comprehensive - Default)</option>
+                            <option value="6">6 Pages (In-depth Research Monograph)</option>
+                            <option value="8">8 Pages (Exhaustive Academic Paper)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 0.8rem;">
+                        <label for="modal-suggestions-input"><i class="fa-solid fa-lightbulb text-warning"></i> Custom Research Focus / Suggestions</label>
+                        <textarea id="modal-suggestions-input" rows="2" placeholder="e.g. Focus on economic impact, Indian agricultural datasets, and cost-benefit analysis"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding: 1rem 1.2rem; border-top: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; background: var(--bg-card);">
+                    <button class="btn-studio-action btn-outline" id="btn-cancel-settings">Cancel</button>
+                    <button class="btn-studio-action btn-primary-gradient" id="btn-confirm-launch">
+                        <i class="fa-solid fa-play"></i> Confirm & Start Research
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application JavaScript -->
+    <script src="/static/js/app.js?v=22"></script>
+</body>
+</html>

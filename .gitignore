@@ -1,0 +1,32 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Secrets & Environment Variables (Never commit!)
+.env
+*.env
+
+# SQLite Database
+*.db
+research_agent.db
+research_agent.db-journal
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Exports / Generated Reports
+exports/
+*.pdf
+!templates/*.html
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

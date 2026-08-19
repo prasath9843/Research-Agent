@@ -1243,3 +1243,202 @@ body.studio-theme {
 
 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); }
 .btn-close-modal { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-muted); }
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE STYLES (iOS, Android & Tablets)
+   ========================================================================== */
+
+@media (max-width: 992px) {
+    body.studio-theme {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .studio-app {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .studio-navbar {
+        height: auto;
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .navbar-center {
+        display: none; /* Hide telemetry pills on smaller screens */
+    }
+
+    .navbar-right {
+        margin-left: auto;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .studio-workspace {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .studio-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 2px solid var(--border-dark);
+        overflow: visible;
+        padding: 1rem;
+    }
+
+    .studio-canvas {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .canvas-tab-bar {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.5rem;
+        flex-wrap: nowrap;
+    }
+
+    .tab-buttons {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        gap: 0.4rem;
+        display: flex;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .report-top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        position: relative;
+    }
+
+    .report-meta-chips {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .report-actions-cluster {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .btn-download-pdf-hero, .btn-edit-toggle, .btn-save-edit, .btn-copy-md {
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .report-paper-container {
+        padding: 1.25rem 0.85rem;
+        margin: 0;
+        border-radius: var(--radius-sm);
+        width: 100%;
+    }
+
+    .markdown-rendered-content {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .markdown-rendered-content table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+    }
+
+    .user-guide-steps {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .studio-followup-bar {
+        position: static;
+        transform: none;
+        width: 100%;
+        margin-top: 1.5rem;
+        padding: 0 0.25rem;
+    }
+
+    .studio-modal {
+        width: 95%;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-name {
+        font-size: 1rem;
+    }
+
+    .brand-sub {
+        display: none;
+    }
+
+    .brand-logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .btn-studio-action {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .speed-btn {
+        font-size: 0.68rem;
+        padding: 0.3rem 0.2rem;
+    }
+
+    .chip-preset {
+        font-size: 0.72rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .report-paper-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .markdown-rendered-content h1 {
+        font-size: 1.25rem;
+        line-height: 1.3;
+    }
+
+    .markdown-rendered-content h2 {
+        font-size: 1.1rem;
+        line-height: 1.3;
+    }
+
+    .markdown-rendered-content p, 
+    .markdown-rendered-content li {
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+}

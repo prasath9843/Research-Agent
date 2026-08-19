@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Marked JS for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=23">
+    <link rel="stylesheet" href="/static/css/style.css?v=24">
 </head>
 <body class="studio-theme">
     <div class="studio-app">
@@ -50,13 +50,37 @@
                     <i class="fa-solid fa-sliders"></i> Engine Settings
                 </button>
                 <button class="btn-studio-action btn-primary-gradient" id="btn-new-query" title="Start a fresh research workspace">
-                    <i class="fa-solid fa-plus"></i> New Research Task
+                    <i class="fa-solid fa-plus"></i> New Task
                 </button>
+                
+                <!-- USER AUTH CONTAINER -->
+                <div class="user-auth-wrapper" id="user-auth-wrapper">
+                    <button class="btn-studio-action btn-user-auth" id="btn-open-auth">
+                        <i class="fa-solid fa-circle-user"></i> <span>Sign In</span>
+                    </button>
+                    <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
+                        <div class="user-info-chip" id="user-info-chip" title="Account profile">
+                            <i class="fa-solid fa-user-check text-emerald"></i>
+                            <span class="user-name-display" id="user-name-display">My Account</span>
+                        </div>
+                        <button class="btn-logout" id="btn-logout" title="Sign out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                    </div>
+                </div>
             </div>
         </header>
 
+        <!-- MOBILE VIEW SWITCHER (Visible on mobile screens) -->
+        <div class="mobile-view-switcher" id="mobile-view-switcher">
+            <button class="mobile-switch-btn active" id="btn-mobile-form" data-target="form">
+                <i class="fa-solid fa-magnifying-glass"></i> Research Form
+            </button>
+            <button class="mobile-switch-btn" id="btn-mobile-report" data-target="report">
+                <i class="fa-solid fa-book-open"></i> Full Report
+            </button>
+        </div>
+
         <!-- MAIN DUAL-PANEL LAYOUT -->
-        <div class="studio-workspace">
+        <div class="studio-workspace" id="studio-workspace">
             
             <!-- LEFT CONTROL & TELEMETRY SIDEBAR -->
             <aside class="studio-sidebar" id="studio-sidebar">
@@ -362,9 +386,59 @@
             </div>
         </div>
 
+        <!-- AUTHENTICATION MODAL -->
+        <div class="studio-modal-backdrop" id="auth-modal">
+            <div class="studio-modal auth-modal-card">
+                <div class="modal-header">
+                    <div class="auth-tabs">
+                        <button type="button" class="auth-tab-btn active" id="btn-tab-login" data-tab="login"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+                        <button type="button" class="auth-tab-btn" id="btn-tab-signup" data-tab="signup"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+                    </div>
+                    <button class="btn-close-modal" id="btn-close-auth">&times;</button>
+                </div>
+
+                <div class="modal-body auth-modal-body">
+                    <!-- GOOGLE 1-CLICK AUTH -->
+                    <button type="button" class="btn-google-auth" id="btn-google-login">
+                        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <div class="auth-divider">
+                        <span>or with email</span>
+                    </div>
+
+                    <!-- ERROR MESSAGE BANNER -->
+                    <div class="auth-error-alert" id="auth-error-alert" style="display: none;"></div>
+
+                    <!-- FORM -->
+                    <form id="auth-form" class="studio-form">
+                        <div class="form-group" id="group-signup-name" style="display: none;">
+                            <label for="auth-name"><i class="fa-solid fa-id-badge text-emerald"></i> Full Name</label>
+                            <input type="text" id="auth-name" placeholder="Dr. Jane Doe" autocomplete="name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="auth-email"><i class="fa-solid fa-envelope text-emerald"></i> Email Address</label>
+                            <input type="email" id="auth-email" placeholder="researcher@university.edu" required autocomplete="email" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="auth-password"><i class="fa-solid fa-lock text-emerald"></i> Password</label>
+                            <input type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password" />
+                        </div>
+
+                        <button type="submit" class="btn-auth-submit" id="btn-auth-submit">
+                            <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Application JavaScript -->
-    <script src="/static/js/app.js?v=22"></script>
+    <script src="/static/js/app.js?v=24"></script>
 </body>
 </html>

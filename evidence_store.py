@@ -8,15 +8,15 @@ class EvidenceStore:
     def __init__(self, session_id: str):
         self.session_id = session_id
 
-    def create_session(self, query: str, config_data: dict):
+    def create_session(self, query: str, config_data: dict, user_id: Optional[str] = None):
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             """
-            INSERT OR REPLACE INTO sessions (session_id, query, status, stage, config_json, created_at, updated_at)
-            VALUES (?, ?, 'running', 'initialized', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            INSERT OR REPLACE INTO sessions (session_id, user_id, query, status, stage, config_json, created_at, updated_at)
+            VALUES (?, ?, ?, 'running', 'initialized', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """,
-            (self.session_id, query, json.dumps(config_data))
+            (self.session_id, user_id, query, json.dumps(config_data))
         )
         conn.commit()
         conn.close()

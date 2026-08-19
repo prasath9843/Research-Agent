@@ -17,7 +17,7 @@ from evidence_store import EvidenceStore
 from pdf_exporter import export_report_files
 
 class ResearchPipeline:
-    def __init__(self, session_id: str, query: str, config_override: dict = None):
+    def __init__(self, session_id: str, query: str, config_override: dict = None, user_id: str = None):
         self.session_id = session_id
         self.query = query
         self.config = {
@@ -35,8 +35,9 @@ class ResearchPipeline:
             self.config["strong_model"] = self.config["fast_model"]
 
         self.user_suggestions = self.config.get("user_suggestions", "")
+        self.user_id = user_id or (config_override.get("user_id") if config_override else None)
         self.store = EvidenceStore(self.session_id)
-        self.store.create_session(self.query, self.config)
+        self.store.create_session(self.query, self.config, user_id=self.user_id)
 
     def log(self, stage: str, message: str, level: str = "INFO"):
         print(f"[{self.session_id[:8]}] [{stage}] [{level}] {message}")

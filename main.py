@@ -9,8 +9,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 
-from db import init_db, get_db_connection
-from models import ResearchRequest, ResearchStatusResponse, UpdateReportRequest
+import os
+import time
+import hmac
+import hashlib
+import base64
+import json
+import requests
+from config import settings
+from db import init_db, get_db_connection, create_user, get_user_by_email, get_user_by_id, get_user_by_google_id
+from models import (
+    ResearchRequest, ResearchStatusResponse, UpdateReportRequest,
+    SignupRequest, LoginRequest, GoogleAuthRequest, UserResponse
+)
 from evidence_store import EvidenceStore
 from pipeline import ResearchPipeline
 from pdf_exporter import export_report_files, generate_pdf_from_markdown
@@ -30,16 +41,67 @@ active_tasks = {}
 def startup_event():
     init_db()
 
-def run_pipeline_worker(session_id: str, query: str, config_override: dict):
+# --- Auth Helpers ---
+AUTH_SECRET = os.getenv("AUTH_SECRET", "deepresearch-studio-secret-auth-token-2026")
+
+def hash_password(password: str) -> str:
+    salt = os.urandom(16).hex()
+    hashed = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}${hashed}"
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    if not stored_hash or "$" not in stored_hash:
+        return False
+    salt, hashed = stored_hash.split("$", 1)
+    check = hashlib.sha256((salt + password).encode()).hexdigest()
+    return hmac.compare_digest(check, hashed)
+
+def create_auth_token(user_id: str, email: str) -> str:
+    payload = {
+        "user_id": user_id,
+        "email": email,
+        "exp": int(time.time()) + (30 * 86400) # 30 days
+    }
+    raw = json.dumps(payload)
+    sig = hmac.new(AUTH_SECRET.encode(), raw.encode(), hashlib.sha256).hexdigest()
+    token_bytes = f"{raw}###{sig}".encode()
+    return base64.urlsafe_b64encode(token_bytes).decode()
+
+def decode_auth_token(token: str) -> Optional[dict]:
     try:
-        pipeline = ResearchPipeline(session_id=session_id, query=query, config_override=config_override)
+        raw_bytes = base64.urlsafe_b64decode(token.encode()).decode()
+        raw_json, sig = raw_bytes.rsplit("###", 1)
+        expected_sig = hmac.new(AUTH_SECRET.encode(), raw_json.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig, expected_sig):
+            return None
+        payload = json.loads(raw_json)
+        if payload.get("exp", 0) < int(time.time()):
+            return None
+        return payload
+    except Exception:
+        return None
+
+def get_current_user_optional(request: Request) -> Optional[dict]:
+    auth_header = request.headers.get("Authorization", "")
+    token = ""
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:].strip()
+    if not token:
+        token = request.cookies.get("auth_token", "")
+    if not token:
+        return None
+    
+    data = decode_auth_token(token)
+    if not data or "user_id" not in data:
+        return None
+    return get_user_by_id(data["user_id"])
+
+def run_pipeline_worker(session_id: str, query: str, config_override: dict, user_id: Optional[str] = None):
+    try:
+        pipeline = ResearchPipeline(session_id=session_id, query=query, config_override=config_override, user_id=user_id)
         pipeline.run()
     except Exception as e:
         print(f"[Worker] Pipeline error for {session_id}: {e}")
-
-import os
-import requests
-from config import settings
 
 @app.get("/api/models")
 def get_nvidia_models():
@@ -105,10 +167,119 @@ def index_page(request: Request):
 def health_check():
     return {"status": "ok"}
 
+# --- User Authentication Endpoints ---
+
+@app.post("/api/auth/signup")
+def auth_signup(payload: SignupRequest):
+    email = payload.email.lower().strip()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Please enter a valid email address.")
+    if not payload.password or len(payload.password) < 4:
+        raise HTTPException(status_code=400, detail="Password must be at least 4 characters long.")
+
+    existing = get_user_by_email(email)
+    if existing:
+        raise HTTPException(status_code=400, detail="An account with this email already exists. Please log in.")
+
+    user_id = str(uuid.uuid4())
+    pw_hash = hash_password(payload.password)
+    create_user(user_id=user_id, email=email, name=payload.name or email.split("@")[0], password_hash=pw_hash, auth_provider="email")
+    token = create_auth_token(user_id, email)
+    return {
+        "status": "success",
+        "token": token,
+        "user": {"id": user_id, "name": payload.name or email.split("@")[0], "email": email, "auth_provider": "email"}
+    }
+
+@app.post("/api/auth/login")
+def auth_login(payload: LoginRequest):
+    email = payload.email.lower().strip()
+    user = get_user_by_email(email)
+    if not user or not verify_password(payload.password, user.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Invalid email or password. Please try again.")
+
+    token = create_auth_token(user["id"], user["email"])
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "auth_provider": user.get("auth_provider", "email"),
+            "avatar_url": user.get("avatar_url")
+        }
+    }
+
+@app.post("/api/auth/google")
+def auth_google(payload: GoogleAuthRequest):
+    email = payload.email
+    name = payload.name or "Google User"
+    google_id = payload.google_id
+    avatar_url = payload.avatar_url
+
+    if payload.credential:
+        try:
+            parts = payload.credential.split(".")
+            if len(parts) >= 2:
+                padded = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
+                jwt_data = json.loads(base64.urlsafe_b64decode(padded.encode()).decode())
+                email = jwt_data.get("email", email)
+                name = jwt_data.get("name", name)
+                google_id = jwt_data.get("sub", google_id)
+                avatar_url = jwt_data.get("picture", avatar_url)
+        except Exception as e:
+            print("Error parsing Google credential:", e)
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Google authentication did not provide a valid email.")
+
+    email = email.lower().strip()
+    user = get_user_by_email(email)
+    if not user:
+        user_id = str(uuid.uuid4())
+        create_user(user_id=user_id, email=email, name=name, auth_provider="google", google_id=google_id, avatar_url=avatar_url)
+        user = get_user_by_id(user_id)
+
+    token = create_auth_token(user["id"], user["email"])
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "auth_provider": "google",
+            "avatar_url": user.get("avatar_url") or avatar_url
+        }
+    }
+
+@app.get("/api/auth/me")
+def auth_me(request: Request):
+    user = get_current_user_optional(request)
+    if not user:
+        return {"user": None}
+    return {
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "auth_provider": user.get("auth_provider", "email"),
+            "avatar_url": user.get("avatar_url")
+        }
+    }
+
+@app.post("/api/auth/logout")
+def auth_logout():
+    return {"status": "success", "message": "Logged out successfully."}
+
 @app.post("/api/research")
-def start_research(payload: ResearchRequest, background_tasks: BackgroundTasks):
+def start_research(payload: ResearchRequest, request: Request, background_tasks: BackgroundTasks):
     if not payload.query or not payload.query.strip():
         raise HTTPException(status_code=400, detail="Research query cannot be empty.")
+
+    user = get_current_user_optional(request)
+    user_id = user["id"] if user else None
 
     session_id = str(uuid.uuid4())
     config_override = {}
@@ -128,7 +299,7 @@ def start_research(payload: ResearchRequest, background_tasks: BackgroundTasks):
     # Start background execution thread
     thread = threading.Thread(
         target=run_pipeline_worker,
-        args=(session_id, payload.query.strip(), config_override),
+        args=(session_id, payload.query.strip(), config_override, user_id),
         daemon=True
     )
     thread.start()
@@ -303,10 +474,14 @@ def download_html_report(session_id: str):
     )
 
 @app.get("/api/sessions")
-def list_sessions():
+def list_sessions(request: Request):
+    user = get_current_user_optional(request)
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT session_id, query, status, stage, created_at FROM sessions ORDER BY created_at DESC LIMIT 20")
+    if user:
+        cursor.execute("SELECT session_id, query, status, stage, created_at FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 30", (user["id"],))
+    else:
+        cursor.execute("SELECT session_id, query, status, stage, created_at FROM sessions WHERE user_id IS NULL ORDER BY created_at DESC LIMIT 15")
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
-    return {"sessions": rows}
+    return {"sessions": rows, "user": user}

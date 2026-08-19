@@ -13,15 +13,28 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.executescript("""
+    CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        password_hash TEXT,
+        auth_provider TEXT DEFAULT 'email',
+        google_id TEXT,
+        avatar_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS sessions (
         session_id TEXT PRIMARY KEY,
+        user_id TEXT,
         query TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
         stage TEXT NOT NULL DEFAULT 'initialized',
         rounds_completed INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        config_json TEXT
+        config_json TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
     CREATE TABLE IF NOT EXISTS sub_questions (
@@ -102,8 +115,48 @@ def init_db():
     );
     """)
 
+    # Safe migration: add user_id column to sessions if not present
+    try:
+        cursor.execute("ALTER TABLE sessions ADD COLUMN user_id TEXT;")
+    except sqlite3.OperationalError:
+        pass # Already exists
+
     conn.commit()
     conn.close()
+
+def create_user(user_id: str, email: str, name: str, password_hash: str = None, auth_provider: str = 'email', google_id: str = None, avatar_url: str = None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (id, email, name, password_hash, auth_provider, google_id, avatar_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (user_id, email.lower().strip(), name.strip(), password_hash, auth_provider, google_id, avatar_url))
+    conn.commit()
+    conn.close()
+
+def get_user_by_email(email: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email.lower().strip(),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_user_by_id(user_id: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_user_by_google_id(google_id: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE google_id = ?", (google_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
 
 if __name__ == "__main__":
     init_db()

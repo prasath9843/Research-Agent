@@ -117,3 +117,28 @@ class ResearchStatusResponse(BaseModel):
     total_claims_extracted: int
     logs: List[SessionLogEntry]
     error: Optional[str] = None
+
+# --- User Authentication Models ---
+
+class SignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class GoogleAuthRequest(BaseModel):
+    credential: Optional[str] = None
+    email: Optional[str] = None
+    name: Optional[str] = None
+    google_id: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    email: str
+    auth_provider: str = "email"
+    avatar_url: Optional[str] = None

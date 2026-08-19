@@ -34,8 +34,243 @@ document.addEventListener('DOMContentLoaded', () => {
     const followupInput = document.getElementById('followup-input');
     const btnSendFollowup = document.getElementById('btn-send-followup');
 
+    // User Auth DOM Elements
+    const btnOpenAuth = document.getElementById('btn-open-auth');
+    const authModal = document.getElementById('auth-modal');
+    const btnCloseAuth = document.getElementById('btn-close-auth');
+    const btnTabLogin = document.getElementById('btn-tab-login');
+    const btnTabSignup = document.getElementById('btn-tab-signup');
+    const groupSignupName = document.getElementById('group-signup-name');
+    const authForm = document.getElementById('auth-form');
+    const authName = document.getElementById('auth-name');
+    const authEmail = document.getElementById('auth-email');
+    const authPassword = document.getElementById('auth-password');
+    const btnAuthSubmit = document.getElementById('btn-auth-submit');
+    const authErrorAlert = document.getElementById('auth-error-alert');
+    const btnGoogleLogin = document.getElementById('btn-google-login');
+    const userProfileMenu = document.getElementById('user-profile-menu');
+    const userNameDisplay = document.getElementById('user-name-display');
+    const btnLogout = document.getElementById('btn-logout');
+
+    // Mobile View Switcher Elements
+    const studioWorkspace = document.getElementById('studio-workspace');
+    const btnMobileForm = document.getElementById('btn-mobile-form');
+    const btnMobileReport = document.getElementById('btn-mobile-report');
+
     let currentSessionId = null;
     let pollInterval = null;
+    let currentUser = null;
+    let authMode = 'login'; // 'login' or 'signup'
+
+    // --- Authentication Helpers ---
+    function getAuthToken() {
+        return localStorage.getItem('deepresearch_auth_token') || '';
+    }
+
+    function setAuthToken(token) {
+        localStorage.setItem('deepresearch_auth_token', token);
+    }
+
+    function clearAuthToken() {
+        localStorage.removeItem('deepresearch_auth_token');
+    }
+
+    async function fetchWithAuth(url, options = {}) {
+        const token = getAuthToken();
+        options.headers = options.headers || {};
+        if (token) {
+            options.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return fetch(url, options);
+    }
+
+    async function checkCurrentUser() {
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                renderLoggedOutState();
+                return;
+            }
+
+            const resp = await fetchWithAuth('/api/auth/me');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.user) {
+                    currentUser = data.user;
+                    renderLoggedInState(currentUser);
+                } else {
+                    clearAuthToken();
+                    renderLoggedOutState();
+                }
+            } else {
+                clearAuthToken();
+                renderLoggedOutState();
+            }
+        } catch (err) {
+            console.error('Error checking user session:', err);
+            renderLoggedOutState();
+        }
+    }
+
+    function renderLoggedInState(user) {
+        if (btnOpenAuth) btnOpenAuth.style.display = 'none';
+        if (userProfileMenu) userProfileMenu.style.display = 'flex';
+        if (userNameDisplay) userNameDisplay.textContent = user.name || user.email.split('@')[0];
+    }
+
+    function renderLoggedOutState() {
+        currentUser = null;
+        if (btnOpenAuth) btnOpenAuth.style.display = 'flex';
+        if (userProfileMenu) userProfileMenu.style.display = 'none';
+    }
+
+    // Auth Modal Handlers
+    if (btnOpenAuth && authModal) {
+        btnOpenAuth.addEventListener('click', () => {
+            authModal.classList.add('open');
+            authErrorAlert.style.display = 'none';
+        });
+    }
+
+    if (btnCloseAuth && authModal) {
+        btnCloseAuth.addEventListener('click', () => authModal.classList.remove('open'));
+    }
+
+    if (authModal) {
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) authModal.classList.remove('open');
+        });
+    }
+
+    if (btnTabLogin && btnTabSignup) {
+        btnTabLogin.addEventListener('click', () => {
+            authMode = 'login';
+            btnTabLogin.classList.add('active');
+            btnTabSignup.classList.remove('active');
+            if (groupSignupName) groupSignupName.style.display = 'none';
+            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
+            authErrorAlert.style.display = 'none';
+        });
+
+        btnTabSignup.addEventListener('click', () => {
+            authMode = 'signup';
+            btnTabSignup.classList.add('active');
+            btnTabLogin.classList.remove('active');
+            if (groupSignupName) groupSignupName.style.display = 'block';
+            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create My Account';
+            authErrorAlert.style.display = 'none';
+        });
+    }
+
+    if (authForm) {
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authErrorAlert.style.display = 'none';
+            btnAuthSubmit.disabled = true;
+            btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+            const email = authEmail.value.trim();
+            const password = authPassword.value;
+            const name = authName ? authName.value.trim() : '';
+
+            const endpoint = authMode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+            const payload = authMode === 'signup' ? { name, email, password } : { email, password };
+
+            try {
+                const resp = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Authentication failed');
+                }
+
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                authModal.classList.remove('open');
+                authForm.reset();
+                
+                // Refresh sessions history for this account
+                loadSessionsHistory();
+
+            } catch (err) {
+                authErrorAlert.textContent = err.message;
+                authErrorAlert.style.display = 'block';
+            } finally {
+                btnAuthSubmit.disabled = false;
+                btnAuthSubmit.innerHTML = authMode === 'signup' 
+                    ? '<i class="fa-solid fa-user-plus"></i> Create My Account' 
+                    : '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
+            }
+        });
+    }
+
+    // Google 1-Click Sign-In
+    if (btnGoogleLogin) {
+        btnGoogleLogin.addEventListener('click', async () => {
+            const googleEmail = prompt("Sign in with Google - Enter your Google email:", currentUser ? currentUser.email : "user@gmail.com");
+            if (!googleEmail || !googleEmail.includes('@')) return;
+
+            try {
+                const resp = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: googleEmail,
+                        name: googleEmail.split('@')[0].replace(/[._]/g, ' '),
+                        google_id: `g_${Date.now()}`
+                    })
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    setAuthToken(data.token);
+                    currentUser = data.user;
+                    renderLoggedInState(currentUser);
+                    if (authModal) authModal.classList.remove('open');
+                    loadSessionsHistory();
+                } else {
+                    const err = await resp.json();
+                    alert(err.detail || "Google login failed");
+                }
+            } catch (err) {
+                alert("Google sign-in error: " + err.message);
+            }
+        });
+    }
+
+    // Logout
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            clearAuthToken();
+            renderLoggedOutState();
+            recentSessionsList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">Signed out. Log in to view saved reports.</div>';
+            currentSessionId = null;
+            heroEmptyState.style.display = 'block';
+            markdownBody.style.display = 'none';
+        });
+    }
+
+    // Mobile View Switcher (Form vs Report)
+    if (btnMobileForm && btnMobileReport && studioWorkspace) {
+        btnMobileForm.addEventListener('click', () => {
+            btnMobileForm.classList.add('active');
+            btnMobileReport.classList.remove('active');
+            studioWorkspace.classList.remove('view-report');
+            studioWorkspace.classList.add('view-form');
+        });
+
+        btnMobileReport.addEventListener('click', () => {
+            btnMobileReport.classList.add('active');
+            btnMobileForm.classList.remove('active');
+            studioWorkspace.classList.remove('view-form');
+            studioWorkspace.classList.add('view-report');
+        });
+    }
 
     // Speed Mode Toggle Buttons
     const speedButtons = document.querySelectorAll('.speed-btn');
@@ -257,8 +492,10 @@ document.addEventListener('DOMContentLoaded', () => {
             modalTargetPages.addEventListener('change', () => { targetPagesInput.value = modalTargetPages.value; });
         }
 
-        const suggestionsVal = (suggestionsInput ? suggestionsInput.value.trim() : '') || (modalSuggestionsInput ? modalSuggestionsInput.value.trim() : '');
-        const targetPagesVal = parseInt((targetPagesInput ? targetPagesInput.value : '4') || (modalTargetPages ? modalTargetPages.value : '4'), 10) || 4;
+        // Automatically switch mobile view to report on mobile screens
+        if (window.innerWidth <= 992 && btnMobileReport) {
+            btnMobileReport.click();
+        }
 
         try {
             const payload = {
@@ -271,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 target_pages: targetPagesVal
             };
 
-            const resp = await fetch('/api/research', {
+            const resp = await fetchWithAuth('/api/research', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -696,21 +933,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load Sessions History
     async function loadSessionsHistory() {
         try {
-            const resp = await fetch('/api/sessions');
+            const resp = await fetchWithAuth('/api/sessions');
             if (!resp.ok) return;
             const data = await resp.json();
             const list = data.sessions || [];
 
-            if (recentSessionsList && list.length > 0) {
-                recentSessionsList.innerHTML = list.slice(0, 8).map(s => `
-                    <div class="session-history-item ${s.session_id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.session_id}')">
-                        <i class="fa-solid fa-file-contract"></i>
-                        <span class="session-name">${s.query.length > 22 ? s.query.slice(0, 20) + '...' : s.query}</span>
-                    </div>
-                `).join('');
+            if (recentSessionsList) {
+                if (list.length > 0) {
+                    recentSessionsList.innerHTML = list.slice(0, 8).map(s => `
+                        <div class="session-history-item ${s.session_id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.session_id}')">
+                            <i class="fa-solid fa-file-contract"></i>
+                            <span class="session-name">${s.query.length > 22 ? s.query.slice(0, 20) + '...' : s.query}</span>
+                        </div>
+                    `).join('');
 
-                if (!currentSessionId && list[0]) {
-                    switchSession(list[0].session_id);
+                    if (!currentSessionId && list[0]) {
+                        switchSession(list[0].session_id);
+                    }
+                } else {
+                    recentSessionsList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">No research tasks found yet. Start a new topic!</div>';
                 }
             }
         } catch (err) {
@@ -722,13 +963,19 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSessionId = sessionId;
         heroEmptyState.style.display = 'none';
         markdownBody.style.display = 'block';
+        if (window.innerWidth <= 992 && btnMobileReport) {
+            btnMobileReport.click();
+        }
         startPolling(sessionId);
         loadFinalReport(sessionId);
         loadEvidenceStore(sessionId);
         loadContradictions(sessionId);
     };
 
-    // Initial Load
-    loadSessionsHistory();
-    loadNvidiaModels();
+    // Initial Load Sequence
+    (async () => {
+        await checkCurrentUser();
+        await loadSessionsHistory();
+        await loadNvidiaModels();
+    })();
 });

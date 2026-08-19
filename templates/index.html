@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Marked JS for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=24">
+    <link rel="stylesheet" href="/static/css/style.css?v=26">
 </head>
 <body class="studio-theme">
     <div class="studio-app">
@@ -55,8 +55,8 @@
                 
                 <!-- USER AUTH CONTAINER -->
                 <div class="user-auth-wrapper" id="user-auth-wrapper">
-                    <button class="btn-studio-action btn-user-auth" id="btn-open-auth">
-                        <i class="fa-solid fa-circle-user"></i> <span>Sign In</span>
+                    <button class="btn-studio-action btn-user-auth" id="btn-open-auth" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(16,185,129,0.4);">
+                        <i class="fa-solid fa-circle-user"></i> <span>Sign In / Register</span>
                     </button>
                     <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
                         <div class="user-info-chip" id="user-info-chip" title="Account profile">
@@ -85,6 +85,20 @@
             <!-- LEFT CONTROL & TELEMETRY SIDEBAR -->
             <aside class="studio-sidebar" id="studio-sidebar">
                 
+                <!-- USER ACCOUNT STATUS BANNER -->
+                <div class="user-account-banner" id="user-account-banner" style="background: #1e293b; border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 0.75rem 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <i class="fa-solid fa-circle-user text-emerald" style="font-size: 1.3rem;"></i>
+                        <div>
+                            <div style="font-size: 0.84rem; font-weight: 700; color: #ffffff;" id="banner-user-name">Guest Mode (Shared)</div>
+                            <div style="font-size: 0.72rem; color: #94a3b8;" id="banner-user-desc">Sign in to save private reports</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-studio-action" id="btn-banner-login" style="background: var(--emerald-accent); color: #ffffff; font-size: 0.75rem; padding: 0.35rem 0.65rem; border: none; font-weight: 700;">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                    </button>
+                </div>
+
                 <!-- RESEARCH INPUT CARD -->
                 <div class="studio-card">
                     <div class="card-title">
@@ -439,6 +453,6 @@
     </div>
 
     <!-- Application JavaScript -->
-    <script src="/static/js/app.js?v=24"></script>
+    <script src="/static/js/app.js?v=26"></script>
 </body>
 </html>

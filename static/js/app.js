@@ -112,21 +112,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const btnBannerLogin = document.getElementById('btn-banner-login');
+    const bannerUserName = document.getElementById('banner-user-name');
+    const bannerUserDesc = document.getElementById('banner-user-desc');
+
     function renderLoggedInState(user) {
         if (btnOpenAuth) btnOpenAuth.style.display = 'none';
         if (userProfileMenu) userProfileMenu.style.display = 'flex';
         if (userNameDisplay) userNameDisplay.textContent = user.name || user.email.split('@')[0];
+        if (bannerUserName) bannerUserName.textContent = `Logged in: ${user.name || user.email.split('@')[0]}`;
+        if (bannerUserDesc) bannerUserDesc.textContent = "Private workspace active";
+        if (btnBannerLogin) btnBannerLogin.style.display = 'none';
     }
 
     function renderLoggedOutState() {
         currentUser = null;
         if (btnOpenAuth) btnOpenAuth.style.display = 'flex';
         if (userProfileMenu) userProfileMenu.style.display = 'none';
+        if (bannerUserName) bannerUserName.textContent = "Guest Mode (Shared)";
+        if (bannerUserDesc) bannerUserDesc.textContent = "Sign in to save private reports";
+        if (btnBannerLogin) {
+            btnBannerLogin.style.display = 'inline-flex';
+            btnBannerLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+        }
     }
 
     // Auth Modal Handlers
     if (btnOpenAuth && authModal) {
         btnOpenAuth.addEventListener('click', () => {
+            authModal.classList.add('open');
+            authErrorAlert.style.display = 'none';
+        });
+    }
+
+    if (btnBannerLogin && authModal) {
+        btnBannerLogin.addEventListener('click', () => {
             authModal.classList.add('open');
             authErrorAlert.style.display = 'none';
         });

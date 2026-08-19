@@ -96,8 +96,14 @@ def get_nvidia_models():
     }
 
 @app.get("/", response_class=HTMLResponse)
+@app.head("/")
 def index_page(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
+
+@app.get("/health")
+@app.head("/health")
+def health_check():
+    return {"status": "ok"}
 
 @app.post("/api/research")
 def start_research(payload: ResearchRequest, background_tasks: BackgroundTasks):

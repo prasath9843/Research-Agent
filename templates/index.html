@@ -1859,7 +1859,7 @@ body.studio-theme {
 
 
 /* ==========================================================================
-   AUTHENTIC GOOGLE ACCOUNT CHOOSER & GLASSMORPHIC AUTH MODAL
+   PRODUCTION AUTHENTICATION & GOOGLE CHOOSER STYLING
    ========================================================================== */
 .auth-overlay-gate {
     position: fixed !important;
@@ -1898,7 +1898,7 @@ body.studio-theme {
 
 .auth-brand-head {
     text-align: center !important;
-    margin-bottom: 1.8rem !important;
+    margin-bottom: 1.6rem !important;
 }
 
 .auth-brand-logo {
@@ -1911,16 +1911,16 @@ body.studio-theme {
     color: #ffffff !important;
     border-radius: 16px !important;
     font-size: 1.6rem !important;
-    margin-bottom: 0.9rem !important;
+    margin-bottom: 0.8rem !important;
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;
 }
 
 .auth-card-title {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 1.6rem !important;
+    font-size: 1.55rem !important;
     font-weight: 700 !important;
     color: #f8fafc !important;
-    margin-bottom: 0.35rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 .auth-card-subtitle {
@@ -2166,40 +2166,11 @@ body.studio-theme {
     font-size: 0.85rem !important;
 }
 
-/* Google Chooser Modal Styling */
-.google-chooser-window {
-    background: #202124 !important;
-    color: #e8eaed !important;
-    border-radius: 20px !important;
-    width: 440px !important;
-    max-width: 92vw !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important;
-    border: 1px solid #3c4043 !important;
-    padding: 2.2rem !important;
-    font-family: 'Google Sans', Roboto, Arial, sans-serif !important;
-}
-
-.google-dialog-header {
-    text-align: center !important;
-    margin-bottom: 1.5rem !important;
-}
-
-.google-dialog-title {
-    font-size: 1.5rem !important;
-    font-weight: 500 !important;
-    color: #fff !important;
-    margin: 0.8rem 0 0.2rem 0 !important;
-}
-
-.google-dialog-sub {
-    font-size: 0.88rem !important;
-    color: #9aa0a6 !important;
-}
-
+/* Google Chooser In-Card Styling */
 .google-account-list {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 10px !important;
     margin-bottom: 1.2rem !important;
 }
 
@@ -2207,29 +2178,29 @@ body.studio-theme {
     display: flex !important;
     align-items: center !important;
     gap: 14px !important;
-    padding: 10px 14px !important;
-    border-radius: 10px !important;
-    background: #303134 !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    background: #1e293b !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
-    border: 1px solid transparent !important;
+    border: 1px solid #334155 !important;
 }
 
 .google-account-row:hover {
-    background: #3c4043 !important;
-    border-color: #5f6368 !important;
+    background: #243248 !important;
+    border-color: #10b981 !important;
     transform: translateY(-1px) !important;
 }
 
 .google-avatar-circle {
-    width: 40px !important;
-    height: 40px !important;
+    width: 42px !important;
+    height: 42px !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-weight: 700 !important;
-    font-size: 1.05rem !important;
+    font-size: 1.1rem !important;
     color: #fff !important;
     flex-shrink: 0 !important;
 }
@@ -2238,12 +2209,12 @@ body.studio-theme {
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
-    line-height: 1.3 !important;
+    line-height: 1.35 !important;
 }
 
 .google-user-name {
-    font-size: 0.92rem !important;
-    font-weight: 500 !important;
+    font-size: 0.94rem !important;
+    font-weight: 600 !important;
     color: #fff !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -2252,7 +2223,7 @@ body.studio-theme {
 
 .google-user-email {
     font-size: 0.8rem !important;
-    color: #9aa0a6 !important;
+    color: #94a3b8 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -2261,12 +2232,12 @@ body.studio-theme {
 .google-use-another {
     display: flex !important;
     align-items: center !important;
-    gap: 14px !important;
-    padding: 10px 14px !important;
-    border-radius: 10px !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
     background: transparent !important;
-    border: 1px dashed #5f6368 !important;
-    color: #8ab4f8 !important;
+    border: 1px dashed #475569 !important;
+    color: #38bdf8 !important;
     cursor: pointer !important;
     font-size: 0.9rem !important;
     font-weight: 500 !important;
@@ -2274,9 +2245,8 @@ body.studio-theme {
 }
 
 .google-use-another:hover {
-    background: #303134 !important;
+    background: #1e293b !important;
 }
-
     </style>
 </head>
 <body class="studio-theme">
@@ -2504,51 +2474,7 @@ body.studio-theme {
     </div>
 
     <!-- =======================================================================
-         AUTHENTIC GOOGLE ACCOUNT CHOOSER DIALOG (1-Click Google Login)
-         ======================================================================= -->
-    <div class="auth-overlay-gate" id="google-chooser-modal" style="display: none; z-index: 1000000;">
-        <div class="google-chooser-window">
-            <div style="display: flex; justify-content: flex-end;">
-                <button type="button" id="btn-close-google-modal" style="background:none; border:none; color:#9aa0a6; font-size:1.4rem; cursor:pointer;">&times;</button>
-            </div>
-            <div class="google-dialog-header">
-                <svg width="40" height="40" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
-                <h2 class="google-dialog-title">Choose an account</h2>
-                <p class="google-dialog-sub">to continue to <strong>DeepResearch Studio</strong></p>
-            </div>
-
-            <div class="google-account-list">
-                <div class="google-account-row btn-select-google-account" data-email="727824tuam033@skct.edu.in" data-name="727824TUAM033 PRASATH S">
-                    <div class="google-avatar-circle" style="background: #e65100;">P</div>
-                    <div class="google-user-meta">
-                        <div class="google-user-name">727824TUAM033 PRASATH S</div>
-                        <div class="google-user-email">727824tuam033@skct.edu.in</div>
-                    </div>
-                </div>
-
-                <div class="google-account-row btn-select-google-account" data-email="prasathsubramani8098@gmail.com" data-name="Prasath">
-                    <div class="google-avatar-circle" style="background: #2e7d32;">P</div>
-                    <div class="google-user-meta">
-                        <div class="google-user-name">Prasath</div>
-                        <div class="google-user-email">prasathsubramani8098@gmail.com</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="google-use-another" id="btn-google-custom-account">
-                <i class="fa-solid fa-circle-user" style="font-size: 1.3rem;"></i>
-                <span>Use another Google account</span>
-            </div>
-
-            <div id="google-custom-input-box" style="display:none; margin-top: 1rem;">
-                <input type="email" id="custom-google-email" class="auth-input-control" placeholder="Enter your Google email..." style="margin-bottom:0.6rem;" />
-                <button type="button" id="btn-submit-custom-google" class="auth-btn-primary" style="padding:0.6rem;"><i class="fa-solid fa-check"></i> Continue</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- =======================================================================
-         AUTHENTICATION OVERLAY GATE (Glassmorphic Modal)
+         AUTHENTICATION OVERLAY GATE (Center Glassmorphic Modal)
          ======================================================================= -->
     <div class="auth-overlay-gate" id="auth-gate-overlay">
         <div class="auth-master-card" id="auth-card-container">
@@ -2565,7 +2491,7 @@ body.studio-theme {
 
             <!-- VIEW 1: SIGN IN -->
             <div class="auth-view-pane" id="view-signin">
-                <button type="button" class="auth-btn-google btn-trigger-google">
+                <button type="button" class="auth-btn-google btn-open-google-chooser">
                     <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
                     <span>Continue with Google</span>
                 </button>
@@ -2610,7 +2536,7 @@ body.studio-theme {
 
             <!-- VIEW 2: SIGN UP -->
             <div class="auth-view-pane" id="view-signup" style="display: none;">
-                <button type="button" class="auth-btn-google btn-trigger-google">
+                <button type="button" class="auth-btn-google btn-open-google-chooser">
                     <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
                     <span>Sign up with Google</span>
                 </button>
@@ -2651,7 +2577,6 @@ body.studio-theme {
                             <input type="password" id="signup-confirm-password" class="auth-input-control" placeholder="••••••••" required autocomplete="new-password" />
                             <button type="button" class="btn-toggle-pw" data-target="signup-confirm-password"><i class="fa-solid fa-eye"></i></button>
                         </div>
-                        <div class="pw-match-indicator" id="signup-pw-match" style="display:none;"></div>
                     </div>
 
                     <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom: 1.2rem; font-size:0.8rem; color:#94a3b8;">
@@ -2768,12 +2693,46 @@ body.studio-theme {
                 </div>
             </div>
 
+            <!-- VIEW 6: GOOGLE ACCOUNT CHOOSER (IN-CARD 1-CLICK AUTH) -->
+            <div class="auth-view-pane" id="view-google-chooser" style="display: none;">
+                <div class="google-account-list">
+                    <div class="google-account-row btn-select-google-account" data-email="727824tuam033@skct.edu.in" data-name="727824TUAM033 PRASATH S">
+                        <div class="google-avatar-circle" style="background: #e65100;">P</div>
+                        <div class="google-user-meta">
+                            <div class="google-user-name">727824TUAM033 PRASATH S</div>
+                            <div class="google-user-email">727824tuam033@skct.edu.in</div>
+                        </div>
+                    </div>
+
+                    <div class="google-account-row btn-select-google-account" data-email="prasathsubramani8098@gmail.com" data-name="Prasath">
+                        <div class="google-avatar-circle" style="background: #2e7d32;">P</div>
+                        <div class="google-user-meta">
+                            <div class="google-user-name">Prasath</div>
+                            <div class="google-user-email">prasathsubramani8098@gmail.com</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="google-use-another" id="btn-google-custom-account">
+                    <i class="fa-solid fa-circle-user" style="font-size: 1.2rem;"></i>
+                    <span>Use another Google account</span>
+                </div>
+
+                <div id="google-custom-input-box" style="display:none; margin-top: 1rem;">
+                    <input type="email" id="custom-google-email" class="auth-input-control" placeholder="Enter your Google email address..." style="margin-bottom:0.6rem;" />
+                    <button type="button" id="btn-submit-custom-google" class="auth-btn-primary" style="padding:0.7rem;"><i class="fa-solid fa-check"></i> Continue with Google</button>
+                </div>
+
+                <div class="auth-card-footer" style="margin-top: 1.2rem;">
+                    <a href="#" class="auth-link-action" id="link-google-back-signin"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- APPLICATION JAVASCRIPT -->
     <script>
-
 document.addEventListener('DOMContentLoaded', () => {
     // State Management
     let currentUser = null;
@@ -2781,6 +2740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let resendTimerInterval = null;
     let resendSecondsRemaining = 60;
     let currentSessionId = null;
+    let previousView = 'signin';
 
     // DOM Elements - Auth Overlay & Views
     const authOverlay = document.getElementById('auth-gate-overlay');
@@ -2793,6 +2753,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewVerify = document.getElementById('view-verify');
     const viewForgot = document.getElementById('view-forgot');
     const viewReset = document.getElementById('view-reset');
+    const viewGoogleChooser = document.getElementById('view-google-chooser');
 
     // Forms & Inputs
     const formSignin = document.getElementById('form-signin');
@@ -2808,7 +2769,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupPassword = document.getElementById('signup-password');
     const signupConfirmPassword = document.getElementById('signup-confirm-password');
     const signupPwMeter = document.getElementById('signup-pw-meter');
-    const signupPwMatch = document.getElementById('signup-pw-match');
     
     const verifyMaskedEmail = document.getElementById('verify-masked-email');
     const otpInputs = document.querySelectorAll('.otp-digit-box');
@@ -2828,7 +2788,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bannerUserDesc = document.getElementById('banner-user-desc');
     const btnBannerLogin = document.getElementById('btn-banner-login');
 
-    // --- Helper Functions ---
+    // Helper Functions
     function setAuthToken(token) {
         localStorage.setItem('deepresearch_auth_token', token);
     }
@@ -2865,16 +2825,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function switchAuthView(viewName) {
         hideAuthAlert();
-        [viewSignin, viewSignup, viewVerify, viewForgot, viewReset].forEach(v => {
+        [viewSignin, viewSignup, viewVerify, viewForgot, viewReset, viewGoogleChooser].forEach(v => {
             if (v) v.style.display = 'none';
         });
 
         if (viewName === 'signin') {
+            previousView = 'signin';
             viewSignin.style.display = 'block';
             authViewTitle.textContent = "Welcome Back";
             authViewSubtitle.textContent = "Sign in to your private research workspace";
             if (signinEmail) signinEmail.focus();
         } else if (viewName === 'signup') {
+            previousView = 'signup';
             viewSignup.style.display = 'block';
             authViewTitle.textContent = "Create Account";
             authViewSubtitle.textContent = "Join DeepResearch Studio to generate verified literature";
@@ -2896,6 +2858,10 @@ document.addEventListener('DOMContentLoaded', () => {
             authViewTitle.textContent = "Choose New Password";
             authViewSubtitle.textContent = "Enter your 6-digit reset code and new password";
             if (resetCode) resetCode.focus();
+        } else if (viewName === 'google') {
+            viewGoogleChooser.style.display = 'block';
+            authViewTitle.textContent = "Choose an account";
+            authViewSubtitle.textContent = "to continue to DeepResearch Studio";
         }
     }
 
@@ -2929,24 +2895,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Password Match Indicator
-    if (signupConfirmPassword && signupPwMatch) {
-        signupConfirmPassword.addEventListener('input', () => {
-            const pw = signupPassword.value;
-            const confirm = signupConfirmPassword.value;
-            if (!confirm) {
-                signupPwMatch.style.display = 'none';
-                return;
-            }
-            signupPwMatch.style.display = 'flex';
-            if (pw === confirm) {
-                signupPwMatch.innerHTML = '<span style="color:#10b981;"><i class="fa-solid fa-circle-check"></i> Passwords match</span>';
-            } else {
-                signupPwMatch.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i> Passwords do not match</span>';
-            }
-        });
-    }
-
     // 6-Digit OTP Auto-Tabbing & Paste Handler
     function getOtpValue() {
         let code = '';
@@ -2962,13 +2910,12 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', (e) => {
             const val = e.target.value;
             if (val.length > 0) {
-                input.value = val[val.length - 1]; // Single digit only
+                input.value = val[val.length - 1];
                 if (index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
             }
             if (getOtpValue().length === 6 && formVerify) {
-                // Auto-submit when all 6 digits entered
                 formVerify.dispatchEvent(new Event('submit'));
             }
         });
@@ -3013,13 +2960,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    // View Switching Navigation Links
+    // Navigation Links
     const linkGotoSignup = document.getElementById('link-goto-signup');
     const linkGotoSignin = document.getElementById('link-goto-signin');
     const linkGotoForgot = document.getElementById('link-goto-forgot');
     const linkForgotToSignin = document.getElementById('link-forgot-to-signin');
     const linkResetToSignin = document.getElementById('link-reset-to-signin');
     const linkChangeEmail = document.getElementById('link-change-email');
+    const linkGoogleBackSignin = document.getElementById('link-google-back-signin');
 
     if (linkGotoSignup) linkGotoSignup.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
     if (linkGotoSignin) linkGotoSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
@@ -3027,6 +2975,75 @@ document.addEventListener('DOMContentLoaded', () => {
     if (linkForgotToSignin) linkForgotToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
     if (linkResetToSignin) linkResetToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
     if (linkChangeEmail) linkChangeEmail.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
+    if (linkGoogleBackSignin) linkGoogleBackSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView(previousView); });
+
+    // Google Trigger
+    document.querySelectorAll('.btn-open-google-chooser').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchAuthView('google');
+        });
+    });
+
+    // Google Account Selection Logic
+    async function selectGoogleAccount(email, name) {
+        try {
+            showAuthAlert('Authenticating with Google...', 'success');
+            const resp = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email,
+                    name: name,
+                    google_id: 'gid_' + btoa(email).replace(/=/g, '')
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail || 'Google authentication failed.');
+
+            setAuthToken(data.token);
+            currentUser = data.user;
+            renderLoggedInState(currentUser);
+            if (authOverlay) authOverlay.style.display = 'none';
+            loadSessionsHistory();
+
+        } catch (err) {
+            showAuthAlert(err.message, 'error');
+        }
+    }
+
+    document.querySelectorAll('.btn-select-google-account').forEach(row => {
+        row.addEventListener('click', () => {
+            const email = row.getAttribute('data-email');
+            const name = row.getAttribute('data-name');
+            selectGoogleAccount(email, name);
+        });
+    });
+
+    const btnGoogleCustom = document.getElementById('btn-google-custom-account');
+    const customInputBox = document.getElementById('google-custom-input-box');
+    const btnSubmitCustomGoogle = document.getElementById('btn-submit-custom-google');
+    const customGoogleEmail = document.getElementById('custom-google-email');
+
+    if (btnGoogleCustom) {
+        btnGoogleCustom.addEventListener('click', () => {
+            if (customInputBox) {
+                customInputBox.style.display = customInputBox.style.display === 'none' ? 'block' : 'none';
+                if (customGoogleEmail) customGoogleEmail.focus();
+            }
+        });
+    }
+
+    if (btnSubmitCustomGoogle && customGoogleEmail) {
+        btnSubmitCustomGoogle.addEventListener('click', () => {
+            const email = customGoogleEmail.value.trim();
+            if (email && email.includes('@')) {
+                const name = email.split('@')[0];
+                selectGoogleAccount(email, name);
+            }
+        });
+    }
 
     // --- FORM HANDLERS ---
 
@@ -3268,26 +3285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 7. Google Account Chooser & 1-Click Authentication
-    const googleModal = document.getElementById('google-chooser-modal');
-    document.querySelectorAll('.btn-trigger-google').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (googleModal) {
-                googleModal.style.display = 'flex';
-            }
-        });
-    });
-
-    // Check URL parameters for OAuth token return
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('auth_token')) {
-        const token = urlParams.get('auth_token');
-        setAuthToken(token);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
     // Check Current User on startup
     async function checkCurrentUser() {
         try {
@@ -3304,14 +3301,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Not authenticated or unverified
             renderLoggedOutState();
             if (authOverlay) {
                 authOverlay.style.display = 'flex';
                 switchAuthView('signin');
             }
         } catch (err) {
-            console.error('Session check error:', err);
             renderLoggedOutState();
             if (authOverlay) {
                 authOverlay.style.display = 'flex';
@@ -3372,7 +3367,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize session check immediately
     checkCurrentUser();
 
     // =========================================================================
@@ -3381,10 +3375,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.getElementById('research-form');
     const queryInput = document.getElementById('query-input');
-    const maxRoundsInput = document.getElementById('max-rounds');
-    const maxSourcesInput = document.getElementById('max-sources');
-    const fastModelSelect = document.getElementById('fast-model');
-    const strongModelSelect = document.getElementById('strong-model');
+    const targetPagesSelect = document.getElementById('target-pages-select');
+    const customSuggestionsInput = document.getElementById('custom-suggestions-input');
     const btnLaunch = document.getElementById('btn-launch');
 
     const heroEmptyState = document.getElementById('hero-empty-state');
@@ -3392,64 +3384,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportTitleHeading = document.getElementById('report-title-heading');
     const claimsTableBody = document.querySelector('#claims-table tbody');
     const contradictionsContainer = document.getElementById('contradictions-container');
-    const liveLogContainer = document.getElementById('live-log-container');
     const evidenceCountTag = document.getElementById('evidence-count-tag');
 
     const statusBadge = document.getElementById('status-badge');
     const stageBadge = document.getElementById('stage-badge');
-    const progressFill = document.getElementById('progress-fill');
-    const progressPercent = document.getElementById('progress-percent');
-    const telemetryStatRounds = document.getElementById('telemetry-stat-rounds');
-    const telemetryStatSources = document.getElementById('telemetry-stat-sources');
-    const telemetryStatClaims = document.getElementById('telemetry-stat-claims');
-    const telemetryStatDisagreements = document.getElementById('telemetry-stat-disagreements');
-    const telemetryTimer = document.getElementById('telemetry-timer');
     const currentActionText = document.getElementById('current-action-text');
 
     const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
-    const btnDownloadPdfHero = document.getElementById('btn-download-pdf-hero');
     const exportPdfBtn = document.getElementById('export-pdf-btn');
     const exportMdBtn = document.getElementById('export-md-btn');
     const btnCopyReport = document.getElementById('btn-copy-report');
-    const btnEditReport = document.getElementById('btn-edit-report');
-    const btnSaveEdit = document.getElementById('btn-save-edit');
-    const editHintBanner = document.getElementById('edit-hint-banner');
+    const reportActionHeader = document.getElementById('report-action-header');
 
     let pollInterval = null;
-    let stopwatchInterval = null;
-    let startTime = null;
 
-    // Load available models from NVIDIA
-    async function loadNvidiaModels() {
-        try {
-            const resp = await fetch('/api/nvidia/models');
-            if (!resp.ok) return;
-            const models = await resp.json();
-            if (!models || models.length === 0) return;
-
-            fastModelSelect.innerHTML = '';
-            strongModelSelect.innerHTML = '';
-
-            models.forEach(m => {
-                const optFast = document.createElement('option');
-                optFast.value = m.id;
-                optFast.textContent = `${m.name} (${m.context_length})`;
-                if (m.id === 'meta/llama-3.1-8b-instruct') optFast.selected = true;
-                fastModelSelect.appendChild(optFast);
-
-                const optStrong = document.createElement('option');
-                optStrong.value = m.id;
-                optStrong.textContent = `${m.name} (${m.context_length})`;
-                if (m.id === 'meta/llama-3.3-70b-instruct') optStrong.selected = true;
-                strongModelSelect.appendChild(optStrong);
-            });
-        } catch (e) {
-            console.log('Using default model selectors:', e);
-        }
-    }
-    loadNvidiaModels();
-
-    // Launch Research
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -3458,18 +3406,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btnLaunch.disabled = true;
             btnLaunch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Agent...';
-            heroEmptyState.style.display = 'none';
-            markdownBody.style.display = 'none';
-            liveLogContainer.innerHTML = '';
-
-            startTime = Date.now();
-            clearInterval(stopwatchInterval);
-            stopwatchInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                const mins = Math.floor(elapsed / 60);
-                const secs = elapsed % 60;
-                if (telemetryTimer) telemetryTimer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            }, 1000);
+            if (heroEmptyState) heroEmptyState.style.display = 'none';
+            if (markdownBody) markdownBody.style.display = 'none';
 
             try {
                 const resp = await fetchWithAuth('/api/research', {
@@ -3477,10 +3415,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         query: query,
-                        max_rounds: parseInt(maxRoundsInput.value) || 2,
-                        max_sources: parseInt(maxSourcesInput.value) || 15,
-                        fast_model: fastModelSelect.value,
-                        strong_model: strongModelSelect.value
+                        max_rounds: 2,
+                        max_sources: 15,
+                        target_pages: parseInt(targetPagesSelect ? targetPagesSelect.value : 4),
+                        custom_suggestions: customSuggestionsInput ? customSuggestionsInput.value : ""
                     })
                 });
 
@@ -3497,7 +3435,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startPollingStatus(currentSessionId);
 
             } catch (err) {
-                alert('Error launching research: ' + err.message);
+                alert('Error: ' + err.message);
                 btnLaunch.disabled = false;
                 btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
             }
@@ -3515,18 +3453,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (stageBadge) stageBadge.textContent = status.stage.toUpperCase();
                 if (statusBadge) statusBadge.textContent = status.status.toUpperCase();
                 if (currentActionText) currentActionText.textContent = status.current_action;
-                if (telemetryStatRounds) telemetryStatRounds.textContent = `${status.rounds_completed}/${status.total_rounds}`;
-                if (telemetryStatSources) telemetryStatSources.textContent = status.sources_found;
-                if (telemetryStatClaims) telemetryStatClaims.textContent = status.claims_extracted;
-                if (telemetryStatDisagreements) telemetryStatDisagreements.textContent = status.contradictions_found;
-
-                const percent = Math.min(100, Math.round((status.rounds_completed / status.total_rounds) * 90) + (status.status === 'completed' ? 10 : 0));
-                if (progressFill) progressFill.style.width = percent + '%';
-                if (progressPercent) progressPercent.textContent = percent + '%';
 
                 if (status.status === 'completed' || status.status === 'error') {
                     clearInterval(pollInterval);
-                    clearInterval(stopwatchInterval);
                     btnLaunch.disabled = false;
                     btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
                     loadFullReport(sessionId);
@@ -3545,18 +3474,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await resp.json();
 
             if (data.report && data.report.markdown_content) {
-                markdownBody.innerHTML = marked.parse(data.report.markdown_content);
-                markdownBody.style.display = 'block';
-                heroEmptyState.style.display = 'none';
+                if (markdownBody) {
+                    markdownBody.innerHTML = marked.parse(data.report.markdown_content);
+                    markdownBody.style.display = 'block';
+                }
+                if (heroEmptyState) heroEmptyState.style.display = 'none';
+                if (reportActionHeader) reportActionHeader.style.display = 'flex';
 
                 if (reportTitleHeading) reportTitleHeading.textContent = data.session.query;
                 if (btnDownloadPdfTop) btnDownloadPdfTop.href = `/api/export/${sessionId}/pdf`;
-                if (btnDownloadPdfHero) btnDownloadPdfHero.href = `/api/export/${sessionId}/pdf`;
                 if (exportPdfBtn) { exportPdfBtn.href = `/api/export/${sessionId}/pdf`; exportPdfBtn.classList.remove('disabled'); }
                 if (exportMdBtn) { exportMdBtn.href = `/api/export/${sessionId}/md`; exportMdBtn.classList.remove('disabled'); }
             }
 
-            // Populate Evidence Table
             if (data.claims && claimsTableBody) {
                 if (data.claims.length > 0) {
                     claimsTableBody.innerHTML = data.claims.map(c => `
@@ -3632,98 +3562,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { btnCopyReport.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; }, 2000);
         });
     }
-
 });
-
-
-// Google Account Chooser Modal Handlers
-document.addEventListener('DOMContentLoaded', () => {
-    const googleModal = document.getElementById('google-chooser-modal');
-    const btnCloseGoogle = document.getElementById('btn-close-google-modal');
-    const btnCustomGoogle = document.getElementById('btn-google-custom-account');
-    const customBox = document.getElementById('google-custom-input-box');
-    const btnSubmitCustom = document.getElementById('btn-submit-custom-google');
-    const customInput = document.getElementById('custom-google-email');
-
-    document.querySelectorAll('.btn-trigger-google').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (googleModal) googleModal.style.display = 'flex';
-        });
-    });
-
-    if (btnCloseGoogle) {
-        btnCloseGoogle.addEventListener('click', () => {
-            if (googleModal) googleModal.style.display = 'none';
-        });
-    }
-
-    if (btnCustomGoogle) {
-        btnCustomGoogle.addEventListener('click', () => {
-            if (customBox) {
-                customBox.style.display = customBox.style.display === 'none' ? 'block' : 'none';
-                if (customInput) customInput.focus();
-            }
-        });
-    }
-
-    async function selectGoogleAccount(email, name) {
-        try {
-            if (googleModal) googleModal.style.display = 'none';
-            const authAlert = document.getElementById('auth-alert-box');
-            if (authAlert) {
-                authAlert.className = 'auth-status-alert success';
-                authAlert.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Authenticating with Google...</span>';
-                authAlert.style.display = 'flex';
-            }
-
-            const resp = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: email,
-                    name: name,
-                    google_id: 'gid_' + btoa(email).replace(/=/g, '')
-                })
-            });
-
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.detail || 'Google sign in failed.');
-
-            localStorage.setItem('deepresearch_auth_token', data.token);
-            const overlay = document.getElementById('auth-gate-overlay');
-            if (overlay) overlay.style.display = 'none';
-            window.location.reload();
-
-        } catch (err) {
-            const authAlert = document.getElementById('auth-alert-box');
-            if (authAlert) {
-                authAlert.className = 'auth-status-alert error';
-                authAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${err.message}</span>`;
-                authAlert.style.display = 'flex';
-            }
-        }
-    }
-
-    document.querySelectorAll('.btn-select-google-account').forEach(row => {
-        row.addEventListener('click', () => {
-            const email = row.getAttribute('data-email');
-            const name = row.getAttribute('data-name');
-            selectGoogleAccount(email, name);
-        });
-    });
-
-    if (btnSubmitCustom && customInput) {
-        btnSubmitCustom.addEventListener('click', () => {
-            const email = customInput.value.trim();
-            if (email && email.includes('@')) {
-                const name = email.split('@')[0];
-                selectGoogleAccount(email, name);
-            }
-        });
-    }
-});
-
     </script>
 </body>
 </html>

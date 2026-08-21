@@ -493,32 +493,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 7. Google OAuth Integration (Server Popup + GIS fallback)
+    // 7. Google Account Chooser & 1-Click Authentication
+    const googleModal = document.getElementById('google-chooser-modal');
     document.querySelectorAll('.btn-trigger-google').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            try {
-                const resp = await fetch('/api/auth/google/url');
-                if (resp.ok) {
-                    const data = await resp.json();
-                    if (data.url) {
-                        const popup = window.open(data.url, 'GoogleOAuth', 'width=520,height=640');
-                        // Poll for popup closure / token callback
-                        const timer = setInterval(() => {
-                            if (popup.closed) {
-                                clearInterval(timer);
-                                checkCurrentUser();
-                            }
-                        }, 800);
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.log("OAuth URL error:", e);
-            }
-            
-            // Fallback: GIS Prompt
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                window.google.accounts.id.prompt();
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (googleModal) {
+                googleModal.style.display = 'flex';
             }
         });
     });

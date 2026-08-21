@@ -149,10 +149,6 @@ def index():
         return FileResponse(str(index_file), media_type="text/html")
     return HTMLResponse(content="<h1>DeepResearch Studio</h1>", status_code=200)
 
-@app.get("/test")
-def test_route():
-    return {"status": "test_ok", "version": "2.0.1"}
-
 @app.get("/health")
 @app.head("/health")
 def health_check():

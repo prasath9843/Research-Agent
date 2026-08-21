@@ -113,6 +113,13 @@ def init_db():
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (session_id) REFERENCES sessions(session_id)
     );
+
+    CREATE TABLE IF NOT EXISTS email_verifications (
+        email TEXT PRIMARY KEY,
+        code TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     """)
 
     # Safe migration: add user_id column to sessions if not present
@@ -121,6 +128,31 @@ def init_db():
     except sqlite3.OperationalError:
         pass # Already exists
 
+    conn.commit()
+    conn.close()
+
+def save_verification_code(email: str, code: str, expires_at: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT OR REPLACE INTO email_verifications (email, code, expires_at, created_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    """, (email.lower().strip(), code.strip(), expires_at))
+    conn.commit()
+    conn.close()
+
+def get_verification_code(email: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM email_verifications WHERE email = ?", (email.lower().strip(),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_verification_code(email: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM email_verifications WHERE email = ?", (email.lower().strip(),))
     conn.commit()
     conn.close()
 

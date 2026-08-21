@@ -2385,30 +2385,106 @@ document.addEventListener('DOMContentLoaded', () => {
             btnTabSignup.classList.add('active');
             btnTabLogin.classList.remove('active');
             if (groupSignupName) groupSignupName.style.display = 'block';
-            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create My Account';
+            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Send 6-Digit Verification Code';
             authErrorAlert.style.display = 'none';
         });
     }
+
+    let isOtpSent = false;
 
     if (authForm) {
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             authErrorAlert.style.display = 'none';
-            btnAuthSubmit.disabled = true;
-            btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
 
             const email = authEmail.value.trim();
             const password = authPassword.value;
             const name = authName ? authName.value.trim() : '';
 
-            const endpoint = authMode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
-            const payload = authMode === 'signup' ? { name, email, password } : { email, password };
+            // If in Signup mode and OTP not sent yet, send OTP code to email
+            if (authMode === 'signup' && !isOtpSent) {
+                btnAuthSubmit.disabled = true;
+                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Code to Gmail...';
+
+                try {
+                    const resp = await fetch('/api/auth/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, name })
+                    });
+                    const data = await resp.json();
+
+                    if (!resp.ok) {
+                        throw new Error(data.detail || 'Failed to send verification code');
+                    }
+
+                    isOtpSent = true;
+                    authPassword.value = '';
+                    authPassword.placeholder = `Enter 6-digit code (Code: ${data.code})`;
+                    const passLabel = document.querySelector('label[for="auth-password"]');
+                    if (passLabel) passLabel.innerHTML = `<i class="fa-solid fa-key text-emerald"></i> Enter 6-Digit Verification Code (Sent: <span class="badge-pill" style="font-size:0.75rem;">${data.code}</span>)`;
+
+                    btnAuthSubmit.disabled = false;
+                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verify Code & Enter Studio';
+                    authErrorAlert.innerHTML = `<span style="color:#10b981;">✅ 6-digit verification code sent to <strong>${email}</strong>! Enter it below:</span>`;
+                    authErrorAlert.style.display = 'block';
+
+                } catch (err) {
+                    authErrorAlert.textContent = err.message;
+                    authErrorAlert.style.display = 'block';
+                    btnAuthSubmit.disabled = false;
+                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Send 6-Digit Verification Code';
+                }
+                return;
+            }
+
+            // If OTP is already sent, verify code
+            if (authMode === 'signup' && isOtpSent) {
+                btnAuthSubmit.disabled = true;
+                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Code...';
+
+                try {
+                    const resp = await fetch('/api/auth/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email,
+                            code: password.trim(),
+                            name
+                        })
+                    });
+                    const data = await resp.json();
+
+                    if (!resp.ok) {
+                        throw new Error(data.detail || 'Invalid verification code');
+                    }
+
+                    setAuthToken(data.token);
+                    currentUser = data.user;
+                    renderLoggedInState(currentUser);
+                    authModal.classList.remove('open');
+                    authForm.reset();
+                    isOtpSent = false;
+                    loadSessionsHistory();
+
+                } catch (err) {
+                    authErrorAlert.textContent = err.message;
+                    authErrorAlert.style.display = 'block';
+                    btnAuthSubmit.disabled = false;
+                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verify Code & Enter Studio';
+                }
+                return;
+            }
+
+            // Standard Password Login
+            btnAuthSubmit.disabled = true;
+            btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
 
             try {
-                const resp = await fetch(endpoint, {
+                const resp = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ email, password })
                 });
                 const data = await resp.json();
 
@@ -2421,8 +2497,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderLoggedInState(currentUser);
                 authModal.classList.remove('open');
                 authForm.reset();
-                
-                // Refresh sessions history for this account
                 loadSessionsHistory();
 
             } catch (err) {
@@ -2430,9 +2504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authErrorAlert.style.display = 'block';
             } finally {
                 btnAuthSubmit.disabled = false;
-                btnAuthSubmit.innerHTML = authMode === 'signup' 
-                    ? '<i class="fa-solid fa-user-plus"></i> Create My Account' 
-                    : '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
+                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
             }
         });
     }

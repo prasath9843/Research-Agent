@@ -142,3 +142,13 @@ class UserResponse(BaseModel):
     email: str
     auth_provider: str = "email"
     avatar_url: Optional[str] = None
+
+class SendOtpRequest(BaseModel):
+    email: str
+    name: Optional[str] = None
+
+class VerifyOtpRequest(BaseModel):
+    email: str
+    code: str
+    name: Optional[str] = None
+    password: Optional[str] = None

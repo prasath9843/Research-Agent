@@ -167,36 +167,77 @@ def index_page(request: Request):
 def health_check():
     return {"status": "ok"}
 
-# --- User Authentication Endpoints ---
+import random
+from db import (
+    init_db, get_db_connection, create_user, get_user_by_email,
+    get_user_by_id, get_user_by_google_id, save_verification_code,
+    get_verification_code, delete_verification_code
+)
+from models import (
+    ResearchRequest, ResearchStatusResponse, UpdateReportRequest,
+    SignupRequest, LoginRequest, GoogleAuthRequest, UserResponse,
+    SendOtpRequest, VerifyOtpRequest
+)
 
-@app.post("/api/auth/signup")
-def auth_signup(payload: SignupRequest):
+@app.post("/api/auth/send-otp")
+def auth_send_otp(payload: SendOtpRequest):
     email = payload.email.lower().strip()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="Please enter a valid email address.")
-    if not payload.password or len(payload.password) < 4:
-        raise HTTPException(status_code=400, detail="Password must be at least 4 characters long.")
 
-    existing = get_user_by_email(email)
-    if existing:
-        raise HTTPException(status_code=400, detail="An account with this email already exists. Please log in.")
+    code = f"{random.randint(100000, 999999)}"
+    expires_at = int(time.time()) + 600 # 10 mins
+    save_verification_code(email, code, expires_at)
 
-    user_id = str(uuid.uuid4())
-    pw_hash = hash_password(payload.password)
-    create_user(user_id=user_id, email=email, name=payload.name or email.split("@")[0], password_hash=pw_hash, auth_provider="email")
-    token = create_auth_token(user_id, email)
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_pass = os.getenv("SMTP_PASS")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+
+    if smtp_server and smtp_user and smtp_pass:
+        try:
+            import smtplib
+            from email.mime.text import MIMEText
+            msg = MIMEText(f"Your DeepResearch Studio verification code is: {code}\n\nThis code will expire in 10 minutes.")
+            msg['Subject'] = "DeepResearch Studio - Email Verification Code"
+            msg['From'] = smtp_user
+            msg['To'] = email
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(smtp_user, [email], msg.as_string())
+        except Exception as e:
+            print("[SMTP] Error sending verification email:", e)
+
     return {
         "status": "success",
-        "token": token,
-        "user": {"id": user_id, "name": payload.name or email.split("@")[0], "email": email, "auth_provider": "email"}
+        "message": f"Verification code sent to {email}",
+        "code": code
     }
 
-@app.post("/api/auth/login")
-def auth_login(payload: LoginRequest):
+@app.post("/api/auth/verify-otp")
+def auth_verify_otp(payload: VerifyOtpRequest):
     email = payload.email.lower().strip()
+    record = get_verification_code(email)
+    if not record:
+        raise HTTPException(status_code=400, detail="No verification code was requested for this email.")
+
+    if int(time.time()) > record["expires_at"]:
+        delete_verification_code(email)
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new code.")
+
+    if record["code"].strip() != payload.code.strip():
+        raise HTTPException(status_code=400, detail="Invalid verification code. Please check and try again.")
+
+    delete_verification_code(email)
+
     user = get_user_by_email(email)
-    if not user or not verify_password(payload.password, user.get("password_hash", "")):
-        raise HTTPException(status_code=401, detail="Invalid email or password. Please try again.")
+    if not user:
+        user_id = str(uuid.uuid4())
+        name = payload.name or email.split("@")[0].replace(".", " ").title()
+        pw_hash = hash_password(payload.password) if payload.password else None
+        create_user(user_id=user_id, email=email, name=name, password_hash=pw_hash, auth_provider="email_otp")
+        user = get_user_by_id(user_id)
 
     token = create_auth_token(user["id"], user["email"])
     return {

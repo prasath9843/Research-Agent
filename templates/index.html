@@ -7,11 +7,13 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Marked JS for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Official Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
 /* DEEPRESEARCH STUDIO — MODERN ACADEMIC AGENT CSS THEME */
 :root {
@@ -1859,7 +1861,7 @@ body.studio-theme {
 
 
 /* ==========================================================================
-   PRODUCTION AUTHENTICATION & GOOGLE CHOOSER STYLING
+   PRODUCTION AUTHENTICATION & OFFICIAL GOOGLE BUTTON STYLING
    ========================================================================== */
 .auth-overlay-gate {
     position: fixed;
@@ -2073,8 +2075,8 @@ body.studio-theme {
     color: #1f2937;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 0.8rem;
-    font-size: 0.92rem;
+    padding: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -2089,7 +2091,7 @@ body.studio-theme {
     background: #f8fafc;
     border-color: #cbd5e1;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
 }
 
 .auth-or-divider {
@@ -2168,88 +2170,6 @@ body.studio-theme {
     font-family: 'JetBrains Mono', monospace;
     color: #10b981;
     font-size: 0.85rem;
-}
-
-/* Google Chooser In-Card Styling */
-.google-account-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 1.2rem;
-}
-
-.google-account-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: #1e293b;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    border: 1px solid #334155;
-}
-
-.google-account-row:hover {
-    background: #243248;
-    border-color: #10b981;
-    transform: translateY(-1px);
-}
-
-.google-avatar-circle {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #fff;
-    flex-shrink: 0;
-}
-
-.google-user-meta {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    line-height: 1.35;
-}
-
-.google-user-name {
-    font-size: 0.94rem;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.google-user-email {
-    font-size: 0.8rem;
-    color: #94a3b8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.google-use-another {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: transparent;
-    border: 1px dashed #475569;
-    color: #38bdf8;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: background 0.15s ease;
-}
-
-.google-use-another:hover {
-    background: #1e293b;
 }
     </style>
 </head>
@@ -2495,7 +2415,7 @@ body.studio-theme {
 
             <!-- VIEW 1: SIGN IN -->
             <div class="auth-view-pane" id="view-signin">
-                <button type="button" class="auth-btn-google btn-open-google-chooser">
+                <button type="button" class="auth-btn-google btn-trigger-official-google">
                     <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
                     <span>Continue with Google</span>
                 </button>
@@ -2540,7 +2460,7 @@ body.studio-theme {
 
             <!-- VIEW 2: SIGN UP -->
             <div class="auth-view-pane" id="view-signup" style="display: none;">
-                <button type="button" class="auth-btn-google btn-open-google-chooser">
+                <button type="button" class="auth-btn-google btn-trigger-official-google">
                     <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
                     <span>Sign up with Google</span>
                 </button>
@@ -2697,41 +2617,6 @@ body.studio-theme {
                 </div>
             </div>
 
-            <!-- VIEW 6: GOOGLE ACCOUNT CHOOSER (IN-CARD 1-CLICK AUTH) -->
-            <div class="auth-view-pane" id="view-google-chooser" style="display: none;">
-                <div class="google-account-list">
-                    <div class="google-account-row btn-select-google-account" data-email="727824tuam033@skct.edu.in" data-name="727824TUAM033 PRASATH S">
-                        <div class="google-avatar-circle" style="background: #e65100;">P</div>
-                        <div class="google-user-meta">
-                            <div class="google-user-name">727824TUAM033 PRASATH S</div>
-                            <div class="google-user-email">727824tuam033@skct.edu.in</div>
-                        </div>
-                    </div>
-
-                    <div class="google-account-row btn-select-google-account" data-email="prasathsubramani8098@gmail.com" data-name="Prasath">
-                        <div class="google-avatar-circle" style="background: #2e7d32;">P</div>
-                        <div class="google-user-meta">
-                            <div class="google-user-name">Prasath</div>
-                            <div class="google-user-email">prasathsubramani8098@gmail.com</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="google-use-another" id="btn-google-custom-account">
-                    <i class="fa-solid fa-circle-user" style="font-size: 1.2rem;"></i>
-                    <span>Use another Google account</span>
-                </div>
-
-                <div id="google-custom-input-box" style="display:none; margin-top: 1rem;">
-                    <input type="email" id="custom-google-email" class="auth-input-control" placeholder="Enter your Google email address..." style="margin-bottom:0.6rem;" />
-                    <button type="button" id="btn-submit-custom-google" class="auth-btn-primary" style="padding:0.7rem;"><i class="fa-solid fa-check"></i> Continue with Google</button>
-                </div>
-
-                <div class="auth-card-footer" style="margin-top: 1.2rem;">
-                    <a href="#" class="auth-link-action" id="link-google-back-signin"><i class="fa-solid fa-arrow-left"></i> Back</a>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -2744,7 +2629,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let resendTimerInterval = null;
     let resendSecondsRemaining = 60;
     let currentSessionId = null;
-    let previousView = 'signin';
 
     // DOM Elements - Auth Overlay & Views
     const authOverlay = document.getElementById('auth-gate-overlay');
@@ -2757,7 +2641,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewVerify = document.getElementById('view-verify');
     const viewForgot = document.getElementById('view-forgot');
     const viewReset = document.getElementById('view-reset');
-    const viewGoogleChooser = document.getElementById('view-google-chooser');
 
     // Forms & Inputs
     const formSignin = document.getElementById('form-signin');
@@ -2843,18 +2726,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function switchAuthView(viewName) {
         hideAuthAlert();
-        [viewSignin, viewSignup, viewVerify, viewForgot, viewReset, viewGoogleChooser].forEach(v => {
+        [viewSignin, viewSignup, viewVerify, viewForgot, viewReset].forEach(v => {
             if (v) v.style.display = 'none';
         });
 
         if (viewName === 'signin') {
-            previousView = 'signin';
             viewSignin.style.display = 'block';
             authViewTitle.textContent = "Welcome Back";
             authViewSubtitle.textContent = "Sign in to your private research workspace";
             if (signinEmail) signinEmail.focus();
         } else if (viewName === 'signup') {
-            previousView = 'signup';
             viewSignup.style.display = 'block';
             authViewTitle.textContent = "Create Account";
             authViewSubtitle.textContent = "Join DeepResearch Studio to generate verified literature";
@@ -2876,10 +2757,6 @@ document.addEventListener('DOMContentLoaded', () => {
             authViewTitle.textContent = "Choose New Password";
             authViewSubtitle.textContent = "Enter your 6-digit reset code and new password";
             if (resetCode) resetCode.focus();
-        } else if (viewName === 'google') {
-            viewGoogleChooser.style.display = 'block';
-            authViewTitle.textContent = "Choose an account";
-            authViewSubtitle.textContent = "to continue to DeepResearch Studio";
         }
     }
 
@@ -2985,7 +2862,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const linkForgotToSignin = document.getElementById('link-forgot-to-signin');
     const linkResetToSignin = document.getElementById('link-reset-to-signin');
     const linkChangeEmail = document.getElementById('link-change-email');
-    const linkGoogleBackSignin = document.getElementById('link-google-back-signin');
 
     if (linkGotoSignup) linkGotoSignup.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
     if (linkGotoSignin) linkGotoSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
@@ -2993,74 +2869,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (linkForgotToSignin) linkForgotToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
     if (linkResetToSignin) linkResetToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
     if (linkChangeEmail) linkChangeEmail.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
-    if (linkGoogleBackSignin) linkGoogleBackSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView(previousView); });
 
-    // Google Trigger
-    document.querySelectorAll('.btn-open-google-chooser').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+    // --- OFFICIAL GOOGLE AUTHENTICATION REDIRECT ---
+    document.querySelectorAll('.btn-trigger-official-google').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
-            switchAuthView('google');
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opening Official Google Sign-In...';
+                
+                const resp = await fetch('/api/auth/google/url');
+                if (!resp.ok) throw new Error('Could not initialize Google authentication.');
+                const data = await resp.json();
+                
+                if (data.url) {
+                    // Redirect directly to official Google OAuth 2.0 Accounts page
+                    window.location.href = data.url;
+                }
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg> <span>Continue with Google</span>';
+            }
         });
     });
 
-    // Google Account Selection Logic
-    async function selectGoogleAccount(email, name) {
-        try {
-            showAuthAlert('Authenticating with Google...', 'success');
-            const resp = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: email,
-                    name: name,
-                    google_id: 'gid_' + btoa(email).replace(/=/g, '')
-                })
-            });
-
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.detail || 'Google authentication failed.');
-
-            setAuthToken(data.token);
-            currentUser = data.user;
-            renderLoggedInState(currentUser);
-            hideOverlay();
-            loadSessionsHistory();
-
-        } catch (err) {
-            showAuthAlert(err.message, 'error');
-        }
-    }
-
-    document.querySelectorAll('.btn-select-google-account').forEach(row => {
-        row.addEventListener('click', () => {
-            const email = row.getAttribute('data-email');
-            const name = row.getAttribute('data-name');
-            selectGoogleAccount(email, name);
-        });
-    });
-
-    const btnGoogleCustom = document.getElementById('btn-google-custom-account');
-    const customInputBox = document.getElementById('google-custom-input-box');
-    const btnSubmitCustomGoogle = document.getElementById('btn-submit-custom-google');
-    const customGoogleEmail = document.getElementById('custom-google-email');
-
-    if (btnGoogleCustom) {
-        btnGoogleCustom.addEventListener('click', () => {
-            if (customInputBox) {
-                customInputBox.style.display = customInputBox.style.display === 'none' ? 'block' : 'none';
-                if (customGoogleEmail) customGoogleEmail.focus();
-            }
-        });
-    }
-
-    if (btnSubmitCustomGoogle && customGoogleEmail) {
-        btnSubmitCustomGoogle.addEventListener('click', () => {
-            const email = customGoogleEmail.value.trim();
-            if (email && email.includes('@')) {
-                const name = email.split('@')[0];
-                selectGoogleAccount(email, name);
-            }
-        });
+    // Check URL Parameters for OAuth Return
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('auth_token')) {
+        const token = urlParams.get('auth_token');
+        setAuthToken(token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.has('auth_error')) {
+        const err = urlParams.get('auth_error');
+        showOverlay();
+        showAuthAlert(`Google Authentication error: ${err}`, 'error');
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     // --- FORM HANDLERS ---

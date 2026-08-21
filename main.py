@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import re
 import uuid
@@ -394,10 +396,16 @@ def auth_login(payload: LoginRequest, response: Response):
 # --- Real Google OAuth 2.0 Endpoints ---
 
 @app.get("/api/auth/google/url")
-def auth_google_url():
+def auth_google_url(request: Request):
+    client_id = GOOGLE_CLIENT_ID
     state = secrets.token_urlsafe(16)
-    client_id = GOOGLE_CLIENT_ID or "109283746152-sampledeepresearch.apps.googleusercontent.com"
-    redirect_uri = GOOGLE_REDIRECT_URI
+    
+    # Dynamically determine redirect URI based on current host (localhost or Render)
+    base_url = str(request.base_url).rstrip("/")
+    # If Render is terminating SSL behind proxy
+    if "onrender.com" in base_url and not base_url.startswith("https://"):
+        base_url = base_url.replace("http://", "https://")
+    redirect_uri = f"{base_url}/api/auth/google/callback"
     
     url = (
         f"https://accounts.google.com/o/oauth2/v2/auth?"
@@ -409,12 +417,20 @@ def auth_google_url():
         f"access_type=offline&"
         f"prompt=select_account"
     )
-    return {"url": url, "state": state}
+    return {"url": url, "state": state, "client_id": client_id}
 
 @app.get("/api/auth/google/callback")
-def auth_google_callback(request: Request, code: Optional[str] = None, state: Optional[str] = None):
+def auth_google_callback(request: Request, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None):
     if not code:
-        return RedirectResponse(url="/?auth_error=google_cancelled")
+        return RedirectResponse(url=f"/?auth_error={error or 'google_cancelled'}")
+
+    base_url = str(request.base_url).rstrip("/")
+    if "onrender.com" in base_url and not base_url.startswith("https://"):
+        base_url = base_url.replace("http://", "https://")
+    redirect_uri = f"{base_url}/api/auth/google/callback"
+    
+    client_id = GOOGLE_CLIENT_ID
+    client_secret = GOOGLE_CLIENT_SECRET
 
     email = None
     name = "Google User"
@@ -422,35 +438,36 @@ def auth_google_callback(request: Request, code: Optional[str] = None, state: Op
     google_id = None
 
     # Exchange code with Google
-    if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
-        try:
-            token_resp = requests.post(
-                "https://oauth2.googleapis.com/token",
-                data={
-                    "code": code,
-                    "client_id": GOOGLE_CLIENT_ID,
-                    "client_secret": GOOGLE_CLIENT_SECRET,
-                    "redirect_uri": GOOGLE_REDIRECT_URI,
-                    "grant_type": "authorization_code"
-                },
+    try:
+        token_resp = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code"
+            },
+            timeout=10
+        )
+        if token_resp.ok:
+            t_data = token_resp.json()
+            access_token = t_data.get("access_token")
+            userinfo_resp = requests.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
                 timeout=10
             )
-            if token_resp.ok:
-                t_data = token_resp.json()
-                access_token = t_data.get("access_token")
-                userinfo_resp = requests.get(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
-                    headers={"Authorization": f"Bearer {access_token}"},
-                    timeout=10
-                )
-                if userinfo_resp.ok:
-                    u_info = userinfo_resp.json()
-                    email = u_info.get("email")
-                    name = u_info.get("name", name)
-                    avatar_url = u_info.get("picture")
-                    google_id = u_info.get("sub")
-        except Exception as e:
-            print("[Google OAuth] Token exchange error:", e)
+            if userinfo_resp.ok:
+                u_info = userinfo_resp.json()
+                email = u_info.get("email")
+                name = u_info.get("name", name)
+                avatar_url = u_info.get("picture")
+                google_id = u_info.get("sub")
+        else:
+            print("[Google OAuth] Token error:", token_resp.status_code, token_resp.text)
+    except Exception as e:
+        print("[Google OAuth] Exchange exception:", e)
 
     if not email:
         return RedirectResponse(url="/?auth_error=google_failed")
@@ -474,7 +491,7 @@ def auth_google_callback(request: Request, code: Optional[str] = None, state: Op
         max_age=30 * 86400,
         httponly=True,
         samesite="lax",
-        secure=True
+        secure=False
     )
     return resp
 

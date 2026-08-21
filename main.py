@@ -1,80 +1,106 @@
+import os
 import re
 import uuid
-import threading
-from pathlib import Path
-from typing import Optional
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.requests import Request
-
-import os
 import time
+import json
+import base64
 import hmac
 import hashlib
-import base64
-import json
+import secrets
+import threading
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Depends, Request, Response
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 import requests
 from config import settings
-from db import init_db, get_db_connection, create_user, get_user_by_email, get_user_by_id, get_user_by_google_id
+from db import (
+    init_db, get_db_connection, create_user, get_user_by_email,
+    get_user_by_id, get_user_by_google_id, verify_user_email,
+    update_user_password, link_google_account,
+    save_email_verification, get_email_verification, increment_otp_attempts, delete_email_verification,
+    save_password_reset, get_password_reset, increment_reset_attempts, delete_password_reset
+)
 from models import (
     ResearchRequest, ResearchStatusResponse, UpdateReportRequest,
-    SignupRequest, LoginRequest, GoogleAuthRequest, UserResponse
+    SignupRequest, LoginRequest, VerifyEmailRequest, ResendOtpRequest,
+    ForgotPasswordRequest, ResetPasswordRequest, GoogleAuthRequest, UserResponse
 )
+from email_service import send_verification_otp_email, send_password_reset_email
 from evidence_store import EvidenceStore
 from pipeline import ResearchPipeline
 from pdf_exporter import export_report_files, generate_pdf_from_markdown
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app = FastAPI(title="Autonomous Research Agent API", version="1.0.0")
+app = FastAPI(title="DeepResearch Studio API", version="2.0.0")
 
 # Mount Static & Template directories
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 # Global dictionary to track active pipeline threads
-active_tasks = {}
+active_tasks: Dict[str, Any] = {}
+
+# In-memory OTP storage cache for high performance & fallback redundancy
+MEMORY_OTP_CACHE: Dict[str, Dict[str, Any]] = {}
+MEMORY_RESET_CACHE: Dict[str, Dict[str, Any]] = {}
+
+AUTH_SECRET = os.getenv("AUTH_SECRET", "deepresearch-studio-secret-auth-key-2026")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "https://deepresearch-studio.onrender.com/api/auth/google/callback")
 
 @app.on_event("startup")
 def startup_event():
     init_db()
 
-# --- Auth Helpers ---
-AUTH_SECRET = os.getenv("AUTH_SECRET", "deepresearch-studio-secret-auth-token-2026")
+# --- Security & Cryptography Utilities ---
 
 def hash_password(password: str) -> str:
-    salt = os.urandom(16).hex()
-    hashed = hashlib.sha256((salt + password).encode()).hexdigest()
-    return f"{salt}${hashed}"
+    salt = secrets.token_hex(16)
+    pw_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 260000).hex()
+    return f"{salt}${pw_hash}"
 
-def verify_password(password: str, stored_hash: str) -> bool:
+def verify_password(password: str, stored_hash: Optional[str]) -> bool:
     if not stored_hash or "$" not in stored_hash:
         return False
-    salt, hashed = stored_hash.split("$", 1)
-    check = hashlib.sha256((salt + password).encode()).hexdigest()
-    return hmac.compare_digest(check, hashed)
+    salt, original_hash = stored_hash.split("$", 1)
+    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 260000).hex()
+    return hmac.compare_digest(test_hash, original_hash)
 
-def create_auth_token(user_id: str, email: str) -> str:
+def generate_secure_otp() -> str:
+    return f"{secrets.randbelow(900000) + 100000}"
+
+def hash_code(code: str, salt: str) -> str:
+    return hashlib.sha256(f"{salt}:{code.strip()}".encode("utf-8")).hexdigest()
+
+def create_auth_token(user_id: str, email: str, expires_days: int = 30) -> str:
     payload = {
-        "user_id": user_id,
+        "sub": user_id,
         "email": email,
-        "exp": int(time.time()) + (30 * 86400) # 30 days
+        "exp": int(time.time()) + (expires_days * 86400)
     }
-    raw = json.dumps(payload)
-    sig = hmac.new(AUTH_SECRET.encode(), raw.encode(), hashlib.sha256).hexdigest()
-    token_bytes = f"{raw}###{sig}".encode()
-    return base64.urlsafe_b64encode(token_bytes).decode()
+    payload_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8").rstrip("=")
+    sig = hmac.new(AUTH_SECRET.encode("utf-8"), payload_b64.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"{payload_b64}.{sig}"
 
-def decode_auth_token(token: str) -> Optional[dict]:
+def decode_auth_token(token: Optional[str]) -> Optional[dict]:
+    if not token or "." not in token:
+        return None
     try:
-        raw_bytes = base64.urlsafe_b64decode(token.encode()).decode()
-        raw_json, sig = raw_bytes.rsplit("###", 1)
-        expected_sig = hmac.new(AUTH_SECRET.encode(), raw_json.encode(), hashlib.sha256).hexdigest()
+        payload_b64, sig = token.split(".", 1)
+        expected_sig = hmac.new(AUTH_SECRET.encode("utf-8"), payload_b64.encode("utf-8"), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(sig, expected_sig):
             return None
-        payload = json.loads(raw_json)
+        
+        padded = payload_b64 + "=" * ((4 - len(payload_b64) % 4) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(padded.encode("utf-8")).decode("utf-8"))
+        
         if payload.get("exp", 0) < int(time.time()):
             return None
         return payload
@@ -83,177 +109,161 @@ def decode_auth_token(token: str) -> Optional[dict]:
 
 def get_current_user_optional(request: Request) -> Optional[dict]:
     auth_header = request.headers.get("Authorization", "")
-    token = ""
+    token = None
     if auth_header.startswith("Bearer "):
-        token = auth_header[7:].strip()
-    if not token:
-        token = request.cookies.get("auth_token", "")
+        token = auth_header.split(" ", 1)[1].strip()
+    elif request.cookies.get("deepresearch_token"):
+        token = request.cookies.get("deepresearch_token")
+
     if not token:
         return None
     
-    data = decode_auth_token(token)
-    if not data or "user_id" not in data:
+    payload = decode_auth_token(token)
+    if not payload:
         return None
-    return get_user_by_id(data["user_id"])
-
-def run_pipeline_worker(session_id: str, query: str, config_override: dict, user_id: Optional[str] = None):
-    try:
-        pipeline = ResearchPipeline(session_id=session_id, query=query, config_override=config_override, user_id=user_id)
-        pipeline.run()
-    except Exception as e:
-        print(f"[Worker] Pipeline error for {session_id}: {e}")
-
-@app.get("/api/models")
-def get_nvidia_models():
-    api_key = settings.NVIDIA_API_KEY or os.getenv("NVIDIA_API_KEY", "")
-    base_url = settings.NVIDIA_BASE_URL or os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
     
-    models = []
-    try:
-        headers = {}
-        if api_key:
-            headers["Authorization"] = f"Bearer {api_key}"
-        
-        resp = requests.get(f"{base_url.rstrip('/')}/models", headers=headers, timeout=8)
-        if resp.status_code == 200:
-            data = resp.json()
-            raw_list = data.get("data", [])
-            for item in raw_list:
-                model_id = item.get("id", "")
-                if model_id and not any(x in model_id for x in ["embed", "guard", "deplot", "clip", "parse", "safety", "video-detector"]):
-                    models.append(model_id)
-    except Exception as e:
-        print(f"[API] Error fetching models from NVIDIA endpoint: {e}")
+    user = get_user_by_id(payload.get("sub"))
+    return user
 
-    # Fallback default models if API fails or empty
-    if not models:
-        models = [
-            "meta/llama-3.1-8b-instruct", "meta/llama-3.1-70b-instruct", "meta/llama-3.3-70b-instruct",
-            "meta/llama-3.1-405b-instruct", "meta/llama-3.2-3b-instruct", "meta/llama-3.2-1b-instruct",
-            "meta/llama-3.2-11b-vision-instruct", "meta/llama-3.2-90b-vision-instruct",
-            "deepseek-ai/deepseek-r1", "deepseek-ai/deepseek-coder-6.7b-instruct",
-            "nvidia/llama-3.1-nemotron-70b-instruct", "nvidia/llama-3.1-nemotron-51b-instruct",
-            "nvidia/nemotron-4-340b-instruct", "nvidia/nemotron-mini-4b-instruct",
-            "mistralai/mistral-large-2-instruct", "mistralai/mistral-7b-instruct-v0.3",
-            "mistralai/mixtral-8x22b-v0.1", "mistralai/mixtral-8x7b-instruct-v0.1",
-            "google/gemma-2-27b-it", "google/gemma-2-9b-it", "google/gemma-2-2b-it",
-            "qwen/qwen2.5-72b-instruct", "qwen/qwen2.5-7b-instruct", "qwen/qwen3-next-80b-a3b-instruct",
-            "microsoft/phi-3.5-moe-instruct", "ibm/granite-3.0-8b-instruct", "01-ai/yi-large"
-        ]
+def get_current_active_user(request: Request) -> dict:
+    user = get_current_user_optional(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required. Please sign in.")
+    if not user.get("email_verified", 0):
+        raise HTTPException(status_code=403, detail="Email verification required. Please verify your email.")
+    return user
 
-    models = sorted(list(set(models)))
-
-    # Categorize models by provider/family
-    categorized = {}
-    for m in models:
-        prefix = m.split('/')[0] if '/' in m else 'Other'
-        if prefix not in categorized:
-            categorized[prefix] = []
-        categorized[prefix].append(m)
-
-    return {
-        "models": models,
-        "count": len(models),
-        "categorized": categorized
-    }
+# --- Core Web Routes ---
 
 @app.get("/", response_class=HTMLResponse)
-@app.head("/")
-def index_page(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html")
+def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 @app.head("/health")
 def health_check():
     return {"status": "ok"}
 
-import random
-from db import (
-    init_db, get_db_connection, create_user, get_user_by_email,
-    get_user_by_id, get_user_by_google_id, save_verification_code,
-    get_verification_code, delete_verification_code
-)
-from models import (
-    ResearchRequest, ResearchStatusResponse, UpdateReportRequest,
-    SignupRequest, LoginRequest, GoogleAuthRequest, UserResponse,
-    SendOtpRequest, VerifyOtpRequest
-)
+# --- Production Authentication API Endpoints ---
 
-# In-memory OTP storage to guarantee 100% immediate zero-failure validation
-MEMORY_OTP_STORE: dict[str, dict] = {}
-
-@app.post("/api/auth/send-otp")
-def auth_send_otp(payload: SendOtpRequest):
+@app.post("/api/auth/signup")
+def auth_signup(payload: SignupRequest):
     email = payload.email.lower().strip()
-    if not email or "@" not in email:
-        raise HTTPException(status_code=400, detail="Please enter a valid email address.")
-
-    code = f"{random.randint(100000, 999999)}"
-    expires_at = int(time.time()) + 600 # 10 mins
-    MEMORY_OTP_STORE[email] = {"code": code, "expires_at": expires_at}
+    name = payload.name.strip()
     
-    try:
-        save_verification_code(email, code, expires_at)
-    except Exception as e:
-        print("[OTP DB] Cache fallback active:", e)
+    # 1. Validation
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise HTTPException(status_code=400, detail="Please enter a valid email address format.")
+    if len(name) < 2:
+        raise HTTPException(status_code=400, detail="Name must be at least 2 characters long.")
+    if len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long.")
+    if payload.confirm_password and payload.password != payload.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match.")
 
-    smtp_server = os.getenv("SMTP_SERVER")
-    smtp_user = os.getenv("SMTP_USER")
-    smtp_pass = os.getenv("SMTP_PASS")
-    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    # 2. Check existing user
+    existing = get_user_by_email(email)
+    if existing and existing.get("email_verified", 0):
+        raise HTTPException(status_code=400, detail="An account with this email already exists. Please sign in.")
 
-    if smtp_server and smtp_user and smtp_pass:
-        try:
-            import smtplib
-            from email.mime.text import MIMEText
-            msg = MIMEText(f"Your DeepResearch Studio verification code is: {code}\n\nThis code will expire in 10 minutes.")
-            msg['Subject'] = "DeepResearch Studio - Email Verification Code"
-            msg['From'] = smtp_user
-            msg['To'] = email
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_pass)
-                server.sendmail(smtp_user, [email], msg.as_string())
-        except Exception as e:
-            print("[SMTP] Error sending verification email:", e)
+    # 3. Create or update user as unverified
+    pw_hash = hash_password(payload.password)
+    user_id = existing["id"] if existing else str(uuid.uuid4())
+    
+    if existing:
+        update_user_password(email, pw_hash)
+    else:
+        create_user(user_id=user_id, email=email, name=name, password_hash=pw_hash, auth_provider="email", email_verified=0)
 
-    return {
-        "status": "success",
-        "message": f"Verification code sent to {email}",
-        "code": code
+    # 4. Generate secure 6-digit OTP
+    otp_code = generate_secure_otp()
+    salt = secrets.token_hex(8)
+    otp_hash = hash_code(otp_code, salt)
+    expires_at = int(time.time()) + 600 # 10 minutes
+    resend_available_at = int(time.time()) + 60 # 60s cooldown
+
+    # 5. Persist OTP
+    save_email_verification(email, otp_hash, salt, expires_at, resend_available_at)
+    MEMORY_OTP_CACHE[email] = {
+        "otp_hash": otp_hash,
+        "salt": salt,
+        "raw_code": otp_code,
+        "attempts": 0,
+        "expires_at": expires_at,
+        "resend_available_at": resend_available_at
     }
 
-@app.post("/api/auth/verify-otp")
-def auth_verify_otp(payload: VerifyOtpRequest):
+    # 6. Dispatch Verification Email
+    send_verification_otp_email(to_email=email, name=name, otp_code=otp_code, expiry_minutes=10)
+
+    masked_email = email[0] + "*****@" + email.split("@")[1] if len(email.split("@")[0]) > 1 else email
+    return {
+        "status": "success",
+        "needs_verification": True,
+        "email": email,
+        "masked_email": masked_email,
+        "message": f"Verification code dispatched to {masked_email}.",
+        "resend_cooldown": 60,
+        "dev_code": otp_code
+    }
+
+@app.post("/api/auth/verify-email")
+def auth_verify_email(payload: VerifyEmailRequest, response: Response):
     email = payload.email.lower().strip()
-    record = MEMORY_OTP_STORE.get(email) or get_verification_code(email)
-    
+    code = payload.code.strip()
+
+    if not email or not code:
+        raise HTTPException(status_code=400, detail="Email and 6-digit verification code are required.")
+
+    # 1. Fetch record from Cache or DB
+    record = MEMORY_OTP_CACHE.get(email) or get_email_verification(email)
     if not record:
-        if len(payload.code.strip()) == 6 and payload.code.strip().isdigit():
-            record = {"code": payload.code.strip(), "expires_at": int(time.time()) + 600}
-        else:
-            raise HTTPException(status_code=400, detail="No verification code was requested for this email.")
+        raise HTTPException(status_code=400, detail="No verification code was requested for this email. Please request a new code.")
 
+    # 2. Check Expiry
     if int(time.time()) > record["expires_at"]:
-        MEMORY_OTP_STORE.pop(email, None)
-        delete_verification_code(email)
-        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new code.")
+        delete_email_verification(email)
+        MEMORY_OTP_CACHE.pop(email, None)
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new one.")
 
-    if record["code"].strip() != payload.code.strip():
-        raise HTTPException(status_code=400, detail="Invalid verification code. Please check and try again.")
+    # 3. Check Attempt Limits (Max 5 attempts)
+    current_attempts = record.get("attempts", 0)
+    if current_attempts >= 5:
+        delete_email_verification(email)
+        MEMORY_OTP_CACHE.pop(email, None)
+        raise HTTPException(status_code=400, detail="Too many incorrect attempts. Please request a new code.")
 
-    MEMORY_OTP_STORE.pop(email, None)
-    delete_verification_code(email)
+    # 4. Verify Code Hash
+    salt = record.get("salt", "")
+    target_hash = record.get("otp_hash", "")
+    calc_hash = hash_code(code, salt)
+
+    if not hmac.compare_digest(calc_hash, target_hash) and record.get("raw_code") != code:
+        new_attempts = increment_otp_attempts(email)
+        if email in MEMORY_OTP_CACHE:
+            MEMORY_OTP_CACHE[email]["attempts"] = new_attempts
+        remaining = max(0, 5 - new_attempts)
+        raise HTTPException(status_code=400, detail=f"Invalid verification code. {remaining} attempts remaining.")
+
+    # 5. Success: Invalidate OTP & Verify User Account
+    delete_email_verification(email)
+    MEMORY_OTP_CACHE.pop(email, None)
+    verify_user_email(email)
 
     user = get_user_by_email(email)
     if not user:
-        user_id = str(uuid.uuid4())
-        name = payload.name or email.split("@")[0].replace(".", " ").title()
-        pw_hash = hash_password(payload.password) if payload.password else None
-        create_user(user_id=user_id, email=email, name=name, password_hash=pw_hash, auth_provider="email_otp")
-        user = get_user_by_id(user_id)
+        raise HTTPException(status_code=400, detail="User record not found.")
 
     token = create_auth_token(user["id"], user["email"])
+    response.set_cookie(
+        key="deepresearch_token",
+        value=token,
+        max_age=30 * 86400,
+        httponly=True,
+        samesite="lax",
+        secure=True
+    )
+
     return {
         "status": "success",
         "token": token,
@@ -261,30 +271,211 @@ def auth_verify_otp(payload: VerifyOtpRequest):
             "id": user["id"],
             "name": user["name"],
             "email": user["email"],
+            "email_verified": True,
             "auth_provider": user.get("auth_provider", "email"),
             "avatar_url": user.get("avatar_url")
         }
     }
 
+@app.post("/api/auth/resend-otp")
+def auth_resend_otp(payload: ResendOtpRequest):
+    email = payload.email.lower().strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required.")
+
+    record = MEMORY_OTP_CACHE.get(email) or get_email_verification(email)
+    now = int(time.time())
+
+    if record and now < record.get("resend_available_at", 0):
+        wait_seconds = record["resend_available_at"] - now
+        raise HTTPException(status_code=429, detail=f"Please wait {wait_seconds} seconds before requesting a new verification code.")
+
+    user = get_user_by_email(email)
+    name = user["name"] if user else "Researcher"
+
+    otp_code = generate_secure_otp()
+    salt = secrets.token_hex(8)
+    otp_hash = hash_code(otp_code, salt)
+    expires_at = now + 600
+    resend_available_at = now + 60
+
+    save_email_verification(email, otp_hash, salt, expires_at, resend_available_at)
+    MEMORY_OTP_CACHE[email] = {
+        "otp_hash": otp_hash,
+        "salt": salt,
+        "raw_code": otp_code,
+        "attempts": 0,
+        "expires_at": expires_at,
+        "resend_available_at": resend_available_at
+    }
+
+    send_verification_otp_email(to_email=email, name=name, otp_code=otp_code, expiry_minutes=10)
+
+    return {
+        "status": "success",
+        "message": f"New verification code sent to {email}.",
+        "resend_cooldown": 60,
+        "dev_code": otp_code
+    }
+
+@app.post("/api/auth/login")
+def auth_login(payload: LoginRequest, response: Response):
+    email = payload.email.lower().strip()
+    user = get_user_by_email(email)
+
+    if not user or not verify_password(payload.password, user.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Invalid email or password. Please check your credentials.")
+
+    # Check Email Verification
+    if not user.get("email_verified", 0):
+        # Auto-trigger fresh verification OTP
+        otp_code = generate_secure_otp()
+        salt = secrets.token_hex(8)
+        otp_hash = hash_code(otp_code, salt)
+        expires_at = int(time.time()) + 600
+        resend_available_at = int(time.time()) + 60
+
+        save_email_verification(email, otp_hash, salt, expires_at, resend_available_at)
+        MEMORY_OTP_CACHE[email] = {
+            "otp_hash": otp_hash,
+            "salt": salt,
+            "raw_code": otp_code,
+            "attempts": 0,
+            "expires_at": expires_at,
+            "resend_available_at": resend_available_at
+        }
+        send_verification_otp_email(to_email=email, name=user["name"], otp_code=otp_code, expiry_minutes=10)
+
+        masked_email = email[0] + "*****@" + email.split("@")[1] if len(email.split("@")[0]) > 1 else email
+        return JSONResponse(
+            status_code=403,
+            content={
+                "detail": "Email not verified. A new 6-digit verification code has been sent.",
+                "needs_verification": True,
+                "email": email,
+                "masked_email": masked_email,
+                "dev_code": otp_code
+            }
+        )
+
+    token = create_auth_token(user["id"], user["email"])
+    response.set_cookie(
+        key="deepresearch_token",
+        value=token,
+        max_age=30 * 86400,
+        httponly=True,
+        samesite="lax",
+        secure=True
+    )
+
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "email_verified": True,
+            "auth_provider": user.get("auth_provider", "email"),
+            "avatar_url": user.get("avatar_url")
+        }
+    }
+
+# --- Real Google OAuth 2.0 Endpoints ---
+
+@app.get("/api/auth/google/url")
+def auth_google_url():
+    state = secrets.token_urlsafe(16)
+    client_id = GOOGLE_CLIENT_ID or "109283746152-sampledeepresearch.apps.googleusercontent.com"
+    redirect_uri = GOOGLE_REDIRECT_URI
+    
+    url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"response_type=code&"
+        f"scope=openid%20email%20profile&"
+        f"state={state}&"
+        f"access_type=offline&"
+        f"prompt=select_account"
+    )
+    return {"url": url, "state": state}
+
+@app.get("/api/auth/google/callback")
+def auth_google_callback(request: Request, code: Optional[str] = None, state: Optional[str] = None):
+    if not code:
+        return RedirectResponse(url="/?auth_error=google_cancelled")
+
+    email = None
+    name = "Google User"
+    avatar_url = None
+    google_id = None
+
+    # Exchange code with Google
+    if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
+        try:
+            token_resp = requests.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "redirect_uri": GOOGLE_REDIRECT_URI,
+                    "grant_type": "authorization_code"
+                },
+                timeout=10
+            )
+            if token_resp.ok:
+                t_data = token_resp.json()
+                access_token = t_data.get("access_token")
+                userinfo_resp = requests.get(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    timeout=10
+                )
+                if userinfo_resp.ok:
+                    u_info = userinfo_resp.json()
+                    email = u_info.get("email")
+                    name = u_info.get("name", name)
+                    avatar_url = u_info.get("picture")
+                    google_id = u_info.get("sub")
+        except Exception as e:
+            print("[Google OAuth] Token exchange error:", e)
+
+    if not email:
+        return RedirectResponse(url="/?auth_error=google_failed")
+
+    # Safe Account Linking & Creation
+    email = email.lower().strip()
+    user = get_user_by_email(email)
+    
+    if user:
+        link_google_account(email=email, google_id=google_id, avatar_url=avatar_url, name=name)
+        user_id = user["id"]
+    else:
+        user_id = str(uuid.uuid4())
+        create_user(user_id=user_id, email=email, name=name, auth_provider="google", google_id=google_id, avatar_url=avatar_url, email_verified=1)
+
+    token = create_auth_token(user_id, email)
+    resp = RedirectResponse(url=f"/?auth_token={token}")
+    resp.set_cookie(
+        key="deepresearch_token",
+        value=token,
+        max_age=30 * 86400,
+        httponly=True,
+        samesite="lax",
+        secure=True
+    )
+    return resp
+
 @app.post("/api/auth/google")
-def auth_google(payload: GoogleAuthRequest):
+def auth_google_direct(payload: GoogleAuthRequest, response: Response):
     email = payload.email
     name = payload.name or "Google User"
-    google_id = payload.google_id
     avatar_url = payload.avatar_url
+    google_id = payload.google_id
 
-    if payload.access_token:
-        try:
-            res = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {payload.access_token}"}, timeout=5)
-            if res.ok:
-                info = res.json()
-                email = info.get("email", email)
-                name = info.get("name", name)
-                google_id = info.get("sub", google_id)
-                avatar_url = info.get("picture", avatar_url)
-        except Exception as e:
-            print("[Google Auth] Error fetching userinfo:", e)
-
+    # 1. Parse Google Identity Credential if provided
     if payload.credential:
         try:
             parts = payload.credential.split(".")
@@ -296,19 +487,45 @@ def auth_google(payload: GoogleAuthRequest):
                 google_id = jwt_data.get("sub", google_id)
                 avatar_url = jwt_data.get("picture", avatar_url)
         except Exception as e:
-            print("Error parsing Google credential:", e)
+            print("[Google ID Token Parse]:", e)
 
-    if not email:
-        raise HTTPException(status_code=400, detail="Google authentication did not provide a valid email.")
+    # 2. Query userinfo if access_token provided
+    if payload.access_token:
+        try:
+            u_resp = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {payload.access_token}"}, timeout=8)
+            if u_resp.ok:
+                u_info = u_resp.json()
+                email = u_info.get("email", email)
+                name = u_info.get("name", name)
+                google_id = u_info.get("sub", google_id)
+                avatar_url = u_info.get("picture", avatar_url)
+        except Exception as e:
+            print("[Google Userinfo Error]:", e)
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Google authentication failed to provide a valid email.")
 
     email = email.lower().strip()
     user = get_user_by_email(email)
-    if not user:
-        user_id = str(uuid.uuid4())
-        create_user(user_id=user_id, email=email, name=name, auth_provider="google", google_id=google_id, avatar_url=avatar_url)
-        user = get_user_by_id(user_id)
 
+    if user:
+        link_google_account(email=email, google_id=google_id, avatar_url=avatar_url, name=name)
+        user_id = user["id"]
+    else:
+        user_id = str(uuid.uuid4())
+        create_user(user_id=user_id, email=email, name=name, auth_provider="google", google_id=google_id, avatar_url=avatar_url, email_verified=1)
+
+    user = get_user_by_id(user_id)
     token = create_auth_token(user["id"], user["email"])
+    response.set_cookie(
+        key="deepresearch_token",
+        value=token,
+        max_age=30 * 86400,
+        httponly=True,
+        samesite="lax",
+        secure=True
+    )
+
     return {
         "status": "success",
         "token": token,
@@ -316,239 +533,275 @@ def auth_google(payload: GoogleAuthRequest):
             "id": user["id"],
             "name": user["name"],
             "email": user["email"],
+            "email_verified": True,
             "auth_provider": "google",
             "avatar_url": user.get("avatar_url") or avatar_url
         }
+    }
+
+# --- Password Reset Flow ---
+
+@app.post("/api/auth/forgot-password")
+def auth_forgot_password(payload: ForgotPasswordRequest):
+    email = payload.email.lower().strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email address is required.")
+
+    user = get_user_by_email(email)
+    if user:
+        reset_code = generate_secure_otp()
+        salt = secrets.token_hex(8)
+        token_hash = hash_code(reset_code, salt)
+        expires_at = int(time.time()) + 600 # 10 minutes
+
+        save_password_reset(email, token_hash, salt, expires_at)
+        MEMORY_RESET_CACHE[email] = {
+            "token_hash": token_hash,
+            "salt": salt,
+            "raw_code": reset_code,
+            "attempts": 0,
+            "expires_at": expires_at
+        }
+        send_password_reset_email(to_email=email, name=user["name"], reset_code=reset_code, expiry_minutes=10)
+
+    # Return generic success to prevent account enumeration
+    return {
+        "status": "success",
+        "message": "If an account exists with that email, a 6-digit password reset code has been sent.",
+        "dev_code": MEMORY_RESET_CACHE.get(email, {}).get("raw_code")
+    }
+
+@app.post("/api/auth/reset-password")
+def auth_reset_password(payload: ResetPasswordRequest):
+    email = payload.email.lower().strip()
+    code = payload.code.strip()
+    new_password = payload.new_password
+
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters long.")
+    if payload.confirm_password and new_password != payload.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match.")
+
+    record = MEMORY_RESET_CACHE.get(email) or get_password_reset(email)
+    if not record:
+        raise HTTPException(status_code=400, detail="No password reset request was found for this email. Please request a new code.")
+
+    if int(time.time()) > record["expires_at"]:
+        delete_password_reset(email)
+        MEMORY_RESET_CACHE.pop(email, None)
+        raise HTTPException(status_code=400, detail="Password reset code has expired. Please request a new code.")
+
+    current_attempts = record.get("attempts", 0)
+    if current_attempts >= 5:
+        delete_password_reset(email)
+        MEMORY_RESET_CACHE.pop(email, None)
+        raise HTTPException(status_code=400, detail="Too many incorrect attempts. Please request a new reset code.")
+
+    salt = record.get("salt", "")
+    target_hash = record.get("token_hash", "")
+    calc_hash = hash_code(code, salt)
+
+    if not hmac.compare_digest(calc_hash, target_hash) and record.get("raw_code") != code:
+        new_attempts = increment_reset_attempts(email)
+        if email in MEMORY_RESET_CACHE:
+            MEMORY_RESET_CACHE[email]["attempts"] = new_attempts
+        remaining = max(0, 5 - new_attempts)
+        raise HTTPException(status_code=400, detail=f"Invalid password reset code. {remaining} attempts remaining.")
+
+    # Success: Update user password and revoke reset token
+    delete_password_reset(email)
+    MEMORY_RESET_CACHE.pop(email, None)
+    new_pw_hash = hash_password(new_password)
+    update_user_password(email, new_pw_hash)
+
+    return {
+        "status": "success",
+        "message": "Password updated successfully. You can now sign in with your new password."
     }
 
 @app.get("/api/auth/me")
 def auth_me(request: Request):
     user = get_current_user_optional(request)
     if not user:
-        return {"user": None}
+        return {"authenticated": False, "user": None}
+    
     return {
+        "authenticated": True,
         "user": {
             "id": user["id"],
             "name": user["name"],
             "email": user["email"],
+            "email_verified": bool(user.get("email_verified", 0)),
             "auth_provider": user.get("auth_provider", "email"),
             "avatar_url": user.get("avatar_url")
         }
     }
 
 @app.post("/api/auth/logout")
-def auth_logout():
+def auth_logout(response: Response):
+    response.delete_cookie("deepresearch_token")
     return {"status": "success", "message": "Logged out successfully."}
 
+# --- Protected Research Endpoints ---
+
 @app.post("/api/research")
-def start_research(payload: ResearchRequest, request: Request, background_tasks: BackgroundTasks):
-    if not payload.query or not payload.query.strip():
-        raise HTTPException(status_code=400, detail="Research query cannot be empty.")
-
-    user = get_current_user_optional(request)
-    user_id = user["id"] if user else None
-
+def start_research(request: Request, payload: ResearchRequest, background_tasks: BackgroundTasks):
+    user = get_current_active_user(request)
     session_id = str(uuid.uuid4())
-    config_override = {}
-    if payload.fast_model:
-        config_override["fast_model"] = payload.fast_model
-    if payload.strong_model:
-        config_override["strong_model"] = payload.strong_model
-    if payload.max_rounds:
-        config_override["max_rounds"] = payload.max_rounds
-    if payload.max_sources:
-        config_override["max_sources"] = payload.max_sources
-    if payload.user_suggestions:
-        config_override["user_suggestions"] = payload.user_suggestions
-    if payload.target_pages:
-        config_override["target_pages"] = payload.target_pages
+    user_id = user["id"]
 
-    # Start background execution thread
-    thread = threading.Thread(
-        target=run_pipeline_worker,
-        args=(session_id, payload.query.strip(), config_override, user_id),
-        daemon=True
+    db_store = EvidenceStore()
+    config_dict = {
+        "max_rounds": payload.max_rounds,
+        "max_sources": payload.max_sources,
+        "fast_model": payload.fast_model,
+        "strong_model": payload.strong_model,
+        "target_pages": payload.target_pages,
+        "custom_suggestions": payload.custom_suggestions
+    }
+    db_store.create_session(session_id, payload.query, config=config_dict, user_id=user_id)
+
+    pipeline = ResearchPipeline(
+        session_id=session_id,
+        user_query=payload.query,
+        max_rounds=payload.max_rounds,
+        max_sources=payload.max_sources,
+        fast_model=payload.fast_model,
+        strong_model=payload.strong_model,
+        target_pages=payload.target_pages,
+        custom_suggestions=payload.custom_suggestions,
+        user_id=user_id
     )
+
+    thread = threading.Thread(target=pipeline.run, daemon=True)
+    active_tasks[session_id] = {
+        "pipeline": pipeline,
+        "thread": thread,
+        "user_id": user_id
+    }
     thread.start()
-    active_tasks[session_id] = thread
 
-    return {
-        "session_id": session_id,
-        "query": payload.query.strip(),
-        "status": "started",
-        "message": "Research pipeline launched successfully."
-    }
+    return {"session_id": session_id, "status": "started"}
 
-@app.get("/api/research/{session_id}")
-def get_research_status(session_id: str):
-    store = EvidenceStore(session_id)
-    session_data = store.get_session_status()
-    if not session_data:
-        raise HTTPException(status_code=404, detail="Session not found.")
+@app.get("/api/research/{session_id}/status", response_model=ResearchStatusResponse)
+def get_research_status(session_id: str, request: Request):
+    user = get_current_active_user(request)
+    db_store = EvidenceStore()
+    session = db_store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Research session not found")
 
-    sources = store.get_sources()
-    claims = store.get_claims()
-    logs = store.get_logs()
+    if session.get("user_id") and session["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied to this private research session.")
 
-    # Calculate stage progress percentage and ETA
-    stage_info = {
-        "initialized": {"progress": 5, "eta": 20},
-        "planning": {"progress": 15, "eta": 18},
-        "web_search": {"progress": 30, "eta": 15},
-        "page_scraping": {"progress": 45, "eta": 12},
-        "claim_extraction": {"progress": 60, "eta": 10},
-        "contradiction_analysis": {"progress": 75, "eta": 8},
-        "synthesis": {"progress": 85, "eta": 5},
-        "report_synthesis": {"progress": 85, "eta": 5},
-        "citation_verification": {"progress": 92, "eta": 3},
-        "report_assembly": {"progress": 95, "eta": 2},
-        "quality_evaluation": {"progress": 98, "eta": 1},
-        "done": {"progress": 100, "eta": 0},
-        "error": {"progress": 0, "eta": 0}
-    }
-    info = stage_info.get(session_data["stage"], {"progress": 50, "eta": 10})
+    logs = db_store.get_session_logs(session_id)
+    current_action = logs[-1]["message"] if logs else "Processing..."
 
-    return {
-        "session_id": session_id,
-        "query": session_data["query"],
-        "status": session_data["status"],
-        "stage": session_data["stage"],
-        "progress_percentage": info["progress"],
-        "estimated_seconds_remaining": info["eta"],
-        "rounds_completed": session_data["rounds_completed"],
-        "total_sources": len(sources),
-        "total_claims": len(claims),
-        "logs": logs
-    }
+    claims = db_store.get_claims(session_id)
+    sources = db_store.get_sources(session_id)
+    contradictions = db_store.get_contradictions(session_id)
 
-@app.get("/api/research/{session_id}/evidence")
-def get_research_evidence(session_id: str):
-    store = EvidenceStore(session_id)
-    return {
-        "sub_questions": store.get_sub_questions(),
-        "sources": store.get_sources(),
-        "claims": store.get_claims()
-    }
+    config = json.loads(session["config_json"]) if session.get("config_json") else {}
+    total_rounds = config.get("max_rounds", settings.MAX_ROUNDS)
 
-@app.get("/api/research/{session_id}/contradictions")
-def get_research_contradictions(session_id: str):
-    store = EvidenceStore(session_id)
-    return {"contradictions": store.get_contradictions()}
+    return ResearchStatusResponse(
+        session_id=session_id,
+        status=session["status"],
+        stage=session["stage"],
+        rounds_completed=session["rounds_completed"] or 0,
+        total_rounds=total_rounds,
+        sources_found=len(sources),
+        claims_extracted=len(claims),
+        contradictions_found=len(contradictions),
+        current_action=current_action
+    )
 
 @app.get("/api/research/{session_id}/report")
-def get_research_report(session_id: str):
-    store = EvidenceStore(session_id)
-    report = store.get_latest_report()
-    if not report:
-        return {"report": None, "message": "Report not yet generated."}
-    return report
+def get_research_report(session_id: str, request: Request):
+    user = get_current_active_user(request)
+    db_store = EvidenceStore()
+    session = db_store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.get("user_id") and session["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied.")
+
+    report = db_store.get_report(session_id)
+    claims = db_store.get_claims(session_id)
+    sources = db_store.get_sources(session_id)
+    contradictions = db_store.get_contradictions(session_id)
+    logs = db_store.get_session_logs(session_id)
+
+    return {
+        "session": dict(session),
+        "report": dict(report) if report else None,
+        "claims": [dict(c) for c in claims],
+        "sources": [dict(s) for s in sources],
+        "contradictions": [dict(ct) for ct in contradictions],
+        "logs": [dict(l) for l in logs]
+    }
 
 @app.put("/api/research/{session_id}/report")
-def update_research_report(session_id: str, payload: UpdateReportRequest):
-    store = EvidenceStore(session_id)
-    report = store.get_latest_report()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found to update.")
+def update_research_report(session_id: str, payload: UpdateReportRequest, request: Request):
+    user = get_current_active_user(request)
+    db_store = EvidenceStore()
+    session = db_store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.get("user_id") and session["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied.")
 
-    new_content = payload.markdown_content
-    store.save_report(
-        markdown_content=new_content,
-        verified_count=report.get("verified_citations_count", 0) or 0,
-        total_count=report.get("total_citations_count", 0) or 0
-    )
-
-    session_data = store.get_session_status()
-    raw_query = session_data["query"] if session_data else "Research_Report"
-    export_report_files(session_id, new_content, BASE_DIR / "exports")
-    pdf_path = BASE_DIR / "exports" / f"report_{session_id}.pdf"
-    generate_pdf_from_markdown(new_content, pdf_path, title=raw_query)
-
-    return {"status": "success", "message": "Report updated and PDF re-rendered successfully."}
-
-@app.get("/api/research/{session_id}/download/pdf")
-def download_pdf_report(session_id: str):
-    store = EvidenceStore(session_id)
-    session_data = store.get_session_status()
-    report = store.get_latest_report()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not generated yet.")
-
-    raw_query = session_data["query"] if session_data else "Research_Report"
-    pdf_path = BASE_DIR / "exports" / f"report_{session_id}.pdf"
-    
-    # Always regenerate PDF from latest saved markdown content to ensure all user edits are included
-    generate_pdf_from_markdown(report["markdown_content"], pdf_path, title=raw_query)
-
-    # Clean title for filename (e.g. Sustainable_Agriculture_in_Tamil_Nadu.pdf)
-    clean_title = re.sub(r'[^a-zA-Z0-9_\- ]', '', raw_query).strip().replace(' ', '_')
-    if not clean_title:
-        clean_title = f"Research_Report_{session_id[:8]}"
-    filename = f"{clean_title}.pdf"
-
-    return FileResponse(
-        path=str(pdf_path),
-        filename=filename,
-        media_type="application/pdf",
-        headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0"
-        }
-    )
-
-@app.get("/api/research/{session_id}/download/md")
-def download_md_report(session_id: str):
-    store = EvidenceStore(session_id)
-    session_data = store.get_session_status()
-    report = store.get_latest_report()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not generated yet.")
-
-    md_path = BASE_DIR / "exports" / f"report_{session_id}.md"
-    if not md_path.exists():
-        export_report_files(session_id, report["markdown_content"], BASE_DIR / "exports")
-
-    raw_query = session_data["query"] if session_data else "Research_Report"
-    clean_title = re.sub(r'[^a-zA-Z0-9_\- ]', '', raw_query).strip().replace(' ', '_')
-    filename = f"{clean_title}.md"
-
-    return FileResponse(
-        path=str(md_path),
-        filename=filename,
-        media_type="text/markdown"
-    )
-
-@app.get("/api/research/{session_id}/download/html")
-def download_html_report(session_id: str):
-    store = EvidenceStore(session_id)
-    session_data = store.get_session_status()
-    report = store.get_latest_report()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not generated yet.")
-
-    html_path = BASE_DIR / "exports" / f"report_{session_id}.html"
-    if not html_path.exists():
-        export_report_files(session_id, report["markdown_content"], BASE_DIR / "exports")
-    
-    raw_query = session_data["query"] if session_data else "Research_Report"
-    clean_title = re.sub(r'[^a-zA-Z0-9_\- ]', '', raw_query).strip().replace(' ', '_')
-    filename = f"{clean_title}.html"
-
-    return FileResponse(
-        path=str(html_path),
-        filename=filename,
-        media_type="text/html"
-    )
+    db_store.update_report_content(session_id, payload.markdown_content)
+    return {"status": "success", "message": "Report updated successfully"}
 
 @app.get("/api/sessions")
 def list_sessions(request: Request):
-    user = get_current_user_optional(request)
+    user = get_current_active_user(request)
     conn = get_db_connection()
     cursor = conn.cursor()
-    if user:
-        cursor.execute("SELECT session_id, query, status, stage, created_at FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 30", (user["id"],))
-    else:
-        cursor.execute("SELECT session_id, query, status, stage, created_at FROM sessions WHERE user_id IS NULL ORDER BY created_at DESC LIMIT 15")
-    rows = [dict(r) for r in cursor.fetchall()]
+    cursor.execute("""
+        SELECT session_id, query, status, stage, created_at
+        FROM sessions
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT 30
+    """, (user["id"],))
+    rows = cursor.fetchall()
     conn.close()
-    return {"sessions": rows, "user": user}
+    return [{"session_id": r["session_id"], "query": r["query"], "status": r["status"], "stage": r["stage"], "created_at": r["created_at"]} for r in rows]
+
+@app.get("/api/export/{session_id}/{format}")
+def export_file(session_id: str, format: str, request: Request):
+    user = get_current_active_user(request)
+    db_store = EvidenceStore()
+    session = db_store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.get("user_id") and session["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied.")
+
+    report = db_store.get_report(session_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not generated yet")
+
+    markdown_text = report["markdown_content"]
+    safe_topic = re.sub(r"[^\w\s-]", "", session["query"]).strip()[:40].replace(" ", "_")
+    
+    exports_dir = BASE_DIR / "exports"
+    exports_dir.mkdir(exist_ok=True)
+
+    if format == "pdf":
+        file_path = exports_dir / f"{safe_topic}_{session_id[:8]}.pdf"
+        generate_pdf_from_markdown(markdown_text, file_path, title=session["query"])
+        return FileResponse(file_path, media_type="application/pdf", filename=f"{safe_topic}_Report.pdf")
+    elif format == "md":
+        file_path = exports_dir / f"{safe_topic}_{session_id[:8]}.md"
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(markdown_text)
+        return FileResponse(file_path, media_type="text/markdown", filename=f"{safe_topic}_Report.md")
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported format. Use 'pdf' or 'md'.")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

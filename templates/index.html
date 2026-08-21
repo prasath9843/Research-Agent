@@ -2316,132 +2316,2139 @@ body.studio-theme {
         </div>
 
         <!-- AUTHENTICATION MODAL -->
-        <div class="studio-modal-backdrop" id="auth-modal">
-            <div class="studio-modal auth-modal-card">
-                <div class="modal-header">
-                    <div class="auth-tabs">
-                        <button type="button" class="auth-tab-btn active" id="btn-tab-login" data-tab="login"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
-                        <button type="button" class="auth-tab-btn" id="btn-tab-signup" data-tab="signup"><i class="fa-solid fa-user-plus"></i> Create Account</button>
-                    </div>
-                    <button class="btn-close-modal" id="btn-close-auth">&times;</button>
-                </div>
+        
+    <!-- PRODUCTION AUTHENTICATION MODAL & OVERLAY SYSTEM -->
+    <div class="auth-overlay-gate" id="auth-gate-overlay">
+        <div class="auth-master-card" id="auth-card-container">
+            
+            <!-- BRAND HEADER -->
+            <div class="auth-brand-head">
+                <div class="auth-brand-logo"><i class="fa-solid fa-atom"></i></div>
+                <h2 class="auth-card-title" id="auth-view-title">Welcome Back</h2>
+                <p class="auth-card-subtitle" id="auth-view-subtitle">Sign in to your private research workspace</p>
+            </div>
 
-                <div class="modal-body auth-modal-body">
-                    <!-- GOOGLE 1-CLICK AUTH CONTAINER -->
-                    <div id="g_id_signin_container" style="width: 100%; display: flex; justify-content: center; margin-bottom: 0.5rem;"></div>
-                    
-                    <button type="button" class="btn-google-auth" id="btn-google-login">
-                        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
-                        <span id="google-btn-text">Sign in with Google</span>
+            <!-- STATUS / ERROR ALERT -->
+            <div class="auth-status-alert error" id="auth-alert-box" style="display: none;"></div>
+
+            <!-- VIEW 1: SIGN IN -->
+            <div class="auth-view-pane" id="view-signin">
+                <button type="button" class="auth-btn-google btn-trigger-google">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+                    <span>Continue with Google</span>
+                </button>
+
+                <div class="auth-or-divider"><span>or with email</span></div>
+
+                <form id="form-signin">
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="signin-email">Email Address</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-envelope auth-input-icon"></i>
+                            <input type="email" id="signin-email" class="auth-input-control" placeholder="researcher@university.edu" required autocomplete="email" />
+                        </div>
+                    </div>
+
+                    <div class="auth-field-group">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.4rem;">
+                            <label class="auth-field-label" for="signin-password" style="margin-bottom:0;">Password</label>
+                            <a href="#" class="auth-link-action" id="link-goto-forgot" style="font-size:0.78rem;">Forgot password?</a>
+                        </div>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-lock auth-input-icon"></i>
+                            <input type="password" id="signin-password" class="auth-input-control" placeholder="••••••••" required autocomplete="current-password" />
+                            <button type="button" class="btn-toggle-pw" data-target="signin-password"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size:0.82rem; color:#94a3b8;">
+                        <input type="checkbox" id="signin-remember" checked style="accent-color:#10b981; cursor:pointer;" />
+                        <label for="signin-remember" style="cursor:pointer;">Remember me for 30 days</label>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary" id="btn-submit-signin">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to Studio
                     </button>
+                </form>
 
-                    <div class="auth-divider">
-                        <span>or with email & password</span>
-                    </div>
-
-                    <!-- ERROR MESSAGE BANNER -->
-                    <div class="auth-error-alert" id="auth-error-alert" style="display: none;"></div>
-
-                    <!-- FORM -->
-                    <form id="auth-form" class="studio-form">
-                        <div class="form-group" id="group-signup-name" style="display: none;">
-                            <label for="auth-name"><i class="fa-solid fa-id-badge text-emerald"></i> Full Name</label>
-                            <input type="text" id="auth-name" placeholder="Dr. Jane Doe" autocomplete="name" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="auth-email"><i class="fa-solid fa-envelope text-emerald"></i> Email Address</label>
-                            <input type="email" id="auth-email" placeholder="researcher@university.edu" required autocomplete="email" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="auth-password"><i class="fa-solid fa-lock text-emerald"></i> Password</label>
-                            <input type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password" />
-                        </div>
-
-                        <button type="submit" class="btn-auth-submit" id="btn-auth-submit">
-                            <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
-                        </button>
-                    </form>
+                <div class="auth-card-footer">
+                    Don't have an account? <a href="#" class="auth-link-action" id="link-goto-signup">Create Account</a>
                 </div>
             </div>
-        </div>
 
+            <!-- VIEW 2: SIGN UP -->
+            <div class="auth-view-pane" id="view-signup" style="display: none;">
+                <button type="button" class="auth-btn-google btn-trigger-google">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+                    <span>Sign up with Google</span>
+                </button>
+
+                <div class="auth-or-divider"><span>or with email</span></div>
+
+                <form id="form-signup">
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="signup-name">Full Name</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-user auth-input-icon"></i>
+                            <input type="text" id="signup-name" class="auth-input-control" placeholder="Dr. Jane Doe" required autocomplete="name" />
+                        </div>
+                    </div>
+
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="signup-email">Email Address</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-envelope auth-input-icon"></i>
+                            <input type="email" id="signup-email" class="auth-input-control" placeholder="researcher@university.edu" required autocomplete="email" />
+                        </div>
+                    </div>
+
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="signup-password">Password (min 6 characters)</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-lock auth-input-icon"></i>
+                            <input type="password" id="signup-password" class="auth-input-control" placeholder="••••••••" required autocomplete="new-password" />
+                            <button type="button" class="btn-toggle-pw" data-target="signup-password"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                        <div class="pw-strength-track"><div class="pw-strength-fill" id="signup-pw-meter"></div></div>
+                    </div>
+
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="signup-confirm-password">Confirm Password</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+                            <input type="password" id="signup-confirm-password" class="auth-input-control" placeholder="••••••••" required autocomplete="new-password" />
+                            <button type="button" class="btn-toggle-pw" data-target="signup-confirm-password"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                        <div class="pw-match-indicator" id="signup-pw-match" style="display:none;"></div>
+                    </div>
+
+                    <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom: 1.2rem; font-size:0.8rem; color:#94a3b8;">
+                        <input type="checkbox" id="signup-terms" checked required style="accent-color:#10b981; margin-top:3px; cursor:pointer;" />
+                        <label for="signup-terms" style="cursor:pointer;">I agree to the Terms of Service & Privacy Policy</label>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary" id="btn-submit-signup">
+                        <i class="fa-solid fa-user-plus"></i> Create Account & Verify
+                    </button>
+                </form>
+
+                <div class="auth-card-footer">
+                    Already have an account? <a href="#" class="auth-link-action" id="link-goto-signin">Sign In</a>
+                </div>
+            </div>
+
+            <!-- VIEW 3: VERIFY EMAIL (6-BOX OTP) -->
+            <div class="auth-view-pane" id="view-verify" style="display: none;">
+                <div style="text-align:center; margin-bottom: 1.2rem;">
+                    <p style="font-size:0.9rem; color:#94a3b8; margin-bottom:0.5rem;">We sent a 6-digit verification code to:</p>
+                    <div class="masked-email-pill" id="verify-masked-email">p*****@gmail.com</div>
+                </div>
+
+                <form id="form-verify">
+                    <div class="otp-digit-grid" id="otp-inputs-container">
+                        <input type="text" maxlength="1" class="otp-digit-box" data-index="0" inputmode="numeric" autocomplete="one-time-code" autofocus />
+                        <input type="text" maxlength="1" class="otp-digit-box" data-index="1" inputmode="numeric" />
+                        <input type="text" maxlength="1" class="otp-digit-box" data-index="2" inputmode="numeric" />
+                        <input type="text" maxlength="1" class="otp-digit-box" data-index="3" inputmode="numeric" />
+                        <input type="text" maxlength="1" class="otp-digit-box" data-index="4" inputmode="numeric" />
+                        <input type="text" maxlength="1" class="otp-digit-box" data-index="5" inputmode="numeric" />
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary" id="btn-submit-verify">
+                        <i class="fa-solid fa-circle-check"></i> Verify Code & Enter Studio
+                    </button>
+                </form>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.4rem; font-size:0.85rem;">
+                    <a href="#" class="auth-link-action" id="link-change-email"><i class="fa-solid fa-arrow-left"></i> Change Email</a>
+                    <div>
+                        <span id="resend-countdown-text" style="color:#64748b; font-size:0.82rem;">Resend code in 0:60</span>
+                        <button type="button" id="btn-resend-otp" class="auth-link-action" style="display:none; background:none; border:none; padding:0;">Resend Code</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: FORGOT PASSWORD -->
+            <div class="auth-view-pane" id="view-forgot" style="display: none;">
+                <p style="font-size:0.88rem; color:#94a3b8; margin-bottom: 1.2rem; line-height:1.5;">
+                    Enter the email address associated with your account, and we will send you a 6-digit password reset code.
+                </p>
+
+                <form id="form-forgot">
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="forgot-email">Email Address</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-envelope auth-input-icon"></i>
+                            <input type="email" id="forgot-email" class="auth-input-control" placeholder="researcher@university.edu" required autocomplete="email" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary" id="btn-submit-forgot">
+                        <i class="fa-solid fa-paper-plane"></i> Send Password Reset Code
+                    </button>
+                </form>
+
+                <div class="auth-card-footer">
+                    <a href="#" class="auth-link-action" id="link-forgot-to-signin"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                </div>
+            </div>
+
+            <!-- VIEW 5: RESET PASSWORD -->
+            <div class="auth-view-pane" id="view-reset" style="display: none;">
+                <p style="font-size:0.88rem; color:#94a3b8; margin-bottom: 1.2rem; line-height:1.5;">
+                    Enter the 6-digit reset code sent to your email and choose your new password.
+                </p>
+
+                <form id="form-reset">
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="reset-code">6-Digit Reset Code</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-key auth-input-icon"></i>
+                            <input type="text" id="reset-code" class="auth-input-control" placeholder="123456" maxlength="6" required style="font-family:var(--font-mono); letter-spacing:4px;" />
+                        </div>
+                    </div>
+
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="reset-new-password">New Password (min 6 characters)</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-lock auth-input-icon"></i>
+                            <input type="password" id="reset-new-password" class="auth-input-control" placeholder="••••••••" required autocomplete="new-password" />
+                            <button type="button" class="btn-toggle-pw" data-target="reset-new-password"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="auth-field-group">
+                        <label class="auth-field-label" for="reset-confirm-password">Confirm New Password</label>
+                        <div class="auth-input-wrapper">
+                            <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+                            <input type="password" id="reset-confirm-password" class="auth-input-control" placeholder="••••••••" required autocomplete="new-password" />
+                            <button type="button" class="btn-toggle-pw" data-target="reset-confirm-password"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="auth-btn-primary" id="btn-submit-reset">
+                        <i class="fa-solid fa-lock-open"></i> Update Password & Sign In
+                    </button>
+                </form>
+
+                <div class="auth-card-footer">
+                    <a href="#" class="auth-link-action" id="link-reset-to-signin"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <!-- Application JavaScript -->
+    </div>
+    <style>
+/* DEEPRESEARCH STUDIO — MODERN ACADEMIC AGENT CSS THEME */
+:root {
+    --bg-dark-app: #090d16;
+    --bg-sidebar: #0f172a;
+    --bg-card: rgba(15, 23, 42, 0.9);
+    --bg-canvas: #f8fafc;
+    --bg-table-header: #f1f5f9;
+    
+    --border-subtle: #e2e8f0;
+    --border-dark: #1e293b;
+    --border-accent: rgba(16, 185, 129, 0.4);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --text-dark-head: #f8fafc;
+    --text-dark-muted: #94a3b8;
+    
+    --emerald-accent: #10b981;
+    --emerald-glow: rgba(16, 185, 129, 0.3);
+    --indigo-accent: #6366f1;
+    --amber-accent: #f59e0b;
+    --blue-accent: #3b82f6;
+    
+    --font-heading: 'Outfit', 'Inter', -apple-system, sans-serif;
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --sidebar-width: 350px;
+    --navbar-height: 64px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+    
+    --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-floating: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.25);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.studio-theme {
+    background-color: var(--bg-dark-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.studio-app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   HEADER NAVBAR
+   ========================================================================== */
+.studio-navbar {
+    height: var(--navbar-height);
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    flex-shrink: 0;
+    z-index: 20;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.studio-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.brand-logo-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 0 16px var(--emerald-glow);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.brand-titles {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-name {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-badge-tag {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--emerald-accent);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 0.3rem;
+}
+
+.brand-sub {
+    font-size: 0.72rem;
+    color: var(--text-dark-muted);
+}
+
+.navbar-center {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.telemetry-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-dark-muted);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.telemetry-pill strong {
+    color: #ffffff;
+}
+
+.text-success { color: var(--emerald-accent); }
+.text-warning { color: var(--amber-accent); }
+.text-amber { color: var(--amber-accent); }
+.text-muted { color: var(--text-muted); }
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-studio-action {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.15s ease;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-dark);
+    color: var(--text-dark-muted);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 0 15px var(--emerald-glow);
+}
+
+.btn-primary-gradient:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* ==========================================================================
+   WORKSPACE DUAL PANEL LAYOUT
+   ========================================================================== */
+.studio-workspace {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - var(--navbar-height));
+    overflow: hidden;
+}
+
+/* Left Sidebar */
+.studio-sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-dark);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.2rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.studio-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.studio-card.flex-fill {
+    flex: 1;
+    min-height: 200px;
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-dark-head);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-title.justify-between {
+    justify-content: space-between;
+}
+
+.status-indicator-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald-accent);
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 8px var(--emerald-accent);
+}
+
+/* Form Controls */
+.studio-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.speed-mode-toggle {
+    display: flex;
+    background: #0f172a;
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius-sm);
+    padding: 0.2rem;
+    gap: 0.2rem;
+}
+
+.speed-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.35rem 0.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.speed-btn.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-dark-muted);
+    margin-bottom: 0.3rem;
+}
+
+.form-group textarea, .form-group select, .form-group input {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid var(--border-dark);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    outline: none;
+}
+
+.form-group textarea:focus, .form-group select:focus {
+    border-color: var(--emerald-accent);
+}
+
+.quick-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.preset-label {
+    font-size: 0.72rem;
+    color: var(--text-dark-muted);
+}
+
+.chip-preset {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-dark-muted);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.chip-preset:hover {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--emerald-accent);
+    border-color: var(--emerald-accent);
+}
+
+.btn-launch-research {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 0 12px var(--emerald-glow);
+    transition: all 0.15s ease;
+}
+
+.btn-launch-research:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* Telemetry Timeline */
+.telemetry-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    overflow-y: auto;
+    max-height: 240px;
+    padding-right: 0.3rem;
+}
+
+.timeline-step {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--text-dark-muted);
+    padding: 0.4rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.timeline-step.done {
+    color: #f8fafc;
+}
+
+.step-icon {
+    width: 20px;
+    height: 20px;
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--emerald-accent);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+}
+
+.step-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.step-title { font-weight: 600; }
+.step-desc { font-size: 0.72rem; color: var(--text-dark-muted); word-break: break-all; }
+
+/* Recent Sessions */
+.recent-sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.session-history-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    color: var(--text-dark-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.session-history-item:hover, .session-history-item.active {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--emerald-accent);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   RIGHT MAIN CANVAS
+   ========================================================================== */
+.studio-canvas {
+    flex: 1;
+    background-color: var(--bg-canvas);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Tab Bar */
+.canvas-tab-bar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 1.5rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 0.8rem 1rem;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--emerald-accent);
+    border-bottom-color: var(--emerald-accent);
+    font-weight: 600;
+}
+
+.tab-meta-badge {
+    background: #fffbebfb;
+    border: 1px solid #fef3c7;
+    color: #b45309;
+    font-size: 0.82rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+}
+
+/* Tab Content Panes */
+.tab-content-pane {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 3rem 6rem 3rem;
+}
+
+.tab-content-pane.active {
+    display: block;
+}
+
+/* Live Progress Bar & ETA Container */
+.live-progress-container {
+    width: 100%;
+    max-width: 540px;
+    margin: 1.5rem auto;
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.2rem 1.5rem;
+    box-shadow: var(--shadow-subtle);
+}
+
+.progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.progress-stage-title {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+}
+
+.progress-percent-text {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: var(--emerald-accent);
+}
+
+.progress-bar-track {
+    width: 100%;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    width: 0%;
+    border-radius: var(--radius-full);
+    transition: width 0.4s ease;
+}
+
+.progress-footer-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.eta-badge-pill {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.elapsed-badge-pill {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.center-telemetry-box {
+    margin-top: 1.2rem;
+    background: #0f172a;
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    overflow: hidden;
+}
+
+.telemetry-box-header {
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
+}
+
+.center-log-feed {
+    padding: 0.6rem 0.8rem;
+    max-height: 160px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.center-log-row {
+    color: #94a3b8;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.log-tag {
+    color: var(--emerald-accent);
+    font-weight: 600;
+    margin-right: 0.4rem;
+}
+
+.log-msg {
+    color: #f1f5f9;
+}
+
+/* Report Action Header & Prominent Download PDF Button */
+.report-top-bar {
+    max-width: 960px;
+    margin: 0 auto 1.2rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 0.9rem 1.6rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+    position: sticky;
+    top: 0.5rem;
+    z-index: 100;
+}
+
+.report-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.report-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.report-stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+}
+
+.btn-download-pdf-hero {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    color: #ffffff !important;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.92rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.01em;
+}
+
+.btn-download-pdf-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(220, 38, 38, 0.45);
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+.btn-pdf-accent {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff !important;
+    border: none;
+    font-weight: 700;
+}
+
+.btn-pdf-accent:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.btn-edit-toggle {
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-full);
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-toggle:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+}
+
+.btn-edit-toggle.active {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.4);
+}
+
+.btn-save-edit {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 0.45rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transition: all 0.2s ease;
+    animation: pulseSave 2s infinite ease-in-out;
+}
+
+@keyframes pulseSave {
+    0%, 100% { box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+    50% { box-shadow: 0 4px 22px rgba(16, 185, 129, 0.65); }
+}
+
+.btn-save-edit:hover {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+.btn-copy-md {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-full);
+    padding: 0.5rem 1rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.btn-copy-md:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+/* Edit Mode Banner */
+.edit-hint-banner {
+    max-width: 960px;
+    margin: -0.5rem auto 1.2rem auto;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 0.75rem 1.4rem;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    animation: fadeInSlide 0.3s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.markdown-article-view[contenteditable="true"] {
+    outline: 2px dashed #2563eb !important;
+    outline-offset: 8px;
+    background: #ffffff;
+    cursor: text;
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+/* Empty Hero State & 3-Step Guide */
+.hero-empty-state {
+    text-align: center;
+    max-width: 780px;
+    margin: 3rem auto 0 auto;
+}
+
+.user-guide-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.guide-step-card {
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guide-step-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.8rem;
+}
+
+.guide-step-card h4 {
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+}
+
+.guide-step-card p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-full);
+    margin-bottom: 1.2rem;
+}
+
+.hero-empty-state h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+}
+
+.hero-empty-state p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Markdown Article View */
+.markdown-article-view {
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--text-primary);
+    font-size: 1.02rem;
+    line-height: 1.8;
+    background: #ffffff;
+    padding: 2.5rem 3rem;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-subtle);
+}
+
+.markdown-article-view h1 {
+    font-family: var(--font-heading);
+    font-size: 2.1rem;
+    font-weight: 800;
+    margin: 0.5rem 0 1.5rem 0;
+    color: #0f172a;
+    letter-spacing: -0.025em;
+    border-bottom: 3px solid var(--emerald-accent);
+    padding-bottom: 0.75rem;
+}
+
+.markdown-article-view h2 {
+    font-family: var(--font-heading);
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin: 2.2rem 0 1rem 0;
+    color: #1e293b;
+    letter-spacing: -0.015em;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.markdown-article-view h3 {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+    color: #334155;
+}
+
+.markdown-article-view p {
+    margin-bottom: 1.25rem;
+    color: #334155;
+}
+
+.markdown-article-view table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.8rem 0;
+    font-size: 0.88rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid var(--border-subtle);
+}
+
+.markdown-article-view th, .markdown-article-view td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.markdown-article-view th {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #0f172a;
+    text-transform: uppercase;
+    font-size: 0.76rem;
+    letter-spacing: 0.05em;
+}
+
+.markdown-article-view tr:hover td {
+    background: #f8fafc;
+}
+
+/* Callout Alert Blocks */
+.markdown-article-view blockquote {
+    border-left: 4px solid var(--emerald-accent);
+    padding: 1.2rem 1.5rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-radius: var(--radius-md);
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+.markdown-article-view blockquote h3 {
+    margin-top: 0;
+    color: #047857;
+}
+
+/* Table & Claims View */
+.table-container-card {
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-subtle);
+    padding: 1.5rem;
+}
+
+.table-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.table-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.table-search-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 0.4rem 0.85rem;
+    width: 280px;
+    transition: all 0.2s ease;
+}
+
+.table-search-input:focus-within {
+    border-color: var(--emerald-accent);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    background: #ffffff;
+}
+
+.table-search-input input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.82rem;
+    width: 100%;
+    color: var(--text-primary);
+}
+
+.badge-pill {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--radius-full);
+}
+
+.table-scroll-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.studio-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.studio-table th, .studio-table td {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.studio-table th {
+    background: var(--bg-table-header);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.studio-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Export Studio */
+.export-studio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 750px;
+    margin: 2rem auto;
+}
+
+.export-tile {
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.8rem;
+    text-align: center;
+    box-shadow: var(--shadow-subtle);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tile-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.pdf-theme { background: #fef2f2; color: #ef4444; }
+.md-theme { background: #ecfdf5; color: var(--emerald-accent); }
+
+.export-tile h4 { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; }
+.export-tile p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+.btn-tile-download {
+    width: 100%;
+    background: var(--emerald-accent);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.15s ease;
+}
+
+.btn-tile-download.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.btn-tile-download:hover { background: #059669; }
+
+/* Floating Followup Bar */
+.studio-followup-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 720px;
+    z-index: 50;
+}
+
+.followup-inner {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-floating);
+    padding: 0.4rem 0.6rem 0.4rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.followup-inner input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    color: var(--text-primary);
+}
+
+.btn-circle-send {
+    width: 36px;
+    height: 36px;
+    background: var(--emerald-accent);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+/* User Auth Bar in Navbar */
+.user-auth-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.btn-user-auth {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.btn-user-auth:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.user-profile-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.user-info-chip {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-logout {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.82rem;
+}
+
+.btn-logout:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #ffffff;
+}
+
+/* Mobile View Switcher */
+.mobile-view-switcher {
+    display: none;
+    background: #0f172a;
+    border-bottom: 1px solid var(--border-dark);
+    padding: 0.4rem 0.6rem;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.mobile-switch-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.45rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.mobile-switch-btn.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Auth Modal Specifics */
+.auth-modal-card {
+    background: #0f172a !important;
+    border: 1px solid var(--border-dark);
+    color: #ffffff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    padding: 1.5rem !important;
+}
+
+.auth-tabs {
+    display: flex;
+    background: #090d16;
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius-sm);
+    padding: 0.2rem;
+    gap: 0.2rem;
+}
+
+.auth-tab-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.auth-tab-btn.active {
+    background: var(--emerald-accent);
+    color: #ffffff;
+}
+
+.btn-google-auth {
+    width: 100%;
+    background: #ffffff;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-google-auth:hover {
+    background: #f9fafb;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+.auth-divider::before, .auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-dark);
+}
+
+.auth-divider span {
+    padding: 0 0.75rem;
+}
+
+.auth-error-alert {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    margin-bottom: 0.8rem;
+}
+
+.btn-auth-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: #ffffff;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    box-shadow: 0 0 15px var(--emerald-glow);
+}
+
+.btn-auth-submit:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* Modal backdrop */
+.studio-modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+
+.studio-modal-backdrop.open, .studio-modal-backdrop.active { display: flex; }
+
+.studio-modal {
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    width: 90%;
+    max-width: 480px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-floating);
+}
+
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); }
+.btn-close-modal { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-muted); }
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE STYLES (iOS, Android & Tablets)
+   ========================================================================== */
+
+@media (max-width: 992px) {
+    body.studio-theme {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .studio-app {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow: visible !important;
+        display: block !important;
+    }
+
+    .studio-navbar {
+        height: auto !important;
+        padding: 0.6rem 0.8rem !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .navbar-center {
+        display: none !important;
+    }
+
+    .navbar-right {
+        margin-left: auto !important;
+        flex-wrap: wrap !important;
+        gap: 0.35rem !important;
+    }
+
+    .mobile-view-switcher {
+        display: flex !important;
+        position: sticky;
+        top: 0;
+        z-index: 30;
+    }
+
+    .studio-workspace {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+        width: 100% !important;
+    }
+
+    .studio-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 2px solid var(--border-dark) !important;
+        overflow: visible !important;
+        padding: 0.8rem !important;
+        flex: none !important;
+    }
+
+    /* When mobile tab 'report' is active, toggle visibility */
+    .studio-workspace.view-report .studio-sidebar {
+        display: none !important;
+    }
+
+    .studio-workspace.view-form .studio-canvas {
+        display: none !important;
+    }
+
+    .studio-canvas {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0.6rem 0.4rem !important;
+        flex: none !important;
+    }
+
+    .canvas-tab-bar {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 0.5rem !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .tab-buttons {
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        gap: 0.35rem !important;
+        display: flex !important;
+    }
+
+    .tab-btn {
+        padding: 0.45rem 0.65rem !important;
+        font-size: 0.78rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    .report-top-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.6rem !important;
+        padding: 0.6rem !important;
+        position: relative !important;
+    }
+
+    .report-meta-chips {
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 0.35rem !important;
+    }
+
+    .report-actions-cluster {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        gap: 0.4rem !important;
+    }
+
+    .btn-download-pdf-hero, .btn-edit-toggle, .btn-save-edit, .btn-copy-md {
+        flex: 1 1 45% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 0.5rem 0.6rem !important;
+        font-size: 0.78rem !important;
+    }
+
+    .report-paper-container {
+        padding: 1rem 0.6rem !important;
+        margin: 0 !important;
+        border-radius: var(--radius-sm) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+    }
+
+    .markdown-rendered-content {
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        width: 100% !important;
+    }
+
+    .markdown-rendered-content table {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .user-guide-steps {
+        grid-template-columns: 1fr !important;
+        gap: 0.6rem !important;
+    }
+
+    .studio-followup-bar {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        margin-top: 1.5rem !important;
+        padding: 0 0.2rem !important;
+    }
+
+    .studio-modal {
+        width: 95% !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-name {
+        font-size: 0.95rem !important;
+    }
+
+    .brand-sub {
+        display: none !important;
+    }
+
+    .brand-logo-icon {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.85rem !important;
+    }
+
+    .btn-studio-action {
+        font-size: 0.72rem !important;
+        padding: 0.35rem 0.5rem !important;
+    }
+
+    .user-info-chip {
+        max-width: 100px !important;
+        font-size: 0.72rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+
+    .speed-btn {
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.15rem !important;
+    }
+
+    .chip-preset {
+        font-size: 0.68rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+
+    .report-paper-container {
+        padding: 0.8rem 0.4rem !important;
+    }
+
+    .markdown-rendered-content h1 {
+        font-size: 1.15rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .markdown-rendered-content h2 {
+        font-size: 1rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .markdown-rendered-content p, 
+    .markdown-rendered-content li {
+        font-size: 0.84rem !important;
+        line-height: 1.45 !important;
+    }
+}
+
+/* ==========================================================================
+   OFFICIAL GOOGLE ACCOUNT CHOOSER & ONE-TAP STYLING
+   ========================================================================== */
+.google-onetap-widget {
+    position: fixed;
+    top: 75px;
+    right: 20px;
+    width: 330px;
+    background: #202124;
+    color: #e8eaed;
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    border: 1px solid #3c4043;
+    z-index: 99999;
+    padding: 14px 16px;
+    font-family: 'Google Sans', Roboto, Arial, sans-serif;
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.google-onetap-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #9aa0a6;
+    margin-bottom: 12px;
+}
+
+.google-onetap-accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.google-onetap-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #303134;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.google-onetap-item:hover {
+    background: #3c4043;
+    border-color: #5f6368;
+}
+
+.google-avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.google-user-meta {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.google-user-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.google-user-email {
+    font-size: 0.76rem;
+    color: #9aa0a6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.google-chooser-window {
+    background: #202124 !important;
+    color: #e8eaed !important;
+    border-radius: 18px !important;
+    width: 440px !important;
+    max-width: 92vw !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important;
+    border: 1px solid #3c4043 !important;
+    padding: 2rem !important;
+}
+
+.google-dialog-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.google-dialog-title {
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: #ffffff;
+    margin-top: 0.6rem;
+}
+
+.google-dialog-sub {
+    font-size: 0.9rem;
+    color: #9aa0a6;
+    margin-top: 0.3rem;
+}
+
+.google-account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    border-top: 1px solid #3c4043;
+    border-bottom: 1px solid #3c4043;
+    padding: 0.5rem 0;
+    margin-bottom: 1.2rem;
+}
+
+.google-account-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.google-account-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.google-use-another {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #8ab4f8;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.google-use-another:hover {
+    background: rgba(138, 180, 248, 0.08);
+}
+
+
+    </style>
     <script>
+
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const form = document.getElementById('research-form');
-    const btnStart = document.getElementById('btn-start');
-    const queryInput = document.getElementById('query-input');
-    const fastModelSelect = document.getElementById('fast-model');
-    const strongModelSelect = document.getElementById('strong-model');
-    const maxRoundsInput = document.getElementById('max-rounds');
-    const maxSourcesInput = document.getElementById('max-sources');
+    // State Management
+    let currentUser = null;
+    let currentAuthEmail = '';
+    let resendTimerInterval = null;
+    let resendSecondsRemaining = 60;
+    let currentSessionId = null;
 
-    const heroEmptyState = document.getElementById('hero-empty-state');
-    const markdownBody = document.getElementById('markdown-body');
-    const telemetryLog = document.getElementById('telemetry-log');
-    const statusDot = document.getElementById('status-dot');
+    // DOM Elements - Auth Overlay & Views
+    const authOverlay = document.getElementById('auth-gate-overlay');
+    const authViewTitle = document.getElementById('auth-view-title');
+    const authViewSubtitle = document.getElementById('auth-view-subtitle');
+    const authAlertBox = document.getElementById('auth-alert-box');
 
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-content-pane');
-    const auditScoreBadge = document.getElementById('audit-score-badge');
+    const viewSignin = document.getElementById('view-signin');
+    const viewSignup = document.getElementById('view-signup');
+    const viewVerify = document.getElementById('view-verify');
+    const viewForgot = document.getElementById('view-forgot');
+    const viewReset = document.getElementById('view-reset');
 
-    const claimsTableBody = document.querySelector('#claims-table tbody');
-    const evidenceCountTag = document.getElementById('evidence-count-tag');
-    const contradictionsContainer = document.getElementById('contradictions-container');
+    // Forms & Inputs
+    const formSignin = document.getElementById('form-signin');
+    const formSignup = document.getElementById('form-signup');
+    const formVerify = document.getElementById('form-verify');
+    const formForgot = document.getElementById('form-forgot');
+    const formReset = document.getElementById('form-reset');
 
-    const exportPdfBtn = document.getElementById('export-pdf-btn');
-    const exportMdBtn = document.getElementById('export-md-btn');
-    const recentSessionsList = document.getElementById('recent-sessions-list');
-    const recentTitleDisplay = document.getElementById('recent-title-display');
+    const signinEmail = document.getElementById('signin-email');
+    const signinPassword = document.getElementById('signin-password');
+    const signupName = document.getElementById('signup-name');
+    const signupEmail = document.getElementById('signup-email');
+    const signupPassword = document.getElementById('signup-password');
+    const signupConfirmPassword = document.getElementById('signup-confirm-password');
+    const signupPwMeter = document.getElementById('signup-pw-meter');
+    const signupPwMatch = document.getElementById('signup-pw-match');
+    
+    const verifyMaskedEmail = document.getElementById('verify-masked-email');
+    const otpInputs = document.querySelectorAll('.otp-digit-box');
+    const resendCountdownText = document.getElementById('resend-countdown-text');
+    const btnResendOtp = document.getElementById('btn-resend-otp');
+    const forgotEmail = document.getElementById('forgot-email');
+    const resetCode = document.getElementById('reset-code');
+    const resetNewPassword = document.getElementById('reset-new-password');
+    const resetConfirmPassword = document.getElementById('reset-confirm-password');
 
-    const settingsModal = document.getElementById('settings-modal');
-    const btnOpenSettings = document.getElementById('btn-open-settings');
-    const btnCloseSettings = document.getElementById('btn-close-settings');
-    const btnNewQuery = document.getElementById('btn-new-query');
-
-    const followupInput = document.getElementById('followup-input');
-    const btnSendFollowup = document.getElementById('btn-send-followup');
-
-    // User Auth DOM Elements
+    // Navbar & User Profile
     const btnOpenAuth = document.getElementById('btn-open-auth');
-    const authModal = document.getElementById('auth-modal');
-    const btnCloseAuth = document.getElementById('btn-close-auth');
-    const btnTabLogin = document.getElementById('btn-tab-login');
-    const btnTabSignup = document.getElementById('btn-tab-signup');
-    const groupSignupName = document.getElementById('group-signup-name');
-    const authForm = document.getElementById('auth-form');
-    const authName = document.getElementById('auth-name');
-    const authEmail = document.getElementById('auth-email');
-    const authPassword = document.getElementById('auth-password');
-    const btnAuthSubmit = document.getElementById('btn-auth-submit');
-    const authErrorAlert = document.getElementById('auth-error-alert');
-    const btnGoogleLogin = document.getElementById('btn-google-login');
     const userProfileMenu = document.getElementById('user-profile-menu');
     const userNameDisplay = document.getElementById('user-name-display');
     const btnLogout = document.getElementById('btn-logout');
+    const bannerUserName = document.getElementById('banner-user-name');
+    const bannerUserDesc = document.getElementById('banner-user-desc');
+    const btnBannerLogin = document.getElementById('btn-banner-login');
 
-    // Mobile View Switcher Elements
-    const studioWorkspace = document.getElementById('studio-workspace');
-    const btnMobileForm = document.getElementById('btn-mobile-form');
-    const btnMobileReport = document.getElementById('btn-mobile-report');
-
-    let currentSessionId = null;
-    let pollInterval = null;
-    let currentUser = null;
-    let authMode = 'login'; // 'login' or 'signup'
-
-    // --- Authentication Helpers ---
-    function getAuthToken() {
-        return localStorage.getItem('deepresearch_auth_token') || '';
-    }
-
+    // --- Helper Functions ---
     function setAuthToken(token) {
         localStorage.setItem('deepresearch_auth_token', token);
+    }
+
+    function getAuthToken() {
+        return localStorage.getItem('deepresearch_auth_token') || '';
     }
 
     function clearAuthToken() {
@@ -2457,51 +4464,500 @@ document.addEventListener('DOMContentLoaded', () => {
         return fetch(url, options);
     }
 
-    async function checkCurrentUser() {
-        try {
-            const token = getAuthToken();
-            if (!token) {
-                renderLoggedOutState();
-                // Force open login modal as the first thing when opening the website
-                if (authModal) {
-                    authModal.classList.add('open');
-                }
-                return;
-            }
+    function showAuthAlert(msg, type = 'error') {
+        if (!authAlertBox) return;
+        authAlertBox.className = `auth-status-alert ${type}`;
+        authAlertBox.innerHTML = type === 'error' 
+            ? `<i class="fa-solid fa-triangle-exclamation"></i> <span>${msg}</span>`
+            : `<i class="fa-solid fa-circle-check"></i> <span>${msg}</span>`;
+        authAlertBox.style.display = 'flex';
+    }
 
-            const resp = await fetchWithAuth('/api/auth/me');
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.user) {
-                    currentUser = data.user;
-                    renderLoggedInState(currentUser);
-                } else {
-                    clearAuthToken();
-                    renderLoggedOutState();
-                    if (authModal) authModal.classList.add('open');
-                }
-            } else {
-                clearAuthToken();
-                renderLoggedOutState();
-                if (authModal) authModal.classList.add('open');
-            }
-        } catch (err) {
-            console.error('Error checking user session:', err);
-            renderLoggedOutState();
-            if (authModal) authModal.classList.add('open');
+    function hideAuthAlert() {
+        if (authAlertBox) authAlertBox.style.display = 'none';
+    }
+
+    function switchAuthView(viewName) {
+        hideAuthAlert();
+        [viewSignin, viewSignup, viewVerify, viewForgot, viewReset].forEach(v => {
+            if (v) v.style.display = 'none';
+        });
+
+        if (viewName === 'signin') {
+            viewSignin.style.display = 'block';
+            authViewTitle.textContent = "Welcome Back";
+            authViewSubtitle.textContent = "Sign in to your private research workspace";
+            if (signinEmail) signinEmail.focus();
+        } else if (viewName === 'signup') {
+            viewSignup.style.display = 'block';
+            authViewTitle.textContent = "Create Account";
+            authViewSubtitle.textContent = "Join DeepResearch Studio to generate verified literature";
+            if (signupName) signupName.focus();
+        } else if (viewName === 'verify') {
+            viewVerify.style.display = 'block';
+            authViewTitle.textContent = "Verify Your Email";
+            authViewSubtitle.textContent = "Enter the 6-digit code sent to your email";
+            clearOtpInputs();
+            if (otpInputs[0]) otpInputs[0].focus();
+            startResendTimer(60);
+        } else if (viewName === 'forgot') {
+            viewForgot.style.display = 'block';
+            authViewTitle.textContent = "Reset Password";
+            authViewSubtitle.textContent = "We will send a 6-digit password reset code";
+            if (forgotEmail) forgotEmail.focus();
+        } else if (viewName === 'reset') {
+            viewReset.style.display = 'block';
+            authViewTitle.textContent = "Choose New Password";
+            authViewSubtitle.textContent = "Enter your 6-digit reset code and new password";
+            if (resetCode) resetCode.focus();
         }
     }
 
-    const btnBannerLogin = document.getElementById('btn-banner-login');
-    const bannerUserName = document.getElementById('banner-user-name');
-    const bannerUserDesc = document.getElementById('banner-user-desc');
+    // Toggle Password Visibility
+    document.querySelectorAll('.btn-toggle-pw').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                const isPw = input.type === 'password';
+                input.type = isPw ? 'text' : 'password';
+                btn.innerHTML = isPw ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+            }
+        });
+    });
+
+    // Password Strength Meter
+    if (signupPassword && signupPwMeter) {
+        signupPassword.addEventListener('input', () => {
+            const val = signupPassword.value;
+            let score = 0;
+            if (val.length >= 6) score += 25;
+            if (val.length >= 10) score += 25;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+            if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score += 25;
+
+            signupPwMeter.style.width = score + '%';
+            if (score <= 25) signupPwMeter.style.background = '#ef4444';
+            else if (score <= 75) signupPwMeter.style.background = '#f59e0b';
+            else signupPwMeter.style.background = '#10b981';
+        });
+    }
+
+    // Password Match Indicator
+    if (signupConfirmPassword && signupPwMatch) {
+        signupConfirmPassword.addEventListener('input', () => {
+            const pw = signupPassword.value;
+            const confirm = signupConfirmPassword.value;
+            if (!confirm) {
+                signupPwMatch.style.display = 'none';
+                return;
+            }
+            signupPwMatch.style.display = 'flex';
+            if (pw === confirm) {
+                signupPwMatch.innerHTML = '<span style="color:#10b981;"><i class="fa-solid fa-circle-check"></i> Passwords match</span>';
+            } else {
+                signupPwMatch.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i> Passwords do not match</span>';
+            }
+        });
+    }
+
+    // 6-Digit OTP Auto-Tabbing & Paste Handler
+    function getOtpValue() {
+        let code = '';
+        otpInputs.forEach(input => { code += input.value.trim(); });
+        return code;
+    }
+
+    function clearOtpInputs() {
+        otpInputs.forEach(input => { input.value = ''; });
+    }
+
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.length > 0) {
+                input.value = val[val.length - 1]; // Single digit only
+                if (index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            }
+            if (getOtpValue().length === 6 && formVerify) {
+                // Auto-submit when all 6 digits entered
+                formVerify.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (/^\d{6}$/.test(pasted)) {
+                for (let i = 0; i < 6; i++) {
+                    otpInputs[i].value = pasted[i];
+                }
+                if (formVerify) formVerify.dispatchEvent(new Event('submit'));
+            }
+        });
+    });
+
+    // Resend Timer
+    function startResendTimer(seconds = 60) {
+        clearInterval(resendTimerInterval);
+        resendSecondsRemaining = seconds;
+        if (resendCountdownText) resendCountdownText.style.display = 'inline';
+        if (btnResendOtp) btnResendOtp.style.display = 'none';
+
+        resendTimerInterval = setInterval(() => {
+            resendSecondsRemaining--;
+            if (resendCountdownText) {
+                const mins = Math.floor(resendSecondsRemaining / 60);
+                const secs = resendSecondsRemaining % 60;
+                resendCountdownText.textContent = `Resend code in ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+            if (resendSecondsRemaining <= 0) {
+                clearInterval(resendTimerInterval);
+                if (resendCountdownText) resendCountdownText.style.display = 'none';
+                if (btnResendOtp) btnResendOtp.style.display = 'inline';
+            }
+        }, 1000);
+    }
+
+    // View Switching Navigation Links
+    const linkGotoSignup = document.getElementById('link-goto-signup');
+    const linkGotoSignin = document.getElementById('link-goto-signin');
+    const linkGotoForgot = document.getElementById('link-goto-forgot');
+    const linkForgotToSignin = document.getElementById('link-forgot-to-signin');
+    const linkResetToSignin = document.getElementById('link-reset-to-signin');
+    const linkChangeEmail = document.getElementById('link-change-email');
+
+    if (linkGotoSignup) linkGotoSignup.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
+    if (linkGotoSignin) linkGotoSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
+    if (linkGotoForgot) linkGotoForgot.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('forgot'); });
+    if (linkForgotToSignin) linkForgotToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
+    if (linkResetToSignin) linkResetToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
+    if (linkChangeEmail) linkChangeEmail.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
+
+    // --- FORM HANDLERS ---
+
+    // 1. Sign In
+    if (formSignin) {
+        formSignin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+            const btn = document.getElementById('btn-submit-signin');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: signinEmail.value.trim(),
+                        password: signinPassword.value,
+                        remember_me: document.getElementById('signin-remember').checked
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (resp.status === 403 && data.needs_verification) {
+                    currentAuthEmail = data.email;
+                    if (verifyMaskedEmail) verifyMaskedEmail.textContent = data.masked_email || data.email;
+                    switchAuthView('verify');
+                    showAuthAlert(data.detail || "Please enter the 6-digit code sent to your email.", "error");
+                    return;
+                }
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Sign in failed. Please check credentials.');
+                }
+
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                authOverlay.style.display = 'none';
+                loadSessionsHistory();
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Studio';
+            }
+        });
+    }
+
+    // 2. Sign Up
+    if (formSignup) {
+        formSignup.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+
+            if (signupPassword.value !== signupConfirmPassword.value) {
+                showAuthAlert('Passwords do not match.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-signup');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account & Sending Code...';
+
+            try {
+                const resp = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: signupName.value.trim(),
+                        email: signupEmail.value.trim(),
+                        password: signupPassword.value,
+                        confirm_password: signupConfirmPassword.value,
+                        terms_accepted: true
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Signup failed. Please try again.');
+                }
+
+                currentAuthEmail = data.email;
+                if (verifyMaskedEmail) verifyMaskedEmail.textContent = data.masked_email || data.email;
+                switchAuthView('verify');
+                showAuthAlert(`Verification code dispatched to ${data.masked_email || data.email}!`, 'success');
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account & Verify';
+            }
+        });
+    }
+
+    // 3. Verify OTP
+    if (formVerify) {
+        formVerify.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+            const code = getOtpValue();
+            if (code.length !== 6) {
+                showAuthAlert('Please enter all 6 digits of your verification code.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-verify');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Code...';
+
+            try {
+                const resp = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentAuthEmail || (signinEmail ? signinEmail.value.trim() : ''),
+                        code: code
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Invalid verification code.');
+                }
+
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                authOverlay.style.display = 'none';
+                loadSessionsHistory();
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+                clearOtpInputs();
+                if (otpInputs[0]) otpInputs[0].focus();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verify Code & Enter Studio';
+            }
+        });
+    }
+
+    // 4. Resend OTP
+    if (btnResendOtp) {
+        btnResendOtp.addEventListener('click', async () => {
+            hideAuthAlert();
+            try {
+                const resp = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentAuthEmail })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Could not resend code.');
+                showAuthAlert('A fresh 6-digit code has been dispatched to your email.', 'success');
+                startResendTimer(60);
+                clearOtpInputs();
+                if (otpInputs[0]) otpInputs[0].focus();
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            }
+        });
+    }
+
+    // 5. Forgot Password
+    if (formForgot) {
+        formForgot.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+            const btn = document.getElementById('btn-submit-forgot');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Reset Code...';
+
+            try {
+                const email = forgotEmail.value.trim();
+                const resp = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await resp.json();
+                currentAuthEmail = email;
+                switchAuthView('reset');
+                showAuthAlert(data.message || 'If an account exists, a 6-digit reset code has been sent.', 'success');
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Password Reset Code';
+            }
+        });
+    }
+
+    // 6. Reset Password
+    if (formReset) {
+        formReset.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+
+            if (resetNewPassword.value !== resetConfirmPassword.value) {
+                showAuthAlert('New passwords do not match.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-reset');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating Password...';
+
+            try {
+                const resp = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentAuthEmail,
+                        code: resetCode.value.trim(),
+                        new_password: resetNewPassword.value,
+                        confirm_password: resetConfirmPassword.value
+                    })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Password reset failed.');
+
+                switchAuthView('signin');
+                showAuthAlert('Password updated successfully! Please sign in with your new password.', 'success');
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Update Password & Sign In';
+            }
+        });
+    }
+
+    // 7. Google OAuth Integration (Server Popup + GIS fallback)
+    document.querySelectorAll('.btn-trigger-google').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            try {
+                const resp = await fetch('/api/auth/google/url');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.url) {
+                        const popup = window.open(data.url, 'GoogleOAuth', 'width=520,height=640');
+                        // Poll for popup closure / token callback
+                        const timer = setInterval(() => {
+                            if (popup.closed) {
+                                clearInterval(timer);
+                                checkCurrentUser();
+                            }
+                        }, 800);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log("OAuth URL error:", e);
+            }
+            
+            // Fallback: GIS Prompt
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.prompt();
+            }
+        });
+    });
+
+    // Check URL parameters for OAuth token return
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('auth_token')) {
+        const token = urlParams.get('auth_token');
+        setAuthToken(token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check Current User on startup
+    async function checkCurrentUser() {
+        try {
+            const token = getAuthToken();
+            const resp = await fetchWithAuth('/api/auth/me');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.authenticated && data.user && data.user.email_verified) {
+                    currentUser = data.user;
+                    renderLoggedInState(currentUser);
+                    if (authOverlay) authOverlay.style.display = 'none';
+                    loadSessionsHistory();
+                    return;
+                }
+            }
+            
+            // Not authenticated or unverified
+            renderLoggedOutState();
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
+        } catch (err) {
+            console.error('Session check error:', err);
+            renderLoggedOutState();
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
+        }
+    }
 
     function renderLoggedInState(user) {
         if (btnOpenAuth) btnOpenAuth.style.display = 'none';
         if (userProfileMenu) userProfileMenu.style.display = 'flex';
         if (userNameDisplay) userNameDisplay.textContent = user.name || user.email.split('@')[0];
         if (bannerUserName) bannerUserName.textContent = `Logged in: ${user.name || user.email.split('@')[0]}`;
-        if (bannerUserDesc) bannerUserDesc.textContent = "Private workspace active";
+        if (bannerUserDesc) bannerUserDesc.textContent = "Private workspace active & verified";
         if (btnBannerLogin) btnBannerLogin.style.display = 'none';
     }
 
@@ -2509,7 +4965,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         if (btnOpenAuth) btnOpenAuth.style.display = 'flex';
         if (userProfileMenu) userProfileMenu.style.display = 'none';
-        if (bannerUserName) bannerUserName.textContent = "Guest Mode (Shared)";
+        if (bannerUserName) bannerUserName.textContent = "Guest Mode";
         if (bannerUserDesc) bannerUserDesc.textContent = "Sign in to save private reports";
         if (btnBannerLogin) {
             btnBannerLogin.style.display = 'inline-flex';
@@ -2517,1062 +4973,300 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Google Identity Services (GSI) Callback
-    window.handleGoogleCredentialResponse = async function(response) {
-        if (!response || !response.credential) return;
-        try {
-            const resp = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: response.credential })
-            });
-
-            if (resp.ok) {
-                const data = await resp.json();
-                setAuthToken(data.token);
-                currentUser = data.user;
-                renderLoggedInState(currentUser);
-                if (authModal) authModal.classList.remove('open');
-                loadSessionsHistory();
-            } else {
-                const err = await resp.json();
-                if (authErrorAlert) {
-                    authErrorAlert.textContent = err.detail || "Google authentication failed";
-                    authErrorAlert.style.display = 'block';
-                }
-            }
-        } catch (err) {
-            if (authErrorAlert) {
-                authErrorAlert.textContent = "Google Sign-In Error: " + err.message;
-                authErrorAlert.style.display = 'block';
-            }
-        }
-    };
-
-    function initGoogleAuth() {
-        if (window.google && window.google.accounts && window.google.accounts.id) {
-            try {
-                // Initialize GSI with standard client ID or deepresearch domain
-                window.google.accounts.id.initialize({
-                    client_id: "109283746152-sampledeepresearch.apps.googleusercontent.com",
-                    callback: window.handleGoogleCredentialResponse,
-                    auto_select: false
-                });
-
-                const container = document.getElementById('g_id_signin_container');
-                if (container) {
-                    window.google.accounts.id.renderButton(container, {
-                        theme: "filled_blue",
-                        size: "large",
-                        width: "320",
-                        text: "continue_with"
-                    });
-                }
-            } catch (e) {
-                console.log("Google GSI initialized in fallback mode:", e);
-            }
-        }
-    }
-
-    // Auth Modal Handlers
-    if (btnOpenAuth && authModal) {
-        btnOpenAuth.addEventListener('click', () => {
-            authModal.classList.add('open');
-            authErrorAlert.style.display = 'none';
-            initGoogleAuth();
-        });
-    }
-
-    if (btnBannerLogin && authModal) {
-        btnBannerLogin.addEventListener('click', () => {
-            authModal.classList.add('open');
-            authErrorAlert.style.display = 'none';
-            initGoogleAuth();
-        });
-    }
-
-    if (btnCloseAuth && authModal) {
-        btnCloseAuth.addEventListener('click', () => authModal.classList.remove('open'));
-    }
-
-    if (authModal) {
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) authModal.classList.remove('open');
-        });
-    }
-
-    if (btnTabLogin && btnTabSignup) {
-        btnTabLogin.addEventListener('click', () => {
-            authMode = 'login';
-            btnTabLogin.classList.add('active');
-            btnTabSignup.classList.remove('active');
-            if (groupSignupName) groupSignupName.style.display = 'none';
-            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
-            authErrorAlert.style.display = 'none';
-        });
-
-        btnTabSignup.addEventListener('click', () => {
-            authMode = 'signup';
-            btnTabSignup.classList.add('active');
-            btnTabLogin.classList.remove('active');
-            if (groupSignupName) groupSignupName.style.display = 'block';
-            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Send 6-Digit Verification Code';
-            authErrorAlert.style.display = 'none';
-        });
-    }
-
-    let isOtpSent = false;
-
-    if (authForm) {
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authErrorAlert.style.display = 'none';
-
-            const email = authEmail.value.trim();
-            const password = authPassword.value;
-            const name = authName ? authName.value.trim() : '';
-
-            // If in Signup mode and OTP not sent yet, send OTP code to email
-            if (authMode === 'signup' && !isOtpSent) {
-                btnAuthSubmit.disabled = true;
-                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Code to Gmail...';
-
-                try {
-                    const resp = await fetch('/api/auth/send-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, name })
-                    });
-                    const data = await resp.json();
-
-                    if (!resp.ok) {
-                        throw new Error(data.detail || 'Failed to send verification code');
-                    }
-
-                    isOtpSent = true;
-                    authPassword.value = '';
-                    authPassword.placeholder = `Enter 6-digit code (Code: ${data.code})`;
-                    const passLabel = document.querySelector('label[for="auth-password"]');
-                    if (passLabel) passLabel.innerHTML = `<i class="fa-solid fa-key text-emerald"></i> Enter 6-Digit Verification Code (Sent: <span class="badge-pill" style="font-size:0.75rem;">${data.code}</span>)`;
-
-                    btnAuthSubmit.disabled = false;
-                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verify Code & Enter Studio';
-                    authErrorAlert.innerHTML = `<span style="color:#10b981;">✅ 6-digit verification code sent to <strong>${email}</strong>! Enter it below:</span>`;
-                    authErrorAlert.style.display = 'block';
-
-                } catch (err) {
-                    authErrorAlert.textContent = err.message;
-                    authErrorAlert.style.display = 'block';
-                    btnAuthSubmit.disabled = false;
-                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Send 6-Digit Verification Code';
-                }
-                return;
-            }
-
-            // If OTP is already sent, verify code
-            if (authMode === 'signup' && isOtpSent) {
-                btnAuthSubmit.disabled = true;
-                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Code...';
-
-                try {
-                    const resp = await fetch('/api/auth/verify-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email,
-                            code: password.trim(),
-                            name
-                        })
-                    });
-                    const data = await resp.json();
-
-                    if (!resp.ok) {
-                        throw new Error(data.detail || 'Invalid verification code');
-                    }
-
-                    setAuthToken(data.token);
-                    currentUser = data.user;
-                    renderLoggedInState(currentUser);
-                    authModal.classList.remove('open');
-                    authForm.reset();
-                    isOtpSent = false;
-                    loadSessionsHistory();
-
-                } catch (err) {
-                    authErrorAlert.textContent = err.message;
-                    authErrorAlert.style.display = 'block';
-                    btnAuthSubmit.disabled = false;
-                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verify Code & Enter Studio';
-                }
-                return;
-            }
-
-            // Standard Password Login
-            btnAuthSubmit.disabled = true;
-            btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
-
-            try {
-                const resp = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await resp.json();
-
-                if (!resp.ok) {
-                    throw new Error(data.detail || 'Authentication failed');
-                }
-
-                setAuthToken(data.token);
-                currentUser = data.user;
-                renderLoggedInState(currentUser);
-                authModal.classList.remove('open');
-                authForm.reset();
-                loadSessionsHistory();
-
-            } catch (err) {
-                authErrorAlert.textContent = err.message;
-                authErrorAlert.style.display = 'block';
-            } finally {
-                btnAuthSubmit.disabled = false;
-                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
-            }
-        });
-    }
-
-    // Google Sign-In: Open Official Google Account Chooser Window & One-Tap
-    const googleChooserModal = document.getElementById('google-chooser-modal');
-    const googleOneTapWidget = document.getElementById('google-onetap-widget');
-    const btnCloseOneTap = document.getElementById('btn-close-onetap');
-
-    if (btnCloseOneTap && googleOneTapWidget) {
-        btnCloseOneTap.addEventListener('click', () => {
-            googleOneTapWidget.style.display = 'none';
-        });
-    }
-
-    if (btnGoogleLogin) {
-        btnGoogleLogin.addEventListener('click', () => {
-            // Trigger Google Identity Services One-Tap prompt if loaded
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                try {
-                    window.google.accounts.id.prompt();
-                } catch (e) {
-                    console.log("Google GIS prompt:", e);
-                }
-            }
-
-            // Open the official Google Account Chooser Dialog
-            if (googleChooserModal) {
-                googleChooserModal.classList.add('open');
-            }
-        });
-    }
-
-    // Google Account Selection Function
-    async function selectGoogleAccount(email, name, googleId) {
-        try {
-            if (authErrorAlert) authErrorAlert.style.display = 'none';
-
-            const resp = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: email,
-                    name: name || email.split('@')[0].replace(/[._]/g, ' '),
-                    google_id: googleId || `g_${Date.now()}`
-                })
-            });
-
-            if (resp.ok) {
-                const data = await resp.json();
-                setAuthToken(data.token);
-                currentUser = data.user;
-                renderLoggedInState(currentUser);
-                if (authModal) authModal.classList.remove('open');
-                if (googleChooserModal) googleChooserModal.classList.remove('open');
-                if (googleOneTapWidget) googleOneTapWidget.style.display = 'none';
-                loadSessionsHistory();
-            } else {
-                const err = await resp.json();
-                alert(err.detail || "Google authentication failed");
-            }
-        } catch (err) {
-            alert("Google Sign-In Error: " + err.message);
-        }
-    }
-
-    // Bind all Google Chooser & One-Tap account items
-    document.querySelectorAll('.google-select-account, .google-onetap-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const email = item.getAttribute('data-email');
-            const name = item.getAttribute('data-name');
-            selectGoogleAccount(email, name);
-        });
-    });
-
-    // Google Chooser Backdrop Close
-    if (googleChooserModal) {
-        googleChooserModal.addEventListener('click', (e) => {
-            if (e.target === googleChooserModal) googleChooserModal.classList.remove('open');
-        });
-    }
-
-    // "Use another account" in Google Chooser
-    const btnGoogleUseCustom = document.getElementById('btn-google-use-custom');
-    if (btnGoogleUseCustom) {
-        btnGoogleUseCustom.addEventListener('click', () => {
-            if (googleChooserModal) googleChooserModal.classList.remove('open');
-            if (authEmail) {
-                authEmail.focus();
-                authEmail.placeholder = "Enter your Google / Gmail account here";
-                if (authErrorAlert) {
-                    authErrorAlert.innerHTML = `<span>Type your Gmail address above and click <strong>Continue with Google</strong> or <strong>Send Verification Code</strong></span>`;
-                    authErrorAlert.style.display = 'block';
-                }
-            }
-        });
-    }
-
     // Logout
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
             clearAuthToken();
             renderLoggedOutState();
-            recentSessionsList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">Signed out. Log in to view saved reports.</div>';
-            currentSessionId = null;
-            heroEmptyState.style.display = 'block';
-            markdownBody.style.display = 'none';
-            // Open auth modal immediately upon logout
-            if (authModal) authModal.classList.add('open');
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
         });
     }
 
-    // Mobile View Switcher (Form vs Report)
-    if (btnMobileForm && btnMobileReport && studioWorkspace) {
-        btnMobileForm.addEventListener('click', () => {
-            btnMobileForm.classList.add('active');
-            btnMobileReport.classList.remove('active');
-            studioWorkspace.classList.remove('view-report');
-            studioWorkspace.classList.add('view-form');
-        });
-
-        btnMobileReport.addEventListener('click', () => {
-            btnMobileReport.classList.add('active');
-            btnMobileForm.classList.remove('active');
-            studioWorkspace.classList.remove('view-form');
-            studioWorkspace.classList.add('view-report');
+    if (btnOpenAuth) {
+        btnOpenAuth.addEventListener('click', () => {
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
         });
     }
 
-    // Speed Mode Toggle Buttons
-    const speedButtons = document.querySelectorAll('.speed-btn');
-    speedButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            speedButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
-
-    // Tab Switching
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabButtons.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            const targetPane = document.getElementById(btn.dataset.tab);
-            if (targetPane) targetPane.classList.add('active');
-        });
-    });
-
-    // Modal Settings Toggle
-    if (btnOpenSettings && settingsModal) {
-        btnOpenSettings.addEventListener('click', () => {
-            settingsModal.classList.add('open');
-            loadNvidiaModels();
-        });
-    }
-    if (btnCloseSettings && settingsModal) {
-        btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('open'));
-    }
-    if (settingsModal) {
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) settingsModal.classList.remove('open');
+    if (btnBannerLogin) {
+        btnBannerLogin.addEventListener('click', () => {
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
         });
     }
 
-    // Dynamic NVIDIA API Models Fetcher
+    // Initialize session check immediately
+    checkCurrentUser();
+
+    // =========================================================================
+    // RESEARCH STUDIO ENGINE & REPORT LOGIC
+    // =========================================================================
+
+    const form = document.getElementById('research-form');
+    const queryInput = document.getElementById('query-input');
+    const maxRoundsInput = document.getElementById('max-rounds');
+    const maxSourcesInput = document.getElementById('max-sources');
+    const fastModelSelect = document.getElementById('fast-model');
+    const strongModelSelect = document.getElementById('strong-model');
+    const btnLaunch = document.getElementById('btn-launch');
+
+    const heroEmptyState = document.getElementById('hero-empty-state');
+    const markdownBody = document.getElementById('markdown-body');
+    const reportTitleHeading = document.getElementById('report-title-heading');
+    const claimsTableBody = document.querySelector('#claims-table tbody');
+    const contradictionsContainer = document.getElementById('contradictions-container');
+    const liveLogContainer = document.getElementById('live-log-container');
+    const evidenceCountTag = document.getElementById('evidence-count-tag');
+
+    const statusBadge = document.getElementById('status-badge');
+    const stageBadge = document.getElementById('stage-badge');
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercent = document.getElementById('progress-percent');
+    const telemetryStatRounds = document.getElementById('telemetry-stat-rounds');
+    const telemetryStatSources = document.getElementById('telemetry-stat-sources');
+    const telemetryStatClaims = document.getElementById('telemetry-stat-claims');
+    const telemetryStatDisagreements = document.getElementById('telemetry-stat-disagreements');
+    const telemetryTimer = document.getElementById('telemetry-timer');
+    const currentActionText = document.getElementById('current-action-text');
+
+    const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
+    const btnDownloadPdfHero = document.getElementById('btn-download-pdf-hero');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    const exportMdBtn = document.getElementById('export-md-btn');
+    const btnCopyReport = document.getElementById('btn-copy-report');
+    const btnEditReport = document.getElementById('btn-edit-report');
+    const btnSaveEdit = document.getElementById('btn-save-edit');
+    const editHintBanner = document.getElementById('edit-hint-banner');
+
+    let pollInterval = null;
+    let stopwatchInterval = null;
+    let startTime = null;
+
+    // Load available models from NVIDIA
     async function loadNvidiaModels() {
         try {
-            const resp = await fetch('/api/models');
+            const resp = await fetch('/api/nvidia/models');
             if (!resp.ok) return;
-            const data = await resp.json();
+            const models = await resp.json();
+            if (!models || models.length === 0) return;
 
-            if (data.categorized && Object.keys(data.categorized).length > 0) {
-                fastModelSelect.innerHTML = '';
-                strongModelSelect.innerHTML = '';
+            fastModelSelect.innerHTML = '';
+            strongModelSelect.innerHTML = '';
 
-                const defaultFast = 'meta/llama-3.1-8b-instruct';
-                const defaultStrong = 'meta/llama-3.3-70b-instruct';
+            models.forEach(m => {
+                const optFast = document.createElement('option');
+                optFast.value = m.id;
+                optFast.textContent = `${m.name} (${m.context_length})`;
+                if (m.id === 'meta/llama-3.1-8b-instruct') optFast.selected = true;
+                fastModelSelect.appendChild(optFast);
 
-                const priority = ['meta', 'deepseek-ai', 'nvidia', 'mistralai', 'google', 'qwen', 'microsoft', 'ibm', '01-ai'];
-                const providers = Object.keys(data.categorized).sort((a, b) => {
-                    const idxA = priority.indexOf(a) !== -1 ? priority.indexOf(a) : 99;
-                    const idxB = priority.indexOf(b) !== -1 ? priority.indexOf(b) : 99;
-                    return idxA - idxB;
-                });
-
-                providers.forEach(provider => {
-                    const groupFast = document.createElement('optgroup');
-                    groupFast.label = `--- ${provider.toUpperCase()} ---`;
-
-                    const groupStrong = document.createElement('optgroup');
-                    groupStrong.label = `--- ${provider.toUpperCase()} ---`;
-
-                    data.categorized[provider].forEach(modelId => {
-                        const optF = document.createElement('option');
-                        optF.value = modelId;
-                        optF.textContent = modelId;
-                        if (modelId === defaultFast) optF.selected = true;
-                        groupFast.appendChild(optF);
-
-                        const optS = document.createElement('option');
-                        optS.value = modelId;
-                        optS.textContent = modelId;
-                        if (modelId === defaultStrong) optS.selected = true;
-                        groupStrong.appendChild(optS);
-                    });
-
-                    fastModelSelect.appendChild(groupFast);
-                    strongModelSelect.appendChild(groupStrong);
-                });
-            }
-        } catch (err) {
-            console.error('Failed to load NVIDIA models:', err);
+                const optStrong = document.createElement('option');
+                optStrong.value = m.id;
+                optStrong.textContent = `${m.name} (${m.context_length})`;
+                if (m.id === 'meta/llama-3.3-70b-instruct') optStrong.selected = true;
+                strongModelSelect.appendChild(optStrong);
+            });
+        } catch (e) {
+            console.log('Using default model selectors:', e);
         }
     }
+    loadNvidiaModels();
 
-    // New Research Task Button
-    if (btnNewQuery) {
-        btnNewQuery.addEventListener('click', () => {
-            if (pollInterval) clearInterval(pollInterval);
-            currentSessionId = null;
-            queryInput.value = '';
-            queryInput.focus();
-            heroEmptyState.style.display = 'block';
-            markdownBody.style.display = 'none';
-            auditScoreBadge.style.display = 'none';
-            telemetryLog.innerHTML = `
-                <div class="timeline-step done">
-                    <div class="step-icon"><i class="fa-solid fa-check"></i></div>
-                    <div class="step-content">
-                        <span class="step-title">System Ready</span>
-                        <span class="step-desc">Awaiting research query input</span>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    // Quick Presets
-    window.loadPreset = function(queryText) {
-        queryInput.value = queryText;
-        form.dispatchEvent(new Event('submit'));
-    };
-
-    // Follow-up Input Action
-    if (btnSendFollowup && followupInput) {
-        btnSendFollowup.addEventListener('click', () => {
-            const val = followupInput.value.trim();
-            if (val) {
-                queryInput.value = val;
-                followupInput.value = '';
-                form.dispatchEvent(new Event('submit'));
-            }
-        });
-        followupInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                btnSendFollowup.click();
-            }
-        });
-    }
-
-    const btnConfirmLaunch = document.getElementById('btn-confirm-launch');
-    const btnCancelSettings = document.getElementById('btn-cancel-settings');
-
-    let researchStartTime = null;
-
-    // Form Submit -> Directly executes research launch immediately without opening modal popup
+    // Launch Research
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const query = queryInput.value.trim();
             if (!query) return;
 
-            executeResearchLaunch(query);
-        });
-    }
+            btnLaunch.disabled = true;
+            btnLaunch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Agent...';
+            heroEmptyState.style.display = 'none';
+            markdownBody.style.display = 'none';
+            liveLogContainer.innerHTML = '';
 
-    if (btnConfirmLaunch) {
-        btnConfirmLaunch.addEventListener('click', () => {
-            if (settingsModal) settingsModal.classList.remove('open');
-            const query = queryInput.value.trim();
-            if (query) {
-                executeResearchLaunch(query);
-            }
-        });
-    }
-
-    if (btnCancelSettings) {
-        btnCancelSettings.addEventListener('click', () => {
-            if (settingsModal) settingsModal.classList.remove('open');
-        });
-    }
-
-    async function executeResearchLaunch(query) {
-        researchStartTime = Date.now();
-        btnStart.disabled = true;
-        btnStart.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Researching...';
-        if (statusDot) statusDot.style.background = '#f59e0b';
-        if (recentTitleDisplay) recentTitleDisplay.textContent = query.length > 22 ? query.slice(0, 20) + '...' : query;
-
-        // Show Hero Loading View
-        heroEmptyState.style.display = 'none';
-        markdownBody.style.display = 'block';
-        markdownBody.innerHTML = `
-            <div class="hero-empty-state">
-                <div class="hero-badge"><i class="fa-solid fa-atom fa-spin-pulse"></i> Deep Research Active</div>
-                <h2>Autonomous AI Lead Researcher at work...</h2>
-                <p>Executing multi-round search, scraping authority domains, extracting atomic claims, and preparing publication report for: <strong>"${query}"</strong></p>
-            </div>
-        `;
-
-        telemetryLog.innerHTML = `
-            <div class="timeline-step done">
-                <div class="step-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
-                <div class="step-content">
-                    <span class="step-title">Research Pipeline Initialized</span>
-                    <span class="step-desc">Target topic: ${query}</span>
-                </div>
-            </div>
-        `;
-
-        let selectedMode = 'turbo';
-        const activeSpeedBtn = document.querySelector('.speed-btn.active');
-        if (activeSpeedBtn) selectedMode = activeSpeedBtn.getAttribute('data-mode') || 'turbo';
-
-        let roundsVal = 1;
-        let sourcesVal = 15; // Set rich default sources
-        if (selectedMode === 'standard') {
-            roundsVal = 2;
-            sourcesVal = 22;
-        } else if (selectedMode === 'deep') {
-            roundsVal = 4;
-            sourcesVal = 35;
-        }
-
-        const suggestionsInput = document.getElementById('suggestions-input');
-        const modalSuggestionsInput = document.getElementById('modal-suggestions-input');
-        if (suggestionsInput && modalSuggestionsInput) {
-            suggestionsInput.addEventListener('input', () => { modalSuggestionsInput.value = suggestionsInput.value; });
-            modalSuggestionsInput.addEventListener('input', () => { suggestionsInput.value = modalSuggestionsInput.value; });
-        }
-
-        const targetPagesInput = document.getElementById('target-pages-input');
-        const modalTargetPages = document.getElementById('modal-target-pages');
-        if (targetPagesInput && modalTargetPages) {
-            targetPagesInput.addEventListener('change', () => { modalTargetPages.value = targetPagesInput.value; });
-            modalTargetPages.addEventListener('change', () => { targetPagesInput.value = modalTargetPages.value; });
-        }
-
-        // Automatically switch mobile view to report on mobile screens
-        if (window.innerWidth <= 992 && btnMobileReport) {
-            btnMobileReport.click();
-        }
-
-        try {
-            const payload = {
-                query: query,
-                fast_model: fastModelSelect.value,
-                strong_model: strongModelSelect.value,
-                max_rounds: roundsVal,
-                max_sources: sourcesVal,
-                user_suggestions: suggestionsVal,
-                target_pages: targetPagesVal
-            };
-
-            const resp = await fetchWithAuth('/api/research', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) throw new Error('Failed to start research task');
-
-            const data = await resp.json();
-            currentSessionId = data.session_id;
-
-            startPolling(currentSessionId);
-            loadSessionsHistory();
-        } catch (err) {
-            alert(`Error: ${err.message}`);
-            btnStart.disabled = false;
-            btnStart.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
-        }
-    }
-
-    // Polling Function
-    function startPolling(sessionId) {
-        if (pollInterval) clearInterval(pollInterval);
-        fetchStatus(sessionId);
-        pollInterval = setInterval(() => fetchStatus(sessionId), 1200);
-    }
-
-    async function fetchStatus(sessionId) {
-        try {
-            const resp = await fetch(`/api/research/${sessionId}`);
-            if (!resp.ok) return;
-
-            const statusData = await resp.json();
-            updateTelemetryLogs(statusData);
-            updateProgressView(statusData);
-
-            if (statusData.status === 'completed' || statusData.status === 'failed') {
-                if (pollInterval) clearInterval(pollInterval);
-                btnStart.disabled = false;
-                btnStart.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
-                if (statusDot) statusDot.style.background = statusData.status === 'completed' ? '#10b981' : '#ef4444';
-
-                if (statusData.status === 'completed') {
-                    loadFinalReport(sessionId);
-                    loadEvidenceStore(sessionId);
-                    loadContradictions(sessionId);
-                }
-            }
-        } catch (err) {
-            console.error('Polling error:', err);
-        }
-    }
-
-    function updateProgressView(data) {
-        if (data.status === 'completed') return;
-
-        if (!researchStartTime) researchStartTime = Date.now();
-        const secondsElapsed = Math.floor((Date.now() - researchStartTime) / 1000);
-        const mm = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-        const ss = String(secondsElapsed % 60).padStart(2, '0');
-
-        const pct = data.progress_percentage || 15;
-        const baseEta = data.estimated_seconds_remaining || 15;
-        const dynamicEta = Math.max(2, baseEta - Math.floor((secondsElapsed % 10) / 2));
-        const stageName = (data.stage || 'researching').toUpperCase().replace(/_/g, ' ');
-
-        markdownBody.style.display = 'block';
-        heroEmptyState.style.display = 'none';
-
-        const logsList = (data.logs || []).slice(-6);
-
-        markdownBody.innerHTML = `
-            <div class="hero-empty-state">
-                <div class="hero-badge"><i class="fa-solid fa-atom fa-spin-pulse"></i> Autonomous Deep Research Active</div>
-                <h2>Synthesizing Publication-Grade Research...</h2>
-                <p style="margin-bottom:1.2rem;">Target Topic: <strong>"${data.query}"</strong></p>
-
-                <div class="live-progress-container">
-                    <div class="progress-header">
-                        <span class="progress-stage-title"><i class="fa-solid fa-circle-notch fa-spin text-warning"></i> Stage: ${stageName}</span>
-                        <span class="progress-percent-text">${pct}% Complete</span>
-                    </div>
-
-                    <div class="progress-bar-track">
-                        <div class="progress-bar-fill" style="width: ${pct}%;"></div>
-                    </div>
-
-                    <div class="progress-footer-stats">
-                        <span class="elapsed-badge-pill"><i class="fa-solid fa-stopwatch"></i> Elapsed: ${mm}:${ss}</span>
-                        <span><i class="fa-solid fa-database"></i> ${data.total_sources || 0} Sources | ${data.total_claims || 0} Claims</span>
-                        <span class="eta-badge-pill"><i class="fa-solid fa-clock"></i> ETA: ~${dynamicEta}s remaining</span>
-                    </div>
-
-                    <!-- CENTER SCREEN LIVE TELEMETRY TERMINAL -->
-                    <div class="center-telemetry-box">
-                        <div class="telemetry-box-header">
-                            <span><i class="fa-solid fa-terminal"></i> Live Telemetry Feed (Real-Time Activity)</span>
-                            <span style="color:#10b981;"><i class="fa-solid fa-circle-dot fa-beat-fade"></i> Live Stream</span>
-                        </div>
-                        <div class="center-log-feed">
-                            ${logsList.length > 0 ? logsList.map(l => `
-                                <div class="center-log-row">
-                                    <span class="log-tag">[${l.stage}]</span>
-                                    <span class="log-msg">${l.message}</span>
-                                </div>
-                            `).join('') : '<div class="center-log-row"><span class="log-msg">Initializing real-time stream...</span></div>'}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Telemetry Timeline Update
-    function updateTelemetryLogs(data) {
-        if (data.logs && data.logs.length > 0) {
-            telemetryLog.innerHTML = data.logs.slice(-15).map(log => `
-                <div class="timeline-step done">
-                    <div class="step-icon"><i class="fa-solid fa-circle-check"></i></div>
-                    <div class="step-content">
-                        <span class="step-title">[${log.stage}]</span>
-                        <span class="step-desc">${log.message}</span>
-                    </div>
-                </div>
-            `).join('');
-            telemetryLog.scrollTop = telemetryLog.scrollHeight;
-        }
-    }
-
-    // Load Synthesized Markdown Report
-    async function loadFinalReport(sessionId) {
-        try {
-            const resp = await fetch(`/api/research/${sessionId}/report`);
-            if (!resp.ok) return;
-            const reportData = await resp.json();
-
-            const mdContent = reportData.markdown_content || reportData.markdown;
-
-            if (mdContent) {
-                markdownBody.innerHTML = marked.parse(mdContent);
-                auditScoreBadge.style.display = 'inline-flex';
-                
-                // Update Word Count telemetry chip
-                const wordsCount = mdContent.trim().split(/\s+/).filter(Boolean).length;
-                const reportWordsVal = document.getElementById('report-words-val');
-                if (reportWordsVal) reportWordsVal.textContent = wordsCount.toLocaleString();
-
-                const pdfUrl = `/api/research/${sessionId}/download/pdf`;
-                const mdUrl = `/api/research/${sessionId}/download/md`;
-
-                // Enable Prominent PDF Download Buttons
-                const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
-                const reportTopBar = document.getElementById('report-top-bar');
-                if (btnDownloadPdfTop && reportTopBar) {
-                    btnDownloadPdfTop.href = pdfUrl;
-                    reportTopBar.style.display = 'flex';
-                }
-
-                const btnDownloadPdfNav = document.getElementById('btn-download-pdf-nav');
-                if (btnDownloadPdfNav) {
-                    btnDownloadPdfNav.href = pdfUrl;
-                    btnDownloadPdfNav.style.display = 'inline-flex';
-                }
-
-                // Enable Export Studio Buttons
-                exportPdfBtn.href = pdfUrl;
-                exportPdfBtn.classList.remove('disabled');
-
-                exportMdBtn.href = mdUrl;
-                exportMdBtn.classList.remove('disabled');
-
-                // Wire up Copy Markdown Button
-                const btnCopyReport = document.getElementById('btn-copy-report');
-                if (btnCopyReport) {
-                    btnCopyReport.onclick = async () => {
-                        try {
-                            await navigator.clipboard.writeText(mdContent);
-                            const origHTML = btnCopyReport.innerHTML;
-                            btnCopyReport.innerHTML = '<i class="fa-solid fa-check text-success"></i> Copied!';
-                            setTimeout(() => { btnCopyReport.innerHTML = origHTML; }, 2000);
-                        } catch (e) {
-                            console.warn('Clipboard write failed:', e);
-                        }
-                    };
-                }
-            }
-        } catch (err) {
-            console.error('Failed loading final report:', err);
-        }
-    }
-
-    // Live WYSIWYG Editing & Word Customization Handler
-    let isEditMode = false;
-    const btnToggleEdit = document.getElementById('btn-toggle-edit');
-    const btnSaveEdit = document.getElementById('btn-save-edit');
-    const editBtnText = document.getElementById('edit-btn-text');
-    const reportStatusBadge = document.getElementById('report-status-badge');
-    const editHintBanner = document.getElementById('edit-hint-banner');
-
-    if (btnToggleEdit) {
-        btnToggleEdit.addEventListener('click', () => {
-            isEditMode = !isEditMode;
-            if (isEditMode) {
-                markdownBody.setAttribute('contenteditable', 'true');
-                markdownBody.focus();
-                btnToggleEdit.classList.add('active');
-                if (editBtnText) editBtnText.textContent = 'Editing Mode (Active)';
-                if (btnSaveEdit) btnSaveEdit.style.display = 'inline-flex';
-                if (reportStatusBadge) reportStatusBadge.innerHTML = '<i class="fa-solid fa-pen text-warning"></i> Editing Mode';
-                if (editHintBanner) editHintBanner.style.display = 'flex';
-            } else {
-                markdownBody.removeAttribute('contenteditable');
-                btnToggleEdit.classList.remove('active');
-                if (editBtnText) editBtnText.textContent = 'Edit Words';
-                if (reportStatusBadge) reportStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald"></i> Publication Ready';
-                if (editHintBanner) editHintBanner.style.display = 'none';
-            }
-        });
-    }
-
-    function htmlToMarkdown(root) {
-        function nodeToMd(node) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                return node.nodeValue;
-            }
-            if (node.nodeType !== Node.ELEMENT_NODE) {
-                return '';
-            }
-
-            const tag = node.tagName.toLowerCase();
-            let childrenMd = Array.from(node.childNodes).map(nodeToMd).join('');
-
-            switch (tag) {
-                case 'h1':
-                    return `\n# ${childrenMd.trim()}\n\n`;
-                case 'h2':
-                    return `\n## ${childrenMd.trim()}\n\n`;
-                case 'h3':
-                    return `\n### ${childrenMd.trim()}\n\n`;
-                case 'h4':
-                    return `\n#### ${childrenMd.trim()}\n\n`;
-                case 'h5':
-                    return `\n##### ${childrenMd.trim()}\n\n`;
-                case 'h6':
-                    return `\n###### ${childrenMd.trim()}\n\n`;
-                case 'p':
-                    return `\n${childrenMd.trim()}\n\n`;
-                case 'strong':
-                case 'b':
-                    return `**${childrenMd}**`;
-                case 'em':
-                case 'i':
-                    return `*${childrenMd}*`;
-                case 'code':
-                    return `\`${childrenMd}\``;
-                case 'pre':
-                    return `\n\`\`\`\n${childrenMd.trim()}\n\`\`\`\n\n`;
-                case 'blockquote':
-                    return `\n> ${childrenMd.trim().replace(/\n/g, '\n> ')}\n\n`;
-                case 'ul':
-                    return `\n${childrenMd}\n`;
-                case 'ol':
-                    return `\n${childrenMd}\n`;
-                case 'li': {
-                    const isOrdered = node.parentElement && node.parentElement.tagName.toLowerCase() === 'ol';
-                    const index = Array.from(node.parentElement ? node.parentElement.children : []).indexOf(node) + 1;
-                    const prefix = isOrdered ? `${index}. ` : `- `;
-                    return `${prefix}${childrenMd.trim()}\n`;
-                }
-                case 'table': {
-                    const rows = Array.from(node.querySelectorAll('tr'));
-                    if (rows.length === 0) return '';
-                    let tableMd = '\n';
-                    rows.forEach((row, rIdx) => {
-                        const cells = Array.from(row.querySelectorAll('th, td')).map(c => c.innerText.trim());
-                        tableMd += `| ${cells.join(' | ')} |\n`;
-                        if (rIdx === 0) {
-                            tableMd += `| ${cells.map(() => '---').join(' | ')} |\n`;
-                        }
-                    });
-                    return tableMd + '\n';
-                }
-                case 'br':
-                    return '\n';
-                case 'hr':
-                    return '\n---\n\n';
-                default:
-                    return childrenMd;
-            }
-        }
-
-        let result = nodeToMd(root);
-        result = result.replace(/\n{3,}/g, '\n\n').trim();
-        return result;
-    }
-
-    if (btnSaveEdit) {
-        btnSaveEdit.addEventListener('click', async () => {
-            if (!currentSessionId) return;
-            btnSaveEdit.disabled = true;
-            btnSaveEdit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-            const updatedMarkdown = htmlToMarkdown(markdownBody);
+            startTime = Date.now();
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const mins = Math.floor(elapsed / 60);
+                const secs = elapsed % 60;
+                if (telemetryTimer) telemetryTimer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }, 1000);
 
             try {
-                const resp = await fetch(`/api/research/${currentSessionId}/report`, {
-                    method: 'PUT',
+                const resp = await fetchWithAuth('/api/research', {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ markdown_content: updatedMarkdown })
+                    body: JSON.stringify({
+                        query: query,
+                        max_rounds: parseInt(maxRoundsInput.value) || 2,
+                        max_sources: parseInt(maxSourcesInput.value) || 15,
+                        fast_model: fastModelSelect.value,
+                        strong_model: strongModelSelect.value
+                    })
                 });
 
-                if (resp.ok) {
-                    btnSaveEdit.innerHTML = '<i class="fa-solid fa-check"></i> Changes Saved!';
-                    if (reportStatusBadge) reportStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald"></i> Saved & PDF Updated';
-                    
-                    const newWords = updatedMarkdown.trim().split(/\s+/).filter(Boolean).length;
-                    const reportWordsVal = document.getElementById('report-words-val');
-                    if (reportWordsVal) reportWordsVal.textContent = newWords.toLocaleString();
-
-                    // Update all PDF download button URLs with timestamp to force fresh download
-                    const freshPdfUrl = `/api/research/${currentSessionId}/download/pdf?t=${Date.now()}`;
-                    const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
-                    const btnDownloadPdfNav = document.getElementById('btn-download-pdf-nav');
-                    if (btnDownloadPdfTop) btnDownloadPdfTop.href = freshPdfUrl;
-                    if (btnDownloadPdfNav) btnDownloadPdfNav.href = freshPdfUrl;
-                    if (exportPdfBtn) exportPdfBtn.href = freshPdfUrl;
-
-                    setTimeout(() => {
-                        btnSaveEdit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
-                        btnSaveEdit.disabled = false;
-                    }, 2500);
-                } else {
-                    throw new Error('Failed to save updated report');
+                if (!resp.ok) {
+                    if (resp.status === 401 || resp.status === 403) {
+                        checkCurrentUser();
+                        return;
+                    }
+                    throw new Error('Failed to launch research session');
                 }
+
+                const data = await resp.json();
+                currentSessionId = data.session_id;
+                startPollingStatus(currentSessionId);
+
             } catch (err) {
-                alert(`Error saving report: ${err.message}`);
-                btnSaveEdit.disabled = false;
-                btnSaveEdit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+                alert('Error launching research: ' + err.message);
+                btnLaunch.disabled = false;
+                btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
             }
         });
     }
 
-    let allLoadedClaims = [];
-    const claimsSearchInput = document.getElementById('claims-search-input');
+    function startPollingStatus(sessionId) {
+        clearInterval(pollInterval);
+        pollInterval = setInterval(async () => {
+            try {
+                const resp = await fetchWithAuth(`/api/research/${sessionId}/status`);
+                if (!resp.ok) return;
+                const status = await resp.json();
 
-    if (claimsSearchInput) {
-        claimsSearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (!allLoadedClaims.length) return;
-            const filtered = allLoadedClaims.filter(c => 
-                (c.claim_text && c.claim_text.toLowerCase().includes(query)) ||
-                (c.source_title && c.source_title.toLowerCase().includes(query)) ||
-                (c.quote_or_paraphrase && c.quote_or_paraphrase.toLowerCase().includes(query)) ||
-                (c.sub_question_tag && c.sub_question_tag.toLowerCase().includes(query))
-            );
-            renderClaimsTable(filtered);
-        });
+                if (stageBadge) stageBadge.textContent = status.stage.toUpperCase();
+                if (statusBadge) statusBadge.textContent = status.status.toUpperCase();
+                if (currentActionText) currentActionText.textContent = status.current_action;
+                if (telemetryStatRounds) telemetryStatRounds.textContent = `${status.rounds_completed}/${status.total_rounds}`;
+                if (telemetryStatSources) telemetryStatSources.textContent = status.sources_found;
+                if (telemetryStatClaims) telemetryStatClaims.textContent = status.claims_extracted;
+                if (telemetryStatDisagreements) telemetryStatDisagreements.textContent = status.contradictions_found;
+
+                const percent = Math.min(100, Math.round((status.rounds_completed / status.total_rounds) * 90) + (status.status === 'completed' ? 10 : 0));
+                if (progressFill) progressFill.style.width = percent + '%';
+                if (progressPercent) progressPercent.textContent = percent + '%';
+
+                if (status.status === 'completed' || status.status === 'error') {
+                    clearInterval(pollInterval);
+                    clearInterval(stopwatchInterval);
+                    btnLaunch.disabled = false;
+                    btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
+                    loadFullReport(sessionId);
+                    loadSessionsHistory();
+                }
+            } catch (e) {
+                console.error('Polling error:', e);
+            }
+        }, 1500);
     }
 
-    function renderClaimsTable(claimsList) {
-        if (!claimsList || claimsList.length === 0) {
-            claimsTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding:2rem;">No matching facts found.</td></tr>';
-            return;
-        }
-        claimsTableBody.innerHTML = claimsList.map(c => `
-            <tr>
-                <td style="max-width:220px;">
-                    <strong style="color:#0f172a;">${c.source_title || 'Source'}</strong><br>
-                    <a href="${c.source_url}" target="_blank" style="font-size:0.75rem; color:#2563eb; text-decoration:none; word-break:break-all;"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${c.source_url}</a>
-                </td>
-                <td style="line-height:1.6; color:#1e293b;">${c.claim_text}</td>
-                <td style="color:#475569; font-style:italic;">"${c.quote_or_paraphrase}"</td>
-                <td><span class="badge-pill">${c.sub_question_tag}</span></td>
-            </tr>
-        `).join('');
-    }
-
-    // Load Evidence & Claims Matrix Table
-    async function loadEvidenceStore(sessionId) {
+    async function loadFullReport(sessionId) {
         try {
-            const resp = await fetch(`/api/research/${sessionId}/evidence`);
+            const resp = await fetchWithAuth(`/api/research/${sessionId}/report`);
             if (!resp.ok) return;
             const data = await resp.json();
 
-            if (data.claims && data.claims.length > 0) {
-                allLoadedClaims = data.claims;
-                evidenceCountTag.textContent = `${data.claims.length} Claims`;
-                renderClaimsTable(allLoadedClaims);
+            if (data.report && data.report.markdown_content) {
+                markdownBody.innerHTML = marked.parse(data.report.markdown_content);
+                markdownBody.style.display = 'block';
+                heroEmptyState.style.display = 'none';
+
+                if (reportTitleHeading) reportTitleHeading.textContent = data.session.query;
+                if (btnDownloadPdfTop) btnDownloadPdfTop.href = `/api/export/${sessionId}/pdf`;
+                if (btnDownloadPdfHero) btnDownloadPdfHero.href = `/api/export/${sessionId}/pdf`;
+                if (exportPdfBtn) { exportPdfBtn.href = `/api/export/${sessionId}/pdf`; exportPdfBtn.classList.remove('disabled'); }
+                if (exportMdBtn) { exportMdBtn.href = `/api/export/${sessionId}/md`; exportMdBtn.classList.remove('disabled'); }
             }
-        } catch (err) {
-            console.error('Failed loading evidence store:', err);
+
+            // Populate Evidence Table
+            if (data.claims && claimsTableBody) {
+                if (data.claims.length > 0) {
+                    claimsTableBody.innerHTML = data.claims.map(c => `
+                        <tr>
+                            <td><a href="#" class="text-emerald">${c.sub_question_tag}</a></td>
+                            <td><strong>${c.claim_text}</strong></td>
+                            <td class="text-muted"><em>"${c.quote_or_paraphrase || ''}"</em></td>
+                            <td><span class="badge-pill">${Math.round(c.confidence * 100)}%</span></td>
+                        </tr>
+                    `).join('');
+                }
+                if (evidenceCountTag) evidenceCountTag.textContent = `${data.claims.length} Claims`;
+            }
+
+        } catch (e) {
+            console.error('Error loading report:', e);
         }
     }
 
-    // Load Contradictions & Consensus Analysis Matrix
-    async function loadContradictions(sessionId) {
-        try {
-            const resp = await fetch(`/api/research/${sessionId}/contradictions`);
-            if (!resp.ok) return;
-            const data = await resp.json();
-
-            if (data.contradictions && data.contradictions.length > 0) {
-                contradictionsContainer.innerHTML = data.contradictions.map(c => {
-                    const views = Array.isArray(c.conflicting_views) 
-                        ? c.conflicting_views.join(' | ') 
-                        : (c.conflicting_views || 'None');
-                    return `
-                        <div class="table-container-card" style="margin-bottom:1.5rem;">
-                            <div class="table-header-bar">
-                                <h3><i class="fa-solid fa-scale-balanced text-warning"></i> Topic: ${c.topic}</h3>
-                            </div>
-                            <p style="margin-bottom:0.8rem; color:#334155;"><strong>Consensus View:</strong> ${c.consensus_summary}</p>
-                            <p style="color:#b45309;"><strong>Conflicting Views:</strong> ${views}</p>
-                        </div>
-                    `;
-                }).join('');
-            }
-        } catch (err) {
-            console.error('Failed loading contradictions:', err);
-        }
-    }
-
-    // Load Sessions History
     async function loadSessionsHistory() {
         try {
             const resp = await fetchWithAuth('/api/sessions');
             if (!resp.ok) return;
-            const data = await resp.json();
-            const list = data.sessions || [];
+            const sessions = await resp.json();
+            const recentList = document.getElementById('recent-sessions-list');
+            if (!recentList) return;
 
-            if (recentSessionsList) {
-                if (list.length > 0) {
-                    recentSessionsList.innerHTML = list.slice(0, 8).map(s => `
-                        <div class="session-history-item ${s.session_id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.session_id}')">
-                            <i class="fa-solid fa-file-contract"></i>
-                            <span class="session-name">${s.query.length > 22 ? s.query.slice(0, 20) + '...' : s.query}</span>
-                        </div>
-                    `).join('');
-
-                    if (!currentSessionId && list[0]) {
-                        switchSession(list[0].session_id);
-                    }
-                } else {
-                    recentSessionsList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">No research tasks found yet. Start a new topic!</div>';
-                }
+            if (sessions.length === 0) {
+                recentList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">No research tasks saved yet.</div>';
+                return;
             }
-        } catch (err) {
-            console.error('Error loading session history:', err);
+
+            recentList.innerHTML = sessions.map(s => `
+                <div class="session-item" data-id="${s.session_id}" style="padding:0.6rem; border-radius:8px; cursor:pointer; margin-bottom:4px; background:rgba(30,41,59,0.5);">
+                    <div style="font-weight:600; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.query}</div>
+                    <div style="font-size:0.72rem; color:#94a3b8; display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>${s.status.toUpperCase()}</span>
+                        <span>${new Date(s.created_at).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.session-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const sid = item.getAttribute('data-id');
+                    loadFullReport(sid);
+                });
+            });
+
+        } catch (e) {
+            console.error('Error loading history:', e);
         }
     }
 
-    window.switchSession = function(sessionId) {
-        currentSessionId = sessionId;
-        heroEmptyState.style.display = 'none';
-        markdownBody.style.display = 'block';
-        if (window.innerWidth <= 992 && btnMobileReport) {
-            btnMobileReport.click();
-        }
-        startPolling(sessionId);
-        loadFinalReport(sessionId);
-        loadEvidenceStore(sessionId);
-        loadContradictions(sessionId);
-    };
+    // Tabs Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const target = btn.getAttribute('data-tab');
+            const pane = document.getElementById(`tab-${target}`);
+            if (pane) pane.classList.add('active');
+        });
+    });
 
-    // Initial Load Sequence
-    (async () => {
-        await checkCurrentUser();
-        await loadSessionsHistory();
-        await loadNvidiaModels();
-    })();
+    // Copy Report
+    if (btnCopyReport) {
+        btnCopyReport.addEventListener('click', () => {
+            const text = markdownBody.innerText || markdownBody.textContent;
+            navigator.clipboard.writeText(text);
+            btnCopyReport.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            setTimeout(() => { btnCopyReport.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; }, 2000);
+        });
+    }
+
 });
 
-</script>
-    <!-- Google Identity Services (GSI) -->
-    <script src="https://accounts.google.com/gsi/client" async defer>
+    </script>
+</body>
+</html>

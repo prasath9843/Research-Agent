@@ -1,74 +1,65 @@
+
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const form = document.getElementById('research-form');
-    const btnStart = document.getElementById('btn-start');
-    const queryInput = document.getElementById('query-input');
-    const fastModelSelect = document.getElementById('fast-model');
-    const strongModelSelect = document.getElementById('strong-model');
-    const maxRoundsInput = document.getElementById('max-rounds');
-    const maxSourcesInput = document.getElementById('max-sources');
+    // State Management
+    let currentUser = null;
+    let currentAuthEmail = '';
+    let resendTimerInterval = null;
+    let resendSecondsRemaining = 60;
+    let currentSessionId = null;
 
-    const heroEmptyState = document.getElementById('hero-empty-state');
-    const markdownBody = document.getElementById('markdown-body');
-    const telemetryLog = document.getElementById('telemetry-log');
-    const statusDot = document.getElementById('status-dot');
+    // DOM Elements - Auth Overlay & Views
+    const authOverlay = document.getElementById('auth-gate-overlay');
+    const authViewTitle = document.getElementById('auth-view-title');
+    const authViewSubtitle = document.getElementById('auth-view-subtitle');
+    const authAlertBox = document.getElementById('auth-alert-box');
 
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-content-pane');
-    const auditScoreBadge = document.getElementById('audit-score-badge');
+    const viewSignin = document.getElementById('view-signin');
+    const viewSignup = document.getElementById('view-signup');
+    const viewVerify = document.getElementById('view-verify');
+    const viewForgot = document.getElementById('view-forgot');
+    const viewReset = document.getElementById('view-reset');
 
-    const claimsTableBody = document.querySelector('#claims-table tbody');
-    const evidenceCountTag = document.getElementById('evidence-count-tag');
-    const contradictionsContainer = document.getElementById('contradictions-container');
+    // Forms & Inputs
+    const formSignin = document.getElementById('form-signin');
+    const formSignup = document.getElementById('form-signup');
+    const formVerify = document.getElementById('form-verify');
+    const formForgot = document.getElementById('form-forgot');
+    const formReset = document.getElementById('form-reset');
 
-    const exportPdfBtn = document.getElementById('export-pdf-btn');
-    const exportMdBtn = document.getElementById('export-md-btn');
-    const recentSessionsList = document.getElementById('recent-sessions-list');
-    const recentTitleDisplay = document.getElementById('recent-title-display');
+    const signinEmail = document.getElementById('signin-email');
+    const signinPassword = document.getElementById('signin-password');
+    const signupName = document.getElementById('signup-name');
+    const signupEmail = document.getElementById('signup-email');
+    const signupPassword = document.getElementById('signup-password');
+    const signupConfirmPassword = document.getElementById('signup-confirm-password');
+    const signupPwMeter = document.getElementById('signup-pw-meter');
+    const signupPwMatch = document.getElementById('signup-pw-match');
+    
+    const verifyMaskedEmail = document.getElementById('verify-masked-email');
+    const otpInputs = document.querySelectorAll('.otp-digit-box');
+    const resendCountdownText = document.getElementById('resend-countdown-text');
+    const btnResendOtp = document.getElementById('btn-resend-otp');
+    const forgotEmail = document.getElementById('forgot-email');
+    const resetCode = document.getElementById('reset-code');
+    const resetNewPassword = document.getElementById('reset-new-password');
+    const resetConfirmPassword = document.getElementById('reset-confirm-password');
 
-    const settingsModal = document.getElementById('settings-modal');
-    const btnOpenSettings = document.getElementById('btn-open-settings');
-    const btnCloseSettings = document.getElementById('btn-close-settings');
-    const btnNewQuery = document.getElementById('btn-new-query');
-
-    const followupInput = document.getElementById('followup-input');
-    const btnSendFollowup = document.getElementById('btn-send-followup');
-
-    // User Auth DOM Elements
+    // Navbar & User Profile
     const btnOpenAuth = document.getElementById('btn-open-auth');
-    const authModal = document.getElementById('auth-modal');
-    const btnCloseAuth = document.getElementById('btn-close-auth');
-    const btnTabLogin = document.getElementById('btn-tab-login');
-    const btnTabSignup = document.getElementById('btn-tab-signup');
-    const groupSignupName = document.getElementById('group-signup-name');
-    const authForm = document.getElementById('auth-form');
-    const authName = document.getElementById('auth-name');
-    const authEmail = document.getElementById('auth-email');
-    const authPassword = document.getElementById('auth-password');
-    const btnAuthSubmit = document.getElementById('btn-auth-submit');
-    const authErrorAlert = document.getElementById('auth-error-alert');
-    const btnGoogleLogin = document.getElementById('btn-google-login');
     const userProfileMenu = document.getElementById('user-profile-menu');
     const userNameDisplay = document.getElementById('user-name-display');
     const btnLogout = document.getElementById('btn-logout');
+    const bannerUserName = document.getElementById('banner-user-name');
+    const bannerUserDesc = document.getElementById('banner-user-desc');
+    const btnBannerLogin = document.getElementById('btn-banner-login');
 
-    // Mobile View Switcher Elements
-    const studioWorkspace = document.getElementById('studio-workspace');
-    const btnMobileForm = document.getElementById('btn-mobile-form');
-    const btnMobileReport = document.getElementById('btn-mobile-report');
-
-    let currentSessionId = null;
-    let pollInterval = null;
-    let currentUser = null;
-    let authMode = 'login'; // 'login' or 'signup'
-
-    // --- Authentication Helpers ---
-    function getAuthToken() {
-        return localStorage.getItem('deepresearch_auth_token') || '';
-    }
-
+    // --- Helper Functions ---
     function setAuthToken(token) {
         localStorage.setItem('deepresearch_auth_token', token);
+    }
+
+    function getAuthToken() {
+        return localStorage.getItem('deepresearch_auth_token') || '';
     }
 
     function clearAuthToken() {
@@ -84,51 +75,500 @@ document.addEventListener('DOMContentLoaded', () => {
         return fetch(url, options);
     }
 
-    async function checkCurrentUser() {
-        try {
-            const token = getAuthToken();
-            if (!token) {
-                renderLoggedOutState();
-                // Force open login modal as the first thing when opening the website
-                if (authModal) {
-                    authModal.classList.add('open');
-                }
-                return;
-            }
+    function showAuthAlert(msg, type = 'error') {
+        if (!authAlertBox) return;
+        authAlertBox.className = `auth-status-alert ${type}`;
+        authAlertBox.innerHTML = type === 'error' 
+            ? `<i class="fa-solid fa-triangle-exclamation"></i> <span>${msg}</span>`
+            : `<i class="fa-solid fa-circle-check"></i> <span>${msg}</span>`;
+        authAlertBox.style.display = 'flex';
+    }
 
-            const resp = await fetchWithAuth('/api/auth/me');
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.user) {
-                    currentUser = data.user;
-                    renderLoggedInState(currentUser);
-                } else {
-                    clearAuthToken();
-                    renderLoggedOutState();
-                    if (authModal) authModal.classList.add('open');
-                }
-            } else {
-                clearAuthToken();
-                renderLoggedOutState();
-                if (authModal) authModal.classList.add('open');
-            }
-        } catch (err) {
-            console.error('Error checking user session:', err);
-            renderLoggedOutState();
-            if (authModal) authModal.classList.add('open');
+    function hideAuthAlert() {
+        if (authAlertBox) authAlertBox.style.display = 'none';
+    }
+
+    function switchAuthView(viewName) {
+        hideAuthAlert();
+        [viewSignin, viewSignup, viewVerify, viewForgot, viewReset].forEach(v => {
+            if (v) v.style.display = 'none';
+        });
+
+        if (viewName === 'signin') {
+            viewSignin.style.display = 'block';
+            authViewTitle.textContent = "Welcome Back";
+            authViewSubtitle.textContent = "Sign in to your private research workspace";
+            if (signinEmail) signinEmail.focus();
+        } else if (viewName === 'signup') {
+            viewSignup.style.display = 'block';
+            authViewTitle.textContent = "Create Account";
+            authViewSubtitle.textContent = "Join DeepResearch Studio to generate verified literature";
+            if (signupName) signupName.focus();
+        } else if (viewName === 'verify') {
+            viewVerify.style.display = 'block';
+            authViewTitle.textContent = "Verify Your Email";
+            authViewSubtitle.textContent = "Enter the 6-digit code sent to your email";
+            clearOtpInputs();
+            if (otpInputs[0]) otpInputs[0].focus();
+            startResendTimer(60);
+        } else if (viewName === 'forgot') {
+            viewForgot.style.display = 'block';
+            authViewTitle.textContent = "Reset Password";
+            authViewSubtitle.textContent = "We will send a 6-digit password reset code";
+            if (forgotEmail) forgotEmail.focus();
+        } else if (viewName === 'reset') {
+            viewReset.style.display = 'block';
+            authViewTitle.textContent = "Choose New Password";
+            authViewSubtitle.textContent = "Enter your 6-digit reset code and new password";
+            if (resetCode) resetCode.focus();
         }
     }
 
-    const btnBannerLogin = document.getElementById('btn-banner-login');
-    const bannerUserName = document.getElementById('banner-user-name');
-    const bannerUserDesc = document.getElementById('banner-user-desc');
+    // Toggle Password Visibility
+    document.querySelectorAll('.btn-toggle-pw').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                const isPw = input.type === 'password';
+                input.type = isPw ? 'text' : 'password';
+                btn.innerHTML = isPw ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+            }
+        });
+    });
+
+    // Password Strength Meter
+    if (signupPassword && signupPwMeter) {
+        signupPassword.addEventListener('input', () => {
+            const val = signupPassword.value;
+            let score = 0;
+            if (val.length >= 6) score += 25;
+            if (val.length >= 10) score += 25;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+            if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score += 25;
+
+            signupPwMeter.style.width = score + '%';
+            if (score <= 25) signupPwMeter.style.background = '#ef4444';
+            else if (score <= 75) signupPwMeter.style.background = '#f59e0b';
+            else signupPwMeter.style.background = '#10b981';
+        });
+    }
+
+    // Password Match Indicator
+    if (signupConfirmPassword && signupPwMatch) {
+        signupConfirmPassword.addEventListener('input', () => {
+            const pw = signupPassword.value;
+            const confirm = signupConfirmPassword.value;
+            if (!confirm) {
+                signupPwMatch.style.display = 'none';
+                return;
+            }
+            signupPwMatch.style.display = 'flex';
+            if (pw === confirm) {
+                signupPwMatch.innerHTML = '<span style="color:#10b981;"><i class="fa-solid fa-circle-check"></i> Passwords match</span>';
+            } else {
+                signupPwMatch.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i> Passwords do not match</span>';
+            }
+        });
+    }
+
+    // 6-Digit OTP Auto-Tabbing & Paste Handler
+    function getOtpValue() {
+        let code = '';
+        otpInputs.forEach(input => { code += input.value.trim(); });
+        return code;
+    }
+
+    function clearOtpInputs() {
+        otpInputs.forEach(input => { input.value = ''; });
+    }
+
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.length > 0) {
+                input.value = val[val.length - 1]; // Single digit only
+                if (index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            }
+            if (getOtpValue().length === 6 && formVerify) {
+                // Auto-submit when all 6 digits entered
+                formVerify.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (/^\d{6}$/.test(pasted)) {
+                for (let i = 0; i < 6; i++) {
+                    otpInputs[i].value = pasted[i];
+                }
+                if (formVerify) formVerify.dispatchEvent(new Event('submit'));
+            }
+        });
+    });
+
+    // Resend Timer
+    function startResendTimer(seconds = 60) {
+        clearInterval(resendTimerInterval);
+        resendSecondsRemaining = seconds;
+        if (resendCountdownText) resendCountdownText.style.display = 'inline';
+        if (btnResendOtp) btnResendOtp.style.display = 'none';
+
+        resendTimerInterval = setInterval(() => {
+            resendSecondsRemaining--;
+            if (resendCountdownText) {
+                const mins = Math.floor(resendSecondsRemaining / 60);
+                const secs = resendSecondsRemaining % 60;
+                resendCountdownText.textContent = `Resend code in ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+            if (resendSecondsRemaining <= 0) {
+                clearInterval(resendTimerInterval);
+                if (resendCountdownText) resendCountdownText.style.display = 'none';
+                if (btnResendOtp) btnResendOtp.style.display = 'inline';
+            }
+        }, 1000);
+    }
+
+    // View Switching Navigation Links
+    const linkGotoSignup = document.getElementById('link-goto-signup');
+    const linkGotoSignin = document.getElementById('link-goto-signin');
+    const linkGotoForgot = document.getElementById('link-goto-forgot');
+    const linkForgotToSignin = document.getElementById('link-forgot-to-signin');
+    const linkResetToSignin = document.getElementById('link-reset-to-signin');
+    const linkChangeEmail = document.getElementById('link-change-email');
+
+    if (linkGotoSignup) linkGotoSignup.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
+    if (linkGotoSignin) linkGotoSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
+    if (linkGotoForgot) linkGotoForgot.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('forgot'); });
+    if (linkForgotToSignin) linkForgotToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
+    if (linkResetToSignin) linkResetToSignin.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signin'); });
+    if (linkChangeEmail) linkChangeEmail.addEventListener('click', (e) => { e.preventDefault(); switchAuthView('signup'); });
+
+    // --- FORM HANDLERS ---
+
+    // 1. Sign In
+    if (formSignin) {
+        formSignin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+            const btn = document.getElementById('btn-submit-signin');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: signinEmail.value.trim(),
+                        password: signinPassword.value,
+                        remember_me: document.getElementById('signin-remember').checked
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (resp.status === 403 && data.needs_verification) {
+                    currentAuthEmail = data.email;
+                    if (verifyMaskedEmail) verifyMaskedEmail.textContent = data.masked_email || data.email;
+                    switchAuthView('verify');
+                    showAuthAlert(data.detail || "Please enter the 6-digit code sent to your email.", "error");
+                    return;
+                }
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Sign in failed. Please check credentials.');
+                }
+
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                authOverlay.style.display = 'none';
+                loadSessionsHistory();
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Studio';
+            }
+        });
+    }
+
+    // 2. Sign Up
+    if (formSignup) {
+        formSignup.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+
+            if (signupPassword.value !== signupConfirmPassword.value) {
+                showAuthAlert('Passwords do not match.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-signup');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account & Sending Code...';
+
+            try {
+                const resp = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: signupName.value.trim(),
+                        email: signupEmail.value.trim(),
+                        password: signupPassword.value,
+                        confirm_password: signupConfirmPassword.value,
+                        terms_accepted: true
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Signup failed. Please try again.');
+                }
+
+                currentAuthEmail = data.email;
+                if (verifyMaskedEmail) verifyMaskedEmail.textContent = data.masked_email || data.email;
+                switchAuthView('verify');
+                showAuthAlert(`Verification code dispatched to ${data.masked_email || data.email}!`, 'success');
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account & Verify';
+            }
+        });
+    }
+
+    // 3. Verify OTP
+    if (formVerify) {
+        formVerify.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+            const code = getOtpValue();
+            if (code.length !== 6) {
+                showAuthAlert('Please enter all 6 digits of your verification code.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-verify');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Code...';
+
+            try {
+                const resp = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentAuthEmail || (signinEmail ? signinEmail.value.trim() : ''),
+                        code: code
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Invalid verification code.');
+                }
+
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                authOverlay.style.display = 'none';
+                loadSessionsHistory();
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+                clearOtpInputs();
+                if (otpInputs[0]) otpInputs[0].focus();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verify Code & Enter Studio';
+            }
+        });
+    }
+
+    // 4. Resend OTP
+    if (btnResendOtp) {
+        btnResendOtp.addEventListener('click', async () => {
+            hideAuthAlert();
+            try {
+                const resp = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentAuthEmail })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Could not resend code.');
+                showAuthAlert('A fresh 6-digit code has been dispatched to your email.', 'success');
+                startResendTimer(60);
+                clearOtpInputs();
+                if (otpInputs[0]) otpInputs[0].focus();
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            }
+        });
+    }
+
+    // 5. Forgot Password
+    if (formForgot) {
+        formForgot.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+            const btn = document.getElementById('btn-submit-forgot');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Reset Code...';
+
+            try {
+                const email = forgotEmail.value.trim();
+                const resp = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await resp.json();
+                currentAuthEmail = email;
+                switchAuthView('reset');
+                showAuthAlert(data.message || 'If an account exists, a 6-digit reset code has been sent.', 'success');
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Password Reset Code';
+            }
+        });
+    }
+
+    // 6. Reset Password
+    if (formReset) {
+        formReset.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthAlert();
+
+            if (resetNewPassword.value !== resetConfirmPassword.value) {
+                showAuthAlert('New passwords do not match.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-reset');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating Password...';
+
+            try {
+                const resp = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentAuthEmail,
+                        code: resetCode.value.trim(),
+                        new_password: resetNewPassword.value,
+                        confirm_password: resetConfirmPassword.value
+                    })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Password reset failed.');
+
+                switchAuthView('signin');
+                showAuthAlert('Password updated successfully! Please sign in with your new password.', 'success');
+
+            } catch (err) {
+                showAuthAlert(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Update Password & Sign In';
+            }
+        });
+    }
+
+    // 7. Google OAuth Integration (Server Popup + GIS fallback)
+    document.querySelectorAll('.btn-trigger-google').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            try {
+                const resp = await fetch('/api/auth/google/url');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.url) {
+                        const popup = window.open(data.url, 'GoogleOAuth', 'width=520,height=640');
+                        // Poll for popup closure / token callback
+                        const timer = setInterval(() => {
+                            if (popup.closed) {
+                                clearInterval(timer);
+                                checkCurrentUser();
+                            }
+                        }, 800);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log("OAuth URL error:", e);
+            }
+            
+            // Fallback: GIS Prompt
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.prompt();
+            }
+        });
+    });
+
+    // Check URL parameters for OAuth token return
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('auth_token')) {
+        const token = urlParams.get('auth_token');
+        setAuthToken(token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check Current User on startup
+    async function checkCurrentUser() {
+        try {
+            const token = getAuthToken();
+            const resp = await fetchWithAuth('/api/auth/me');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.authenticated && data.user && data.user.email_verified) {
+                    currentUser = data.user;
+                    renderLoggedInState(currentUser);
+                    if (authOverlay) authOverlay.style.display = 'none';
+                    loadSessionsHistory();
+                    return;
+                }
+            }
+            
+            // Not authenticated or unverified
+            renderLoggedOutState();
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
+        } catch (err) {
+            console.error('Session check error:', err);
+            renderLoggedOutState();
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
+        }
+    }
 
     function renderLoggedInState(user) {
         if (btnOpenAuth) btnOpenAuth.style.display = 'none';
         if (userProfileMenu) userProfileMenu.style.display = 'flex';
         if (userNameDisplay) userNameDisplay.textContent = user.name || user.email.split('@')[0];
         if (bannerUserName) bannerUserName.textContent = `Logged in: ${user.name || user.email.split('@')[0]}`;
-        if (bannerUserDesc) bannerUserDesc.textContent = "Private workspace active";
+        if (bannerUserDesc) bannerUserDesc.textContent = "Private workspace active & verified";
         if (btnBannerLogin) btnBannerLogin.style.display = 'none';
     }
 
@@ -136,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         if (btnOpenAuth) btnOpenAuth.style.display = 'flex';
         if (userProfileMenu) userProfileMenu.style.display = 'none';
-        if (bannerUserName) bannerUserName.textContent = "Guest Mode (Shared)";
+        if (bannerUserName) bannerUserName.textContent = "Guest Mode";
         if (bannerUserDesc) bannerUserDesc.textContent = "Sign in to save private reports";
         if (btnBannerLogin) {
             btnBannerLogin.style.display = 'inline-flex';
@@ -144,1058 +584,296 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Google Identity Services (GSI) Callback
-    window.handleGoogleCredentialResponse = async function(response) {
-        if (!response || !response.credential) return;
-        try {
-            const resp = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: response.credential })
-            });
-
-            if (resp.ok) {
-                const data = await resp.json();
-                setAuthToken(data.token);
-                currentUser = data.user;
-                renderLoggedInState(currentUser);
-                if (authModal) authModal.classList.remove('open');
-                loadSessionsHistory();
-            } else {
-                const err = await resp.json();
-                if (authErrorAlert) {
-                    authErrorAlert.textContent = err.detail || "Google authentication failed";
-                    authErrorAlert.style.display = 'block';
-                }
-            }
-        } catch (err) {
-            if (authErrorAlert) {
-                authErrorAlert.textContent = "Google Sign-In Error: " + err.message;
-                authErrorAlert.style.display = 'block';
-            }
-        }
-    };
-
-    function initGoogleAuth() {
-        if (window.google && window.google.accounts && window.google.accounts.id) {
-            try {
-                // Initialize GSI with standard client ID or deepresearch domain
-                window.google.accounts.id.initialize({
-                    client_id: "109283746152-sampledeepresearch.apps.googleusercontent.com",
-                    callback: window.handleGoogleCredentialResponse,
-                    auto_select: false
-                });
-
-                const container = document.getElementById('g_id_signin_container');
-                if (container) {
-                    window.google.accounts.id.renderButton(container, {
-                        theme: "filled_blue",
-                        size: "large",
-                        width: "320",
-                        text: "continue_with"
-                    });
-                }
-            } catch (e) {
-                console.log("Google GSI initialized in fallback mode:", e);
-            }
-        }
-    }
-
-    // Auth Modal Handlers
-    if (btnOpenAuth && authModal) {
-        btnOpenAuth.addEventListener('click', () => {
-            authModal.classList.add('open');
-            authErrorAlert.style.display = 'none';
-            initGoogleAuth();
-        });
-    }
-
-    if (btnBannerLogin && authModal) {
-        btnBannerLogin.addEventListener('click', () => {
-            authModal.classList.add('open');
-            authErrorAlert.style.display = 'none';
-            initGoogleAuth();
-        });
-    }
-
-    if (btnCloseAuth && authModal) {
-        btnCloseAuth.addEventListener('click', () => authModal.classList.remove('open'));
-    }
-
-    if (authModal) {
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) authModal.classList.remove('open');
-        });
-    }
-
-    if (btnTabLogin && btnTabSignup) {
-        btnTabLogin.addEventListener('click', () => {
-            authMode = 'login';
-            btnTabLogin.classList.add('active');
-            btnTabSignup.classList.remove('active');
-            if (groupSignupName) groupSignupName.style.display = 'none';
-            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
-            authErrorAlert.style.display = 'none';
-        });
-
-        btnTabSignup.addEventListener('click', () => {
-            authMode = 'signup';
-            btnTabSignup.classList.add('active');
-            btnTabLogin.classList.remove('active');
-            if (groupSignupName) groupSignupName.style.display = 'block';
-            if (btnAuthSubmit) btnAuthSubmit.innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Send 6-Digit Verification Code';
-            authErrorAlert.style.display = 'none';
-        });
-    }
-
-    let isOtpSent = false;
-
-    if (authForm) {
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authErrorAlert.style.display = 'none';
-
-            const email = authEmail.value.trim();
-            const password = authPassword.value;
-            const name = authName ? authName.value.trim() : '';
-
-            // If in Signup mode and OTP not sent yet, send OTP code to email
-            if (authMode === 'signup' && !isOtpSent) {
-                btnAuthSubmit.disabled = true;
-                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Code to Gmail...';
-
-                try {
-                    const resp = await fetch('/api/auth/send-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, name })
-                    });
-                    const data = await resp.json();
-
-                    if (!resp.ok) {
-                        throw new Error(data.detail || 'Failed to send verification code');
-                    }
-
-                    isOtpSent = true;
-                    authPassword.value = '';
-                    authPassword.placeholder = `Enter 6-digit code (Code: ${data.code})`;
-                    const passLabel = document.querySelector('label[for="auth-password"]');
-                    if (passLabel) passLabel.innerHTML = `<i class="fa-solid fa-key text-emerald"></i> Enter 6-Digit Verification Code (Sent: <span class="badge-pill" style="font-size:0.75rem;">${data.code}</span>)`;
-
-                    btnAuthSubmit.disabled = false;
-                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verify Code & Enter Studio';
-                    authErrorAlert.innerHTML = `<span style="color:#10b981;">✅ 6-digit verification code sent to <strong>${email}</strong>! Enter it below:</span>`;
-                    authErrorAlert.style.display = 'block';
-
-                } catch (err) {
-                    authErrorAlert.textContent = err.message;
-                    authErrorAlert.style.display = 'block';
-                    btnAuthSubmit.disabled = false;
-                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-envelope-circle-check"></i> Send 6-Digit Verification Code';
-                }
-                return;
-            }
-
-            // If OTP is already sent, verify code
-            if (authMode === 'signup' && isOtpSent) {
-                btnAuthSubmit.disabled = true;
-                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Code...';
-
-                try {
-                    const resp = await fetch('/api/auth/verify-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email,
-                            code: password.trim(),
-                            name
-                        })
-                    });
-                    const data = await resp.json();
-
-                    if (!resp.ok) {
-                        throw new Error(data.detail || 'Invalid verification code');
-                    }
-
-                    setAuthToken(data.token);
-                    currentUser = data.user;
-                    renderLoggedInState(currentUser);
-                    authModal.classList.remove('open');
-                    authForm.reset();
-                    isOtpSent = false;
-                    loadSessionsHistory();
-
-                } catch (err) {
-                    authErrorAlert.textContent = err.message;
-                    authErrorAlert.style.display = 'block';
-                    btnAuthSubmit.disabled = false;
-                    btnAuthSubmit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verify Code & Enter Studio';
-                }
-                return;
-            }
-
-            // Standard Password Login
-            btnAuthSubmit.disabled = true;
-            btnAuthSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
-
-            try {
-                const resp = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await resp.json();
-
-                if (!resp.ok) {
-                    throw new Error(data.detail || 'Authentication failed');
-                }
-
-                setAuthToken(data.token);
-                currentUser = data.user;
-                renderLoggedInState(currentUser);
-                authModal.classList.remove('open');
-                authForm.reset();
-                loadSessionsHistory();
-
-            } catch (err) {
-                authErrorAlert.textContent = err.message;
-                authErrorAlert.style.display = 'block';
-            } finally {
-                btnAuthSubmit.disabled = false;
-                btnAuthSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Account';
-            }
-        });
-    }
-
-    // Google Sign-In: Open Official Google Account Chooser Window & One-Tap
-    const googleChooserModal = document.getElementById('google-chooser-modal');
-    const googleOneTapWidget = document.getElementById('google-onetap-widget');
-    const btnCloseOneTap = document.getElementById('btn-close-onetap');
-
-    if (btnCloseOneTap && googleOneTapWidget) {
-        btnCloseOneTap.addEventListener('click', () => {
-            googleOneTapWidget.style.display = 'none';
-        });
-    }
-
-    if (btnGoogleLogin) {
-        btnGoogleLogin.addEventListener('click', () => {
-            // Trigger Google Identity Services One-Tap prompt if loaded
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                try {
-                    window.google.accounts.id.prompt();
-                } catch (e) {
-                    console.log("Google GIS prompt:", e);
-                }
-            }
-
-            // Open the official Google Account Chooser Dialog
-            if (googleChooserModal) {
-                googleChooserModal.classList.add('open');
-            }
-        });
-    }
-
-    // Google Account Selection Function
-    async function selectGoogleAccount(email, name, googleId) {
-        try {
-            if (authErrorAlert) authErrorAlert.style.display = 'none';
-
-            const resp = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: email,
-                    name: name || email.split('@')[0].replace(/[._]/g, ' '),
-                    google_id: googleId || `g_${Date.now()}`
-                })
-            });
-
-            if (resp.ok) {
-                const data = await resp.json();
-                setAuthToken(data.token);
-                currentUser = data.user;
-                renderLoggedInState(currentUser);
-                if (authModal) authModal.classList.remove('open');
-                if (googleChooserModal) googleChooserModal.classList.remove('open');
-                if (googleOneTapWidget) googleOneTapWidget.style.display = 'none';
-                loadSessionsHistory();
-            } else {
-                const err = await resp.json();
-                alert(err.detail || "Google authentication failed");
-            }
-        } catch (err) {
-            alert("Google Sign-In Error: " + err.message);
-        }
-    }
-
-    // Bind all Google Chooser & One-Tap account items
-    document.querySelectorAll('.google-select-account, .google-onetap-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const email = item.getAttribute('data-email');
-            const name = item.getAttribute('data-name');
-            selectGoogleAccount(email, name);
-        });
-    });
-
-    // Google Chooser Backdrop Close
-    if (googleChooserModal) {
-        googleChooserModal.addEventListener('click', (e) => {
-            if (e.target === googleChooserModal) googleChooserModal.classList.remove('open');
-        });
-    }
-
-    // "Use another account" in Google Chooser
-    const btnGoogleUseCustom = document.getElementById('btn-google-use-custom');
-    if (btnGoogleUseCustom) {
-        btnGoogleUseCustom.addEventListener('click', () => {
-            if (googleChooserModal) googleChooserModal.classList.remove('open');
-            if (authEmail) {
-                authEmail.focus();
-                authEmail.placeholder = "Enter your Google / Gmail account here";
-                if (authErrorAlert) {
-                    authErrorAlert.innerHTML = `<span>Type your Gmail address above and click <strong>Continue with Google</strong> or <strong>Send Verification Code</strong></span>`;
-                    authErrorAlert.style.display = 'block';
-                }
-            }
-        });
-    }
-
     // Logout
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
             clearAuthToken();
             renderLoggedOutState();
-            recentSessionsList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">Signed out. Log in to view saved reports.</div>';
-            currentSessionId = null;
-            heroEmptyState.style.display = 'block';
-            markdownBody.style.display = 'none';
-            // Open auth modal immediately upon logout
-            if (authModal) authModal.classList.add('open');
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
         });
     }
 
-    // Mobile View Switcher (Form vs Report)
-    if (btnMobileForm && btnMobileReport && studioWorkspace) {
-        btnMobileForm.addEventListener('click', () => {
-            btnMobileForm.classList.add('active');
-            btnMobileReport.classList.remove('active');
-            studioWorkspace.classList.remove('view-report');
-            studioWorkspace.classList.add('view-form');
-        });
-
-        btnMobileReport.addEventListener('click', () => {
-            btnMobileReport.classList.add('active');
-            btnMobileForm.classList.remove('active');
-            studioWorkspace.classList.remove('view-form');
-            studioWorkspace.classList.add('view-report');
+    if (btnOpenAuth) {
+        btnOpenAuth.addEventListener('click', () => {
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
         });
     }
 
-    // Speed Mode Toggle Buttons
-    const speedButtons = document.querySelectorAll('.speed-btn');
-    speedButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            speedButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
-
-    // Tab Switching
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabButtons.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            const targetPane = document.getElementById(btn.dataset.tab);
-            if (targetPane) targetPane.classList.add('active');
-        });
-    });
-
-    // Modal Settings Toggle
-    if (btnOpenSettings && settingsModal) {
-        btnOpenSettings.addEventListener('click', () => {
-            settingsModal.classList.add('open');
-            loadNvidiaModels();
-        });
-    }
-    if (btnCloseSettings && settingsModal) {
-        btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('open'));
-    }
-    if (settingsModal) {
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) settingsModal.classList.remove('open');
+    if (btnBannerLogin) {
+        btnBannerLogin.addEventListener('click', () => {
+            if (authOverlay) {
+                authOverlay.style.display = 'flex';
+                switchAuthView('signin');
+            }
         });
     }
 
-    // Dynamic NVIDIA API Models Fetcher
+    // Initialize session check immediately
+    checkCurrentUser();
+
+    // =========================================================================
+    // RESEARCH STUDIO ENGINE & REPORT LOGIC
+    // =========================================================================
+
+    const form = document.getElementById('research-form');
+    const queryInput = document.getElementById('query-input');
+    const maxRoundsInput = document.getElementById('max-rounds');
+    const maxSourcesInput = document.getElementById('max-sources');
+    const fastModelSelect = document.getElementById('fast-model');
+    const strongModelSelect = document.getElementById('strong-model');
+    const btnLaunch = document.getElementById('btn-launch');
+
+    const heroEmptyState = document.getElementById('hero-empty-state');
+    const markdownBody = document.getElementById('markdown-body');
+    const reportTitleHeading = document.getElementById('report-title-heading');
+    const claimsTableBody = document.querySelector('#claims-table tbody');
+    const contradictionsContainer = document.getElementById('contradictions-container');
+    const liveLogContainer = document.getElementById('live-log-container');
+    const evidenceCountTag = document.getElementById('evidence-count-tag');
+
+    const statusBadge = document.getElementById('status-badge');
+    const stageBadge = document.getElementById('stage-badge');
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercent = document.getElementById('progress-percent');
+    const telemetryStatRounds = document.getElementById('telemetry-stat-rounds');
+    const telemetryStatSources = document.getElementById('telemetry-stat-sources');
+    const telemetryStatClaims = document.getElementById('telemetry-stat-claims');
+    const telemetryStatDisagreements = document.getElementById('telemetry-stat-disagreements');
+    const telemetryTimer = document.getElementById('telemetry-timer');
+    const currentActionText = document.getElementById('current-action-text');
+
+    const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
+    const btnDownloadPdfHero = document.getElementById('btn-download-pdf-hero');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    const exportMdBtn = document.getElementById('export-md-btn');
+    const btnCopyReport = document.getElementById('btn-copy-report');
+    const btnEditReport = document.getElementById('btn-edit-report');
+    const btnSaveEdit = document.getElementById('btn-save-edit');
+    const editHintBanner = document.getElementById('edit-hint-banner');
+
+    let pollInterval = null;
+    let stopwatchInterval = null;
+    let startTime = null;
+
+    // Load available models from NVIDIA
     async function loadNvidiaModels() {
         try {
-            const resp = await fetch('/api/models');
+            const resp = await fetch('/api/nvidia/models');
             if (!resp.ok) return;
-            const data = await resp.json();
+            const models = await resp.json();
+            if (!models || models.length === 0) return;
 
-            if (data.categorized && Object.keys(data.categorized).length > 0) {
-                fastModelSelect.innerHTML = '';
-                strongModelSelect.innerHTML = '';
+            fastModelSelect.innerHTML = '';
+            strongModelSelect.innerHTML = '';
 
-                const defaultFast = 'meta/llama-3.1-8b-instruct';
-                const defaultStrong = 'meta/llama-3.3-70b-instruct';
+            models.forEach(m => {
+                const optFast = document.createElement('option');
+                optFast.value = m.id;
+                optFast.textContent = `${m.name} (${m.context_length})`;
+                if (m.id === 'meta/llama-3.1-8b-instruct') optFast.selected = true;
+                fastModelSelect.appendChild(optFast);
 
-                const priority = ['meta', 'deepseek-ai', 'nvidia', 'mistralai', 'google', 'qwen', 'microsoft', 'ibm', '01-ai'];
-                const providers = Object.keys(data.categorized).sort((a, b) => {
-                    const idxA = priority.indexOf(a) !== -1 ? priority.indexOf(a) : 99;
-                    const idxB = priority.indexOf(b) !== -1 ? priority.indexOf(b) : 99;
-                    return idxA - idxB;
-                });
-
-                providers.forEach(provider => {
-                    const groupFast = document.createElement('optgroup');
-                    groupFast.label = `--- ${provider.toUpperCase()} ---`;
-
-                    const groupStrong = document.createElement('optgroup');
-                    groupStrong.label = `--- ${provider.toUpperCase()} ---`;
-
-                    data.categorized[provider].forEach(modelId => {
-                        const optF = document.createElement('option');
-                        optF.value = modelId;
-                        optF.textContent = modelId;
-                        if (modelId === defaultFast) optF.selected = true;
-                        groupFast.appendChild(optF);
-
-                        const optS = document.createElement('option');
-                        optS.value = modelId;
-                        optS.textContent = modelId;
-                        if (modelId === defaultStrong) optS.selected = true;
-                        groupStrong.appendChild(optS);
-                    });
-
-                    fastModelSelect.appendChild(groupFast);
-                    strongModelSelect.appendChild(groupStrong);
-                });
-            }
-        } catch (err) {
-            console.error('Failed to load NVIDIA models:', err);
+                const optStrong = document.createElement('option');
+                optStrong.value = m.id;
+                optStrong.textContent = `${m.name} (${m.context_length})`;
+                if (m.id === 'meta/llama-3.3-70b-instruct') optStrong.selected = true;
+                strongModelSelect.appendChild(optStrong);
+            });
+        } catch (e) {
+            console.log('Using default model selectors:', e);
         }
     }
+    loadNvidiaModels();
 
-    // New Research Task Button
-    if (btnNewQuery) {
-        btnNewQuery.addEventListener('click', () => {
-            if (pollInterval) clearInterval(pollInterval);
-            currentSessionId = null;
-            queryInput.value = '';
-            queryInput.focus();
-            heroEmptyState.style.display = 'block';
-            markdownBody.style.display = 'none';
-            auditScoreBadge.style.display = 'none';
-            telemetryLog.innerHTML = `
-                <div class="timeline-step done">
-                    <div class="step-icon"><i class="fa-solid fa-check"></i></div>
-                    <div class="step-content">
-                        <span class="step-title">System Ready</span>
-                        <span class="step-desc">Awaiting research query input</span>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    // Quick Presets
-    window.loadPreset = function(queryText) {
-        queryInput.value = queryText;
-        form.dispatchEvent(new Event('submit'));
-    };
-
-    // Follow-up Input Action
-    if (btnSendFollowup && followupInput) {
-        btnSendFollowup.addEventListener('click', () => {
-            const val = followupInput.value.trim();
-            if (val) {
-                queryInput.value = val;
-                followupInput.value = '';
-                form.dispatchEvent(new Event('submit'));
-            }
-        });
-        followupInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                btnSendFollowup.click();
-            }
-        });
-    }
-
-    const btnConfirmLaunch = document.getElementById('btn-confirm-launch');
-    const btnCancelSettings = document.getElementById('btn-cancel-settings');
-
-    let researchStartTime = null;
-
-    // Form Submit -> Directly executes research launch immediately without opening modal popup
+    // Launch Research
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const query = queryInput.value.trim();
             if (!query) return;
 
-            executeResearchLaunch(query);
-        });
-    }
+            btnLaunch.disabled = true;
+            btnLaunch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Agent...';
+            heroEmptyState.style.display = 'none';
+            markdownBody.style.display = 'none';
+            liveLogContainer.innerHTML = '';
 
-    if (btnConfirmLaunch) {
-        btnConfirmLaunch.addEventListener('click', () => {
-            if (settingsModal) settingsModal.classList.remove('open');
-            const query = queryInput.value.trim();
-            if (query) {
-                executeResearchLaunch(query);
-            }
-        });
-    }
-
-    if (btnCancelSettings) {
-        btnCancelSettings.addEventListener('click', () => {
-            if (settingsModal) settingsModal.classList.remove('open');
-        });
-    }
-
-    async function executeResearchLaunch(query) {
-        researchStartTime = Date.now();
-        btnStart.disabled = true;
-        btnStart.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Researching...';
-        if (statusDot) statusDot.style.background = '#f59e0b';
-        if (recentTitleDisplay) recentTitleDisplay.textContent = query.length > 22 ? query.slice(0, 20) + '...' : query;
-
-        // Show Hero Loading View
-        heroEmptyState.style.display = 'none';
-        markdownBody.style.display = 'block';
-        markdownBody.innerHTML = `
-            <div class="hero-empty-state">
-                <div class="hero-badge"><i class="fa-solid fa-atom fa-spin-pulse"></i> Deep Research Active</div>
-                <h2>Autonomous AI Lead Researcher at work...</h2>
-                <p>Executing multi-round search, scraping authority domains, extracting atomic claims, and preparing publication report for: <strong>"${query}"</strong></p>
-            </div>
-        `;
-
-        telemetryLog.innerHTML = `
-            <div class="timeline-step done">
-                <div class="step-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
-                <div class="step-content">
-                    <span class="step-title">Research Pipeline Initialized</span>
-                    <span class="step-desc">Target topic: ${query}</span>
-                </div>
-            </div>
-        `;
-
-        let selectedMode = 'turbo';
-        const activeSpeedBtn = document.querySelector('.speed-btn.active');
-        if (activeSpeedBtn) selectedMode = activeSpeedBtn.getAttribute('data-mode') || 'turbo';
-
-        let roundsVal = 1;
-        let sourcesVal = 15; // Set rich default sources
-        if (selectedMode === 'standard') {
-            roundsVal = 2;
-            sourcesVal = 22;
-        } else if (selectedMode === 'deep') {
-            roundsVal = 4;
-            sourcesVal = 35;
-        }
-
-        const suggestionsInput = document.getElementById('suggestions-input');
-        const modalSuggestionsInput = document.getElementById('modal-suggestions-input');
-        if (suggestionsInput && modalSuggestionsInput) {
-            suggestionsInput.addEventListener('input', () => { modalSuggestionsInput.value = suggestionsInput.value; });
-            modalSuggestionsInput.addEventListener('input', () => { suggestionsInput.value = modalSuggestionsInput.value; });
-        }
-
-        const targetPagesInput = document.getElementById('target-pages-input');
-        const modalTargetPages = document.getElementById('modal-target-pages');
-        if (targetPagesInput && modalTargetPages) {
-            targetPagesInput.addEventListener('change', () => { modalTargetPages.value = targetPagesInput.value; });
-            modalTargetPages.addEventListener('change', () => { targetPagesInput.value = modalTargetPages.value; });
-        }
-
-        // Automatically switch mobile view to report on mobile screens
-        if (window.innerWidth <= 992 && btnMobileReport) {
-            btnMobileReport.click();
-        }
-
-        try {
-            const payload = {
-                query: query,
-                fast_model: fastModelSelect.value,
-                strong_model: strongModelSelect.value,
-                max_rounds: roundsVal,
-                max_sources: sourcesVal,
-                user_suggestions: suggestionsVal,
-                target_pages: targetPagesVal
-            };
-
-            const resp = await fetchWithAuth('/api/research', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) throw new Error('Failed to start research task');
-
-            const data = await resp.json();
-            currentSessionId = data.session_id;
-
-            startPolling(currentSessionId);
-            loadSessionsHistory();
-        } catch (err) {
-            alert(`Error: ${err.message}`);
-            btnStart.disabled = false;
-            btnStart.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
-        }
-    }
-
-    // Polling Function
-    function startPolling(sessionId) {
-        if (pollInterval) clearInterval(pollInterval);
-        fetchStatus(sessionId);
-        pollInterval = setInterval(() => fetchStatus(sessionId), 1200);
-    }
-
-    async function fetchStatus(sessionId) {
-        try {
-            const resp = await fetch(`/api/research/${sessionId}`);
-            if (!resp.ok) return;
-
-            const statusData = await resp.json();
-            updateTelemetryLogs(statusData);
-            updateProgressView(statusData);
-
-            if (statusData.status === 'completed' || statusData.status === 'failed') {
-                if (pollInterval) clearInterval(pollInterval);
-                btnStart.disabled = false;
-                btnStart.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
-                if (statusDot) statusDot.style.background = statusData.status === 'completed' ? '#10b981' : '#ef4444';
-
-                if (statusData.status === 'completed') {
-                    loadFinalReport(sessionId);
-                    loadEvidenceStore(sessionId);
-                    loadContradictions(sessionId);
-                }
-            }
-        } catch (err) {
-            console.error('Polling error:', err);
-        }
-    }
-
-    function updateProgressView(data) {
-        if (data.status === 'completed') return;
-
-        if (!researchStartTime) researchStartTime = Date.now();
-        const secondsElapsed = Math.floor((Date.now() - researchStartTime) / 1000);
-        const mm = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-        const ss = String(secondsElapsed % 60).padStart(2, '0');
-
-        const pct = data.progress_percentage || 15;
-        const baseEta = data.estimated_seconds_remaining || 15;
-        const dynamicEta = Math.max(2, baseEta - Math.floor((secondsElapsed % 10) / 2));
-        const stageName = (data.stage || 'researching').toUpperCase().replace(/_/g, ' ');
-
-        markdownBody.style.display = 'block';
-        heroEmptyState.style.display = 'none';
-
-        const logsList = (data.logs || []).slice(-6);
-
-        markdownBody.innerHTML = `
-            <div class="hero-empty-state">
-                <div class="hero-badge"><i class="fa-solid fa-atom fa-spin-pulse"></i> Autonomous Deep Research Active</div>
-                <h2>Synthesizing Publication-Grade Research...</h2>
-                <p style="margin-bottom:1.2rem;">Target Topic: <strong>"${data.query}"</strong></p>
-
-                <div class="live-progress-container">
-                    <div class="progress-header">
-                        <span class="progress-stage-title"><i class="fa-solid fa-circle-notch fa-spin text-warning"></i> Stage: ${stageName}</span>
-                        <span class="progress-percent-text">${pct}% Complete</span>
-                    </div>
-
-                    <div class="progress-bar-track">
-                        <div class="progress-bar-fill" style="width: ${pct}%;"></div>
-                    </div>
-
-                    <div class="progress-footer-stats">
-                        <span class="elapsed-badge-pill"><i class="fa-solid fa-stopwatch"></i> Elapsed: ${mm}:${ss}</span>
-                        <span><i class="fa-solid fa-database"></i> ${data.total_sources || 0} Sources | ${data.total_claims || 0} Claims</span>
-                        <span class="eta-badge-pill"><i class="fa-solid fa-clock"></i> ETA: ~${dynamicEta}s remaining</span>
-                    </div>
-
-                    <!-- CENTER SCREEN LIVE TELEMETRY TERMINAL -->
-                    <div class="center-telemetry-box">
-                        <div class="telemetry-box-header">
-                            <span><i class="fa-solid fa-terminal"></i> Live Telemetry Feed (Real-Time Activity)</span>
-                            <span style="color:#10b981;"><i class="fa-solid fa-circle-dot fa-beat-fade"></i> Live Stream</span>
-                        </div>
-                        <div class="center-log-feed">
-                            ${logsList.length > 0 ? logsList.map(l => `
-                                <div class="center-log-row">
-                                    <span class="log-tag">[${l.stage}]</span>
-                                    <span class="log-msg">${l.message}</span>
-                                </div>
-                            `).join('') : '<div class="center-log-row"><span class="log-msg">Initializing real-time stream...</span></div>'}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Telemetry Timeline Update
-    function updateTelemetryLogs(data) {
-        if (data.logs && data.logs.length > 0) {
-            telemetryLog.innerHTML = data.logs.slice(-15).map(log => `
-                <div class="timeline-step done">
-                    <div class="step-icon"><i class="fa-solid fa-circle-check"></i></div>
-                    <div class="step-content">
-                        <span class="step-title">[${log.stage}]</span>
-                        <span class="step-desc">${log.message}</span>
-                    </div>
-                </div>
-            `).join('');
-            telemetryLog.scrollTop = telemetryLog.scrollHeight;
-        }
-    }
-
-    // Load Synthesized Markdown Report
-    async function loadFinalReport(sessionId) {
-        try {
-            const resp = await fetch(`/api/research/${sessionId}/report`);
-            if (!resp.ok) return;
-            const reportData = await resp.json();
-
-            const mdContent = reportData.markdown_content || reportData.markdown;
-
-            if (mdContent) {
-                markdownBody.innerHTML = marked.parse(mdContent);
-                auditScoreBadge.style.display = 'inline-flex';
-                
-                // Update Word Count telemetry chip
-                const wordsCount = mdContent.trim().split(/\s+/).filter(Boolean).length;
-                const reportWordsVal = document.getElementById('report-words-val');
-                if (reportWordsVal) reportWordsVal.textContent = wordsCount.toLocaleString();
-
-                const pdfUrl = `/api/research/${sessionId}/download/pdf`;
-                const mdUrl = `/api/research/${sessionId}/download/md`;
-
-                // Enable Prominent PDF Download Buttons
-                const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
-                const reportTopBar = document.getElementById('report-top-bar');
-                if (btnDownloadPdfTop && reportTopBar) {
-                    btnDownloadPdfTop.href = pdfUrl;
-                    reportTopBar.style.display = 'flex';
-                }
-
-                const btnDownloadPdfNav = document.getElementById('btn-download-pdf-nav');
-                if (btnDownloadPdfNav) {
-                    btnDownloadPdfNav.href = pdfUrl;
-                    btnDownloadPdfNav.style.display = 'inline-flex';
-                }
-
-                // Enable Export Studio Buttons
-                exportPdfBtn.href = pdfUrl;
-                exportPdfBtn.classList.remove('disabled');
-
-                exportMdBtn.href = mdUrl;
-                exportMdBtn.classList.remove('disabled');
-
-                // Wire up Copy Markdown Button
-                const btnCopyReport = document.getElementById('btn-copy-report');
-                if (btnCopyReport) {
-                    btnCopyReport.onclick = async () => {
-                        try {
-                            await navigator.clipboard.writeText(mdContent);
-                            const origHTML = btnCopyReport.innerHTML;
-                            btnCopyReport.innerHTML = '<i class="fa-solid fa-check text-success"></i> Copied!';
-                            setTimeout(() => { btnCopyReport.innerHTML = origHTML; }, 2000);
-                        } catch (e) {
-                            console.warn('Clipboard write failed:', e);
-                        }
-                    };
-                }
-            }
-        } catch (err) {
-            console.error('Failed loading final report:', err);
-        }
-    }
-
-    // Live WYSIWYG Editing & Word Customization Handler
-    let isEditMode = false;
-    const btnToggleEdit = document.getElementById('btn-toggle-edit');
-    const btnSaveEdit = document.getElementById('btn-save-edit');
-    const editBtnText = document.getElementById('edit-btn-text');
-    const reportStatusBadge = document.getElementById('report-status-badge');
-    const editHintBanner = document.getElementById('edit-hint-banner');
-
-    if (btnToggleEdit) {
-        btnToggleEdit.addEventListener('click', () => {
-            isEditMode = !isEditMode;
-            if (isEditMode) {
-                markdownBody.setAttribute('contenteditable', 'true');
-                markdownBody.focus();
-                btnToggleEdit.classList.add('active');
-                if (editBtnText) editBtnText.textContent = 'Editing Mode (Active)';
-                if (btnSaveEdit) btnSaveEdit.style.display = 'inline-flex';
-                if (reportStatusBadge) reportStatusBadge.innerHTML = '<i class="fa-solid fa-pen text-warning"></i> Editing Mode';
-                if (editHintBanner) editHintBanner.style.display = 'flex';
-            } else {
-                markdownBody.removeAttribute('contenteditable');
-                btnToggleEdit.classList.remove('active');
-                if (editBtnText) editBtnText.textContent = 'Edit Words';
-                if (reportStatusBadge) reportStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald"></i> Publication Ready';
-                if (editHintBanner) editHintBanner.style.display = 'none';
-            }
-        });
-    }
-
-    function htmlToMarkdown(root) {
-        function nodeToMd(node) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                return node.nodeValue;
-            }
-            if (node.nodeType !== Node.ELEMENT_NODE) {
-                return '';
-            }
-
-            const tag = node.tagName.toLowerCase();
-            let childrenMd = Array.from(node.childNodes).map(nodeToMd).join('');
-
-            switch (tag) {
-                case 'h1':
-                    return `\n# ${childrenMd.trim()}\n\n`;
-                case 'h2':
-                    return `\n## ${childrenMd.trim()}\n\n`;
-                case 'h3':
-                    return `\n### ${childrenMd.trim()}\n\n`;
-                case 'h4':
-                    return `\n#### ${childrenMd.trim()}\n\n`;
-                case 'h5':
-                    return `\n##### ${childrenMd.trim()}\n\n`;
-                case 'h6':
-                    return `\n###### ${childrenMd.trim()}\n\n`;
-                case 'p':
-                    return `\n${childrenMd.trim()}\n\n`;
-                case 'strong':
-                case 'b':
-                    return `**${childrenMd}**`;
-                case 'em':
-                case 'i':
-                    return `*${childrenMd}*`;
-                case 'code':
-                    return `\`${childrenMd}\``;
-                case 'pre':
-                    return `\n\`\`\`\n${childrenMd.trim()}\n\`\`\`\n\n`;
-                case 'blockquote':
-                    return `\n> ${childrenMd.trim().replace(/\n/g, '\n> ')}\n\n`;
-                case 'ul':
-                    return `\n${childrenMd}\n`;
-                case 'ol':
-                    return `\n${childrenMd}\n`;
-                case 'li': {
-                    const isOrdered = node.parentElement && node.parentElement.tagName.toLowerCase() === 'ol';
-                    const index = Array.from(node.parentElement ? node.parentElement.children : []).indexOf(node) + 1;
-                    const prefix = isOrdered ? `${index}. ` : `- `;
-                    return `${prefix}${childrenMd.trim()}\n`;
-                }
-                case 'table': {
-                    const rows = Array.from(node.querySelectorAll('tr'));
-                    if (rows.length === 0) return '';
-                    let tableMd = '\n';
-                    rows.forEach((row, rIdx) => {
-                        const cells = Array.from(row.querySelectorAll('th, td')).map(c => c.innerText.trim());
-                        tableMd += `| ${cells.join(' | ')} |\n`;
-                        if (rIdx === 0) {
-                            tableMd += `| ${cells.map(() => '---').join(' | ')} |\n`;
-                        }
-                    });
-                    return tableMd + '\n';
-                }
-                case 'br':
-                    return '\n';
-                case 'hr':
-                    return '\n---\n\n';
-                default:
-                    return childrenMd;
-            }
-        }
-
-        let result = nodeToMd(root);
-        result = result.replace(/\n{3,}/g, '\n\n').trim();
-        return result;
-    }
-
-    if (btnSaveEdit) {
-        btnSaveEdit.addEventListener('click', async () => {
-            if (!currentSessionId) return;
-            btnSaveEdit.disabled = true;
-            btnSaveEdit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-            const updatedMarkdown = htmlToMarkdown(markdownBody);
+            startTime = Date.now();
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const mins = Math.floor(elapsed / 60);
+                const secs = elapsed % 60;
+                if (telemetryTimer) telemetryTimer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }, 1000);
 
             try {
-                const resp = await fetch(`/api/research/${currentSessionId}/report`, {
-                    method: 'PUT',
+                const resp = await fetchWithAuth('/api/research', {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ markdown_content: updatedMarkdown })
+                    body: JSON.stringify({
+                        query: query,
+                        max_rounds: parseInt(maxRoundsInput.value) || 2,
+                        max_sources: parseInt(maxSourcesInput.value) || 15,
+                        fast_model: fastModelSelect.value,
+                        strong_model: strongModelSelect.value
+                    })
                 });
 
-                if (resp.ok) {
-                    btnSaveEdit.innerHTML = '<i class="fa-solid fa-check"></i> Changes Saved!';
-                    if (reportStatusBadge) reportStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald"></i> Saved & PDF Updated';
-                    
-                    const newWords = updatedMarkdown.trim().split(/\s+/).filter(Boolean).length;
-                    const reportWordsVal = document.getElementById('report-words-val');
-                    if (reportWordsVal) reportWordsVal.textContent = newWords.toLocaleString();
-
-                    // Update all PDF download button URLs with timestamp to force fresh download
-                    const freshPdfUrl = `/api/research/${currentSessionId}/download/pdf?t=${Date.now()}`;
-                    const btnDownloadPdfTop = document.getElementById('btn-download-pdf-top');
-                    const btnDownloadPdfNav = document.getElementById('btn-download-pdf-nav');
-                    if (btnDownloadPdfTop) btnDownloadPdfTop.href = freshPdfUrl;
-                    if (btnDownloadPdfNav) btnDownloadPdfNav.href = freshPdfUrl;
-                    if (exportPdfBtn) exportPdfBtn.href = freshPdfUrl;
-
-                    setTimeout(() => {
-                        btnSaveEdit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
-                        btnSaveEdit.disabled = false;
-                    }, 2500);
-                } else {
-                    throw new Error('Failed to save updated report');
+                if (!resp.ok) {
+                    if (resp.status === 401 || resp.status === 403) {
+                        checkCurrentUser();
+                        return;
+                    }
+                    throw new Error('Failed to launch research session');
                 }
+
+                const data = await resp.json();
+                currentSessionId = data.session_id;
+                startPollingStatus(currentSessionId);
+
             } catch (err) {
-                alert(`Error saving report: ${err.message}`);
-                btnSaveEdit.disabled = false;
-                btnSaveEdit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+                alert('Error launching research: ' + err.message);
+                btnLaunch.disabled = false;
+                btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
             }
         });
     }
 
-    let allLoadedClaims = [];
-    const claimsSearchInput = document.getElementById('claims-search-input');
+    function startPollingStatus(sessionId) {
+        clearInterval(pollInterval);
+        pollInterval = setInterval(async () => {
+            try {
+                const resp = await fetchWithAuth(`/api/research/${sessionId}/status`);
+                if (!resp.ok) return;
+                const status = await resp.json();
 
-    if (claimsSearchInput) {
-        claimsSearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (!allLoadedClaims.length) return;
-            const filtered = allLoadedClaims.filter(c => 
-                (c.claim_text && c.claim_text.toLowerCase().includes(query)) ||
-                (c.source_title && c.source_title.toLowerCase().includes(query)) ||
-                (c.quote_or_paraphrase && c.quote_or_paraphrase.toLowerCase().includes(query)) ||
-                (c.sub_question_tag && c.sub_question_tag.toLowerCase().includes(query))
-            );
-            renderClaimsTable(filtered);
-        });
+                if (stageBadge) stageBadge.textContent = status.stage.toUpperCase();
+                if (statusBadge) statusBadge.textContent = status.status.toUpperCase();
+                if (currentActionText) currentActionText.textContent = status.current_action;
+                if (telemetryStatRounds) telemetryStatRounds.textContent = `${status.rounds_completed}/${status.total_rounds}`;
+                if (telemetryStatSources) telemetryStatSources.textContent = status.sources_found;
+                if (telemetryStatClaims) telemetryStatClaims.textContent = status.claims_extracted;
+                if (telemetryStatDisagreements) telemetryStatDisagreements.textContent = status.contradictions_found;
+
+                const percent = Math.min(100, Math.round((status.rounds_completed / status.total_rounds) * 90) + (status.status === 'completed' ? 10 : 0));
+                if (progressFill) progressFill.style.width = percent + '%';
+                if (progressPercent) progressPercent.textContent = percent + '%';
+
+                if (status.status === 'completed' || status.status === 'error') {
+                    clearInterval(pollInterval);
+                    clearInterval(stopwatchInterval);
+                    btnLaunch.disabled = false;
+                    btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
+                    loadFullReport(sessionId);
+                    loadSessionsHistory();
+                }
+            } catch (e) {
+                console.error('Polling error:', e);
+            }
+        }, 1500);
     }
 
-    function renderClaimsTable(claimsList) {
-        if (!claimsList || claimsList.length === 0) {
-            claimsTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding:2rem;">No matching facts found.</td></tr>';
-            return;
-        }
-        claimsTableBody.innerHTML = claimsList.map(c => `
-            <tr>
-                <td style="max-width:220px;">
-                    <strong style="color:#0f172a;">${c.source_title || 'Source'}</strong><br>
-                    <a href="${c.source_url}" target="_blank" style="font-size:0.75rem; color:#2563eb; text-decoration:none; word-break:break-all;"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${c.source_url}</a>
-                </td>
-                <td style="line-height:1.6; color:#1e293b;">${c.claim_text}</td>
-                <td style="color:#475569; font-style:italic;">"${c.quote_or_paraphrase}"</td>
-                <td><span class="badge-pill">${c.sub_question_tag}</span></td>
-            </tr>
-        `).join('');
-    }
-
-    // Load Evidence & Claims Matrix Table
-    async function loadEvidenceStore(sessionId) {
+    async function loadFullReport(sessionId) {
         try {
-            const resp = await fetch(`/api/research/${sessionId}/evidence`);
+            const resp = await fetchWithAuth(`/api/research/${sessionId}/report`);
             if (!resp.ok) return;
             const data = await resp.json();
 
-            if (data.claims && data.claims.length > 0) {
-                allLoadedClaims = data.claims;
-                evidenceCountTag.textContent = `${data.claims.length} Claims`;
-                renderClaimsTable(allLoadedClaims);
+            if (data.report && data.report.markdown_content) {
+                markdownBody.innerHTML = marked.parse(data.report.markdown_content);
+                markdownBody.style.display = 'block';
+                heroEmptyState.style.display = 'none';
+
+                if (reportTitleHeading) reportTitleHeading.textContent = data.session.query;
+                if (btnDownloadPdfTop) btnDownloadPdfTop.href = `/api/export/${sessionId}/pdf`;
+                if (btnDownloadPdfHero) btnDownloadPdfHero.href = `/api/export/${sessionId}/pdf`;
+                if (exportPdfBtn) { exportPdfBtn.href = `/api/export/${sessionId}/pdf`; exportPdfBtn.classList.remove('disabled'); }
+                if (exportMdBtn) { exportMdBtn.href = `/api/export/${sessionId}/md`; exportMdBtn.classList.remove('disabled'); }
             }
-        } catch (err) {
-            console.error('Failed loading evidence store:', err);
+
+            // Populate Evidence Table
+            if (data.claims && claimsTableBody) {
+                if (data.claims.length > 0) {
+                    claimsTableBody.innerHTML = data.claims.map(c => `
+                        <tr>
+                            <td><a href="#" class="text-emerald">${c.sub_question_tag}</a></td>
+                            <td><strong>${c.claim_text}</strong></td>
+                            <td class="text-muted"><em>"${c.quote_or_paraphrase || ''}"</em></td>
+                            <td><span class="badge-pill">${Math.round(c.confidence * 100)}%</span></td>
+                        </tr>
+                    `).join('');
+                }
+                if (evidenceCountTag) evidenceCountTag.textContent = `${data.claims.length} Claims`;
+            }
+
+        } catch (e) {
+            console.error('Error loading report:', e);
         }
     }
 
-    // Load Contradictions & Consensus Analysis Matrix
-    async function loadContradictions(sessionId) {
-        try {
-            const resp = await fetch(`/api/research/${sessionId}/contradictions`);
-            if (!resp.ok) return;
-            const data = await resp.json();
-
-            if (data.contradictions && data.contradictions.length > 0) {
-                contradictionsContainer.innerHTML = data.contradictions.map(c => {
-                    const views = Array.isArray(c.conflicting_views) 
-                        ? c.conflicting_views.join(' | ') 
-                        : (c.conflicting_views || 'None');
-                    return `
-                        <div class="table-container-card" style="margin-bottom:1.5rem;">
-                            <div class="table-header-bar">
-                                <h3><i class="fa-solid fa-scale-balanced text-warning"></i> Topic: ${c.topic}</h3>
-                            </div>
-                            <p style="margin-bottom:0.8rem; color:#334155;"><strong>Consensus View:</strong> ${c.consensus_summary}</p>
-                            <p style="color:#b45309;"><strong>Conflicting Views:</strong> ${views}</p>
-                        </div>
-                    `;
-                }).join('');
-            }
-        } catch (err) {
-            console.error('Failed loading contradictions:', err);
-        }
-    }
-
-    // Load Sessions History
     async function loadSessionsHistory() {
         try {
             const resp = await fetchWithAuth('/api/sessions');
             if (!resp.ok) return;
-            const data = await resp.json();
-            const list = data.sessions || [];
+            const sessions = await resp.json();
+            const recentList = document.getElementById('recent-sessions-list');
+            if (!recentList) return;
 
-            if (recentSessionsList) {
-                if (list.length > 0) {
-                    recentSessionsList.innerHTML = list.slice(0, 8).map(s => `
-                        <div class="session-history-item ${s.session_id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.session_id}')">
-                            <i class="fa-solid fa-file-contract"></i>
-                            <span class="session-name">${s.query.length > 22 ? s.query.slice(0, 20) + '...' : s.query}</span>
-                        </div>
-                    `).join('');
-
-                    if (!currentSessionId && list[0]) {
-                        switchSession(list[0].session_id);
-                    }
-                } else {
-                    recentSessionsList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">No research tasks found yet. Start a new topic!</div>';
-                }
+            if (sessions.length === 0) {
+                recentList.innerHTML = '<div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">No research tasks saved yet.</div>';
+                return;
             }
-        } catch (err) {
-            console.error('Error loading session history:', err);
+
+            recentList.innerHTML = sessions.map(s => `
+                <div class="session-item" data-id="${s.session_id}" style="padding:0.6rem; border-radius:8px; cursor:pointer; margin-bottom:4px; background:rgba(30,41,59,0.5);">
+                    <div style="font-weight:600; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.query}</div>
+                    <div style="font-size:0.72rem; color:#94a3b8; display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>${s.status.toUpperCase()}</span>
+                        <span>${new Date(s.created_at).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.session-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const sid = item.getAttribute('data-id');
+                    loadFullReport(sid);
+                });
+            });
+
+        } catch (e) {
+            console.error('Error loading history:', e);
         }
     }
 
-    window.switchSession = function(sessionId) {
-        currentSessionId = sessionId;
-        heroEmptyState.style.display = 'none';
-        markdownBody.style.display = 'block';
-        if (window.innerWidth <= 992 && btnMobileReport) {
-            btnMobileReport.click();
-        }
-        startPolling(sessionId);
-        loadFinalReport(sessionId);
-        loadEvidenceStore(sessionId);
-        loadContradictions(sessionId);
-    };
+    // Tabs Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const target = btn.getAttribute('data-tab');
+            const pane = document.getElementById(`tab-${target}`);
+            if (pane) pane.classList.add('active');
+        });
+    });
 
-    // Initial Load Sequence
-    (async () => {
-        await checkCurrentUser();
-        await loadSessionsHistory();
-        await loadNvidiaModels();
-    })();
+    // Copy Report
+    if (btnCopyReport) {
+        btnCopyReport.addEventListener('click', () => {
+            const text = markdownBody.innerText || markdownBody.textContent;
+            navigator.clipboard.writeText(text);
+            btnCopyReport.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            setTimeout(() => { btnCopyReport.innerHTML = '<i class="fa-solid fa-copy"></i> Copy'; }, 2000);
+        });
+    }
+
 });

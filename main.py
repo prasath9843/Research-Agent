@@ -142,13 +142,12 @@ def get_current_active_user(request: Request) -> dict:
 
 # --- Core Web Routes ---
 
-@app.get("/", response_class=HTMLResponse)
-def index(request: Request):
+@app.get("/")
+def index():
     index_file = BASE_DIR / "templates" / "index.html"
     if index_file.is_file():
-        with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read(), status_code=200)
-    return HTMLResponse(content="<h1>DeepResearch Studio Loading...</h1>", status_code=200)
+        return FileResponse(str(index_file), media_type="text/html")
+    return HTMLResponse(content="<h1>DeepResearch Studio</h1>", status_code=200)
 
 @app.get("/health")
 @app.head("/health")

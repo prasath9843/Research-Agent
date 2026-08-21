@@ -131,6 +131,7 @@ class LoginRequest(BaseModel):
 
 class GoogleAuthRequest(BaseModel):
     credential: Optional[str] = None
+    access_token: Optional[str] = None
     email: Optional[str] = None
     name: Optional[str] = None
     google_id: Optional[str] = None

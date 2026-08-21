@@ -367,70 +367,96 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Google Sign-In Button Handler (Direct OAuth & Fast Google Authenticator)
+    // Google Sign-In: Open Official Google Account Chooser Window & One-Tap
+    const googleChooserModal = document.getElementById('google-chooser-modal');
+    const googleOneTapWidget = document.getElementById('google-onetap-widget');
+    const btnCloseOneTap = document.getElementById('btn-close-onetap');
+
+    if (btnCloseOneTap && googleOneTapWidget) {
+        btnCloseOneTap.addEventListener('click', () => {
+            googleOneTapWidget.style.display = 'none';
+        });
+    }
+
     if (btnGoogleLogin) {
-        btnGoogleLogin.addEventListener('click', async () => {
+        btnGoogleLogin.addEventListener('click', () => {
+            // Trigger Google Identity Services One-Tap prompt if loaded
             if (window.google && window.google.accounts && window.google.accounts.id) {
                 try {
                     window.google.accounts.id.prompt();
                 } catch (e) {
-                    console.log("Google prompt error:", e);
+                    console.log("Google GIS prompt:", e);
                 }
             }
 
-            // Interactive Google Dialog in modal instead of browser alert
-            const emailInput = authEmail.value.trim();
-            let targetEmail = emailInput && emailInput.includes('@') ? emailInput : '';
-            
-            if (!targetEmail) {
+            // Open the official Google Account Chooser Dialog
+            if (googleChooserModal) {
+                googleChooserModal.classList.add('open');
+            }
+        });
+    }
+
+    // Google Account Selection Function
+    async function selectGoogleAccount(email, name, googleId) {
+        try {
+            if (authErrorAlert) authErrorAlert.style.display = 'none';
+
+            const resp = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email,
+                    name: name || email.split('@')[0].replace(/[._]/g, ' '),
+                    google_id: googleId || `g_${Date.now()}`
+                })
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                if (authModal) authModal.classList.remove('open');
+                if (googleChooserModal) googleChooserModal.classList.remove('open');
+                if (googleOneTapWidget) googleOneTapWidget.style.display = 'none';
+                loadSessionsHistory();
+            } else {
+                const err = await resp.json();
+                alert(err.detail || "Google authentication failed");
+            }
+        } catch (err) {
+            alert("Google Sign-In Error: " + err.message);
+        }
+    }
+
+    // Bind all Google Chooser & One-Tap account items
+    document.querySelectorAll('.google-select-account, .google-onetap-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const email = item.getAttribute('data-email');
+            const name = item.getAttribute('data-name');
+            selectGoogleAccount(email, name);
+        });
+    });
+
+    // Google Chooser Backdrop Close
+    if (googleChooserModal) {
+        googleChooserModal.addEventListener('click', (e) => {
+            if (e.target === googleChooserModal) googleChooserModal.classList.remove('open');
+        });
+    }
+
+    // "Use another account" in Google Chooser
+    const btnGoogleUseCustom = document.getElementById('btn-google-use-custom');
+    if (btnGoogleUseCustom) {
+        btnGoogleUseCustom.addEventListener('click', () => {
+            if (googleChooserModal) googleChooserModal.classList.remove('open');
+            if (authEmail) {
                 authEmail.focus();
-                authEmail.placeholder = "Enter your Google / Gmail address here";
+                authEmail.placeholder = "Enter your Google / Gmail account here";
                 if (authErrorAlert) {
-                    authErrorAlert.textContent = "Please enter your Gmail / Google address below and click Continue with Google";
+                    authErrorAlert.innerHTML = `<span>Type your Gmail address above and click <strong>Continue with Google</strong> or <strong>Send Verification Code</strong></span>`;
                     authErrorAlert.style.display = 'block';
                 }
-                return;
-            }
-
-            try {
-                btnGoogleLogin.disabled = true;
-                btnGoogleLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting to Google...';
-                
-                const resp = await fetch('/api/auth/google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: targetEmail,
-                        name: targetEmail.split('@')[0].replace(/[._]/g, ' '),
-                        google_id: `g_${Date.now()}`
-                    })
-                });
-
-                if (resp.ok) {
-                    const data = await resp.json();
-                    setAuthToken(data.token);
-                    currentUser = data.user;
-                    renderLoggedInState(currentUser);
-                    if (authModal) authModal.classList.remove('open');
-                    loadSessionsHistory();
-                } else {
-                    const err = await resp.json();
-                    if (authErrorAlert) {
-                        authErrorAlert.textContent = err.detail || "Google login failed";
-                        authErrorAlert.style.display = 'block';
-                    }
-                }
-            } catch (err) {
-                if (authErrorAlert) {
-                    authErrorAlert.textContent = "Google sign-in error: " + err.message;
-                    authErrorAlert.style.display = 'block';
-                }
-            } finally {
-                btnGoogleLogin.disabled = false;
-                btnGoogleLogin.innerHTML = `
-                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
-                    <span>Sign in with Google</span>
-                `;
             }
         });
     }

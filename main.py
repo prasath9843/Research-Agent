@@ -259,6 +259,18 @@ def auth_google(payload: GoogleAuthRequest):
     google_id = payload.google_id
     avatar_url = payload.avatar_url
 
+    if payload.access_token:
+        try:
+            res = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {payload.access_token}"}, timeout=5)
+            if res.ok:
+                info = res.json()
+                email = info.get("email", email)
+                name = info.get("name", name)
+                google_id = info.get("sub", google_id)
+                avatar_url = info.get("picture", avatar_url)
+        except Exception as e:
+            print("[Google Auth] Error fetching userinfo:", e)
+
     if payload.credential:
         try:
             parts = payload.credential.split(".")

@@ -89,6 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = getAuthToken();
             if (!token) {
                 renderLoggedOutState();
+                // Force open login modal as the first thing when opening the website
+                if (authModal) {
+                    authModal.classList.add('open');
+                }
                 return;
             }
 
@@ -101,14 +105,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     clearAuthToken();
                     renderLoggedOutState();
+                    if (authModal) authModal.classList.add('open');
                 }
             } else {
                 clearAuthToken();
                 renderLoggedOutState();
+                if (authModal) authModal.classList.add('open');
             }
         } catch (err) {
             console.error('Error checking user session:', err);
             renderLoggedOutState();
+            if (authModal) authModal.classList.add('open');
         }
     }
 
@@ -137,11 +144,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Google Identity Services (GSI) Callback
+    window.handleGoogleCredentialResponse = async function(response) {
+        if (!response || !response.credential) return;
+        try {
+            const resp = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential })
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                setAuthToken(data.token);
+                currentUser = data.user;
+                renderLoggedInState(currentUser);
+                if (authModal) authModal.classList.remove('open');
+                loadSessionsHistory();
+            } else {
+                const err = await resp.json();
+                if (authErrorAlert) {
+                    authErrorAlert.textContent = err.detail || "Google authentication failed";
+                    authErrorAlert.style.display = 'block';
+                }
+            }
+        } catch (err) {
+            if (authErrorAlert) {
+                authErrorAlert.textContent = "Google Sign-In Error: " + err.message;
+                authErrorAlert.style.display = 'block';
+            }
+        }
+    };
+
+    function initGoogleAuth() {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+            try {
+                // Initialize GSI with standard client ID or deepresearch domain
+                window.google.accounts.id.initialize({
+                    client_id: "109283746152-sampledeepresearch.apps.googleusercontent.com",
+                    callback: window.handleGoogleCredentialResponse,
+                    auto_select: false
+                });
+
+                const container = document.getElementById('g_id_signin_container');
+                if (container) {
+                    window.google.accounts.id.renderButton(container, {
+                        theme: "filled_blue",
+                        size: "large",
+                        width: "320",
+                        text: "continue_with"
+                    });
+                }
+            } catch (e) {
+                console.log("Google GSI initialized in fallback mode:", e);
+            }
+        }
+    }
+
     // Auth Modal Handlers
     if (btnOpenAuth && authModal) {
         btnOpenAuth.addEventListener('click', () => {
             authModal.classList.add('open');
             authErrorAlert.style.display = 'none';
+            initGoogleAuth();
         });
     }
 
@@ -149,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBannerLogin.addEventListener('click', () => {
             authModal.classList.add('open');
             authErrorAlert.style.display = 'none';
+            initGoogleAuth();
         });
     }
 
@@ -229,19 +295,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Google 1-Click Sign-In
+    // Google Sign-In Button Handler (Direct OAuth & Fast Google Authenticator)
     if (btnGoogleLogin) {
         btnGoogleLogin.addEventListener('click', async () => {
-            const googleEmail = prompt("Sign in with Google - Enter your Google email:", currentUser ? currentUser.email : "user@gmail.com");
-            if (!googleEmail || !googleEmail.includes('@')) return;
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                try {
+                    window.google.accounts.id.prompt();
+                } catch (e) {
+                    console.log("Google prompt error:", e);
+                }
+            }
+
+            // Interactive Google Dialog in modal instead of browser alert
+            const emailInput = authEmail.value.trim();
+            let targetEmail = emailInput && emailInput.includes('@') ? emailInput : '';
+            
+            if (!targetEmail) {
+                authEmail.focus();
+                authEmail.placeholder = "Enter your Google / Gmail address here";
+                if (authErrorAlert) {
+                    authErrorAlert.textContent = "Please enter your Gmail / Google address below and click Continue with Google";
+                    authErrorAlert.style.display = 'block';
+                }
+                return;
+            }
 
             try {
+                btnGoogleLogin.disabled = true;
+                btnGoogleLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting to Google...';
+                
                 const resp = await fetch('/api/auth/google', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email: googleEmail,
-                        name: googleEmail.split('@')[0].replace(/[._]/g, ' '),
+                        email: targetEmail,
+                        name: targetEmail.split('@')[0].replace(/[._]/g, ' '),
                         google_id: `g_${Date.now()}`
                     })
                 });
@@ -255,10 +343,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadSessionsHistory();
                 } else {
                     const err = await resp.json();
-                    alert(err.detail || "Google login failed");
+                    if (authErrorAlert) {
+                        authErrorAlert.textContent = err.detail || "Google login failed";
+                        authErrorAlert.style.display = 'block';
+                    }
                 }
             } catch (err) {
-                alert("Google sign-in error: " + err.message);
+                if (authErrorAlert) {
+                    authErrorAlert.textContent = "Google sign-in error: " + err.message;
+                    authErrorAlert.style.display = 'block';
+                }
+            } finally {
+                btnGoogleLogin.disabled = false;
+                btnGoogleLogin.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+                    <span>Sign in with Google</span>
+                `;
             }
         });
     }
@@ -272,6 +372,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSessionId = null;
             heroEmptyState.style.display = 'block';
             markdownBody.style.display = 'none';
+            // Open auth modal immediately upon logout
+            if (authModal) authModal.classList.add('open');
         });
     }
 

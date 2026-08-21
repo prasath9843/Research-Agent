@@ -7,13 +7,11 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Marked JS for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Google Identity Services (GSI) -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
 /* DEEPRESEARCH STUDIO — MODERN ACADEMIC AGENT CSS THEME */
 :root {
@@ -1859,257 +1857,580 @@ body.studio-theme {
 }
 
 
-</style>
+
+/* ==========================================================================
+   AUTHENTIC GOOGLE ACCOUNT CHOOSER & GLASSMORPHIC AUTH MODAL
+   ========================================================================== */
+.auth-overlay-gate {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(4, 7, 13, 0.88) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1.5rem !important;
+    overflow-y: auto !important;
+}
+
+.auth-master-card {
+    width: 100% !important;
+    max-width: 450px !important;
+    background: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 24px !important;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.85), 0 0 35px rgba(16, 185, 129, 0.2) !important;
+    padding: 2.2rem 2.4rem !important;
+    color: #f8fafc !important;
+    position: relative !important;
+    animation: authFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes authFadeIn {
+    from { opacity: 0; transform: scale(0.94) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.auth-brand-head {
+    text-align: center !important;
+    margin-bottom: 1.8rem !important;
+}
+
+.auth-brand-logo {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 52px !important;
+    height: 52px !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    border-radius: 16px !important;
+    font-size: 1.6rem !important;
+    margin-bottom: 0.9rem !important;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.auth-card-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin-bottom: 0.35rem !important;
+}
+
+.auth-card-subtitle {
+    font-size: 0.88rem !important;
+    color: #94a3b8 !important;
+    line-height: 1.4 !important;
+}
+
+.auth-field-group {
+    margin-bottom: 1.15rem !important;
+    position: relative !important;
+}
+
+.auth-field-label {
+    display: block !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    color: #cbd5e1 !important;
+    margin-bottom: 0.45rem !important;
+}
+
+.auth-input-wrapper {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.auth-input-icon {
+    position: absolute !important;
+    left: 14px !important;
+    color: #64748b !important;
+    font-size: 0.95rem !important;
+    pointer-events: none !important;
+}
+
+.auth-input-control {
+    width: 100% !important;
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 12px !important;
+    padding: 0.8rem 2.5rem 0.8rem 2.6rem !important;
+    color: #f8fafc !important;
+    font-size: 0.92rem !important;
+    font-family: inherit !important;
+    transition: all 0.2s ease !important;
+}
+
+.auth-input-control:focus {
+    outline: none !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+    background: #243248 !important;
+}
+
+.btn-toggle-pw {
+    position: absolute !important;
+    right: 12px !important;
+    background: none !important;
+    border: none !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    font-size: 1rem !important;
+    padding: 4px !important;
+}
+
+.btn-toggle-pw:hover {
+    color: #f8fafc !important;
+}
+
+.pw-strength-track {
+    height: 4px !important;
+    background: #1e293b !important;
+    border-radius: 2px !important;
+    margin-top: 6px !important;
+    overflow: hidden !important;
+}
+
+.pw-strength-fill {
+    height: 100% !important;
+    width: 0% !important;
+    transition: width 0.3s ease, background 0.3s ease !important;
+}
+
+/* 6-Digit OTP Box Grid */
+.otp-digit-grid {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin: 1.5rem 0 !important;
+}
+
+.otp-digit-box {
+    width: 50px !important;
+    height: 58px !important;
+    background: #1e293b !important;
+    border: 2px solid #334155 !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #10b981 !important;
+    transition: all 0.2s ease !important;
+}
+
+.otp-digit-box:focus {
+    outline: none !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3) !important;
+    background: #243248 !important;
+    transform: translateY(-2px) !important;
+}
+
+.auth-btn-primary {
+    width: 100% !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.88rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+}
+
+.auth-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.5) !important;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+}
+
+.auth-btn-primary:disabled {
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+}
+
+.auth-btn-google {
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 0.8rem !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+.auth-btn-google:hover {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2) !important;
+}
+
+.auth-or-divider {
+    display: flex !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin: 1.4rem 0 !important;
+    color: #64748b !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.auth-or-divider::before,
+.auth-or-divider::after {
+    content: '' !important;
+    flex: 1 !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+.auth-or-divider span {
+    padding: 0 12px !important;
+}
+
+.auth-card-footer {
+    text-align: center !important;
+    margin-top: 1.4rem !important;
+    font-size: 0.85rem !important;
+    color: #94a3b8 !important;
+}
+
+.auth-link-action {
+    color: #10b981 !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: color 0.15s ease !important;
+}
+
+.auth-link-action:hover {
+    color: #34d399 !important;
+    text-decoration: underline !important;
+}
+
+.auth-status-alert {
+    padding: 0.85rem 1.1rem !important;
+    border-radius: 12px !important;
+    font-size: 0.86rem !important;
+    margin-bottom: 1.2rem !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    line-height: 1.4 !important;
+}
+
+.auth-status-alert.error {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #fca5a5 !important;
+}
+
+.auth-status-alert.success {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    color: #6ee7b7 !important;
+}
+
+.masked-email-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    padding: 5px 12px !important;
+    border-radius: 9999px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #10b981 !important;
+    font-size: 0.85rem !important;
+}
+
+/* Google Chooser Modal Styling */
+.google-chooser-window {
+    background: #202124 !important;
+    color: #e8eaed !important;
+    border-radius: 20px !important;
+    width: 440px !important;
+    max-width: 92vw !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important;
+    border: 1px solid #3c4043 !important;
+    padding: 2.2rem !important;
+    font-family: 'Google Sans', Roboto, Arial, sans-serif !important;
+}
+
+.google-dialog-header {
+    text-align: center !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.google-dialog-title {
+    font-size: 1.5rem !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+    margin: 0.8rem 0 0.2rem 0 !important;
+}
+
+.google-dialog-sub {
+    font-size: 0.88rem !important;
+    color: #9aa0a6 !important;
+}
+
+.google-account-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 1.2rem !important;
+}
+
+.google-account-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    background: #303134 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    border: 1px solid transparent !important;
+}
+
+.google-account-row:hover {
+    background: #3c4043 !important;
+    border-color: #5f6368 !important;
+    transform: translateY(-1px) !important;
+}
+
+.google-avatar-circle {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    font-size: 1.05rem !important;
+    color: #fff !important;
+    flex-shrink: 0 !important;
+}
+
+.google-user-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    line-height: 1.3 !important;
+}
+
+.google-user-name {
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.google-user-email {
+    font-size: 0.8rem !important;
+    color: #9aa0a6 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.google-use-another {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    border: 1px dashed #5f6368 !important;
+    color: #8ab4f8 !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    transition: background 0.15s ease !important;
+}
+
+.google-use-another:hover {
+    background: #303134 !important;
+}
+
+    </style>
 </head>
 <body class="studio-theme">
-    <div class="studio-app">
-        
-        <!-- HEADER NAVBAR -->
+
+    <div class="studio-app-container">
+
+        <!-- TOP NAVIGATION BAR -->
         <header class="studio-navbar">
             <div class="navbar-left">
-                <div class="studio-brand">
-                    <div class="brand-logo-icon">
-                        <i class="fa-solid fa-atom fa-spin-pulse"></i>
-                    </div>
-                    <div class="brand-titles">
-                        <span class="brand-name">DeepResearch <span class="brand-badge-tag">STUDIO</span></span>
-                        <span class="brand-sub">Autonomous AI Research & Fact Verification</span>
+                <div class="brand-badge">
+                    <i class="fa-solid fa-atom brand-icon"></i>
+                    <div class="brand-text">
+                        <span class="brand-title">DeepResearch</span>
+                        <span class="brand-tag">STUDIO</span>
                     </div>
                 </div>
-            </div>
-
-            <div class="navbar-center">
-                <div class="telemetry-pill" title="Our AI double-checks all facts & statistics against official sources before outputting results.">
-                    <i class="fa-solid fa-shield-check text-success"></i>
-                    <span>Fact Accuracy: <strong>9.2+ / 10 Rigor Stamped</strong></span>
+                <div class="header-divider"></div>
+                <div class="model-status-pill">
+                    <i class="fa-solid fa-stamp text-emerald"></i>
+                    <span class="pill-label">Fact Accuracy:</span>
+                    <strong class="pill-value">9.2+ / 10 Rigor Stamped</strong>
                 </div>
-                <div class="telemetry-pill" title="Targeting official government, university extension, and top-tier academic journals.">
+                <div class="model-status-pill">
                     <i class="fa-solid fa-globe text-warning"></i>
-                    <span>Source Filter: <strong>Verified Academic & Govt Sites</strong></span>
+                    <span class="pill-label">Source Filter:</span>
+                    <strong class="pill-value">Verified Academic & Govt Sites</strong>
                 </div>
             </div>
 
             <div class="navbar-right">
-                <a href="#" class="btn-studio-action btn-pdf-accent" id="btn-download-pdf-nav" style="display: none;" target="_blank">
-                    <i class="fa-solid fa-file-pdf"></i> Download as a PDF
-                </a>
-                <button class="btn-studio-action btn-outline" id="btn-open-settings" title="Configure AI Models, Research Depth & Source Count">
+                <button type="button" class="btn-studio-action btn-outline" id="btn-open-settings" title="Change fast and strong AI models or max sources">
                     <i class="fa-solid fa-sliders"></i> Engine Settings
                 </button>
-                <button class="btn-studio-action btn-primary-gradient" id="btn-new-query" title="Start a fresh research workspace">
+                <button type="button" class="btn-studio-action btn-primary-gradient" id="btn-top-new-task">
                     <i class="fa-solid fa-plus"></i> New Task
                 </button>
-                
-                <!-- USER AUTH CONTAINER -->
-                <div class="user-auth-wrapper" id="user-auth-wrapper">
-                    <button class="btn-studio-action btn-user-auth" id="btn-open-auth" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(16,185,129,0.4);">
-                        <i class="fa-solid fa-circle-user"></i> <span>Sign In / Register</span>
-                    </button>
-                    <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
-                        <div class="user-info-chip" id="user-info-chip" title="Account profile">
-                            <i class="fa-solid fa-user-check text-emerald"></i>
-                            <span class="user-name-display" id="user-name-display">My Account</span>
-                        </div>
-                        <button class="btn-logout" id="btn-logout" title="Sign out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <button type="button" class="btn-studio-action btn-login-auth" id="btn-open-auth">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In / Register
+                </button>
+
+                <!-- USER LOGGED IN PROFILE DROPDOWN -->
+                <div class="user-profile-menu" id="user-profile-menu" style="display: none; align-items: center; gap: 8px;">
+                    <div class="user-avatar-circle" style="width:34px; height:34px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">
+                        <i class="fa-solid fa-user-check"></i>
                     </div>
+                    <span id="user-name-display" style="font-weight:600; color:#f8fafc; font-size:0.85rem;">Researcher</span>
+                    <button type="button" id="btn-logout" class="btn-studio-action btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem;" title="Sign out of your workspace">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
                 </div>
             </div>
         </header>
 
-        <!-- MOBILE VIEW SWITCHER (Visible on mobile screens) -->
-        <div class="mobile-view-switcher" id="mobile-view-switcher">
-            <button class="mobile-switch-btn active" id="btn-mobile-form" data-target="form">
-                <i class="fa-solid fa-magnifying-glass"></i> Research Form
-            </button>
-            <button class="mobile-switch-btn" id="btn-mobile-report" data-target="report">
-                <i class="fa-solid fa-book-open"></i> Full Report
-            </button>
-        </div>
+        <!-- MAIN LAYOUT -->
+        <div class="studio-workspace">
 
-        <!-- MAIN DUAL-PANEL LAYOUT -->
-        <div class="studio-workspace" id="studio-workspace">
-            
-            <!-- LEFT CONTROL & TELEMETRY SIDEBAR -->
-            <aside class="studio-sidebar" id="studio-sidebar">
+            <!-- SIDEBAR -->
+            <aside class="studio-sidebar">
                 
-                <!-- USER ACCOUNT STATUS BANNER -->
-                <div class="user-account-banner" id="user-account-banner" style="background: #1e293b; border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 0.75rem 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;">
-                    <div style="display: flex; align-items: center; gap: 0.6rem;">
-                        <i class="fa-solid fa-circle-user text-emerald" style="font-size: 1.3rem;"></i>
-                        <div>
-                            <div style="font-size: 0.84rem; font-weight: 700; color: #ffffff;" id="banner-user-name">Guest Mode (Shared)</div>
-                            <div style="font-size: 0.72rem; color: #94a3b8;" id="banner-user-desc">Sign in to save private reports</div>
+                <!-- USER STATUS BANNER -->
+                <div class="auth-user-banner" id="auth-user-banner">
+                    <div class="auth-banner-left">
+                        <div class="auth-avatar"><i class="fa-solid fa-user-shield"></i></div>
+                        <div class="auth-meta">
+                            <span class="auth-user-name" id="banner-user-name">Guest Mode</span>
+                            <span class="auth-user-desc" id="banner-user-desc">Sign in to save private reports</span>
                         </div>
                     </div>
-                    <button type="button" class="btn-studio-action" id="btn-banner-login" style="background: var(--emerald-accent); color: #ffffff; font-size: 0.75rem; padding: 0.35rem 0.65rem; border: none; font-weight: 700;">
+                    <button type="button" class="btn-banner-login" id="btn-banner-login">
                         <i class="fa-solid fa-right-to-bracket"></i> Sign In
                     </button>
                 </div>
 
-                <!-- RESEARCH INPUT CARD -->
-                <div class="studio-card">
-                    <div class="card-title">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i> Start New Research
+                <div class="sidebar-section-title">
+                    <i class="fa-solid fa-magnifying-glass text-emerald"></i> Start New Research
+                </div>
+
+                <form id="research-form" class="studio-form">
+                    <div class="form-group">
+                        <label for="query-input">What would you like to research today?</label>
+                        <textarea id="query-input" rows="4" placeholder="Enter any scientific, medical, agricultural, tech, or policy question (e.g. Sustainable Agriculture in Tamil Nadu)" required></textarea>
                     </div>
-                    
-                    <form id="research-form" class="studio-form">
-                        <div class="form-group">
-                            <label for="query-input">What would you like to research today?</label>
-                            <textarea id="query-input" rows="3" placeholder="Enter any scientific, medical, agricultural, tech, or policy question (e.g. Sustainable Agriculture in Tamil Nadu)" required></textarea>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="suggestions-input"><i class="fa-solid fa-lightbulb text-warning"></i> Research Focus & Suggestions (Optional)</label>
-                            <textarea id="suggestions-input" rows="2" placeholder="e.g. Focus on economic impact, Indian agricultural datasets, and cost-benefit analysis"></textarea>
-                        </div>
+                    <div class="form-group">
+                        <label for="custom-suggestions-input"><i class="fa-solid fa-lightbulb text-warning"></i> Research Focus & Suggestions (Optional)</label>
+                        <textarea id="custom-suggestions-input" rows="2" placeholder="e.g. Focus on economic impact, specific state policies, and verified metrics"></textarea>
+                    </div>
 
+                    <div class="advanced-settings-bar" id="advanced-settings-toggle">
+                        <span><i class="fa-solid fa-sliders"></i> Engine Depth & Pages</span>
+                        <i class="fa-solid fa-chevron-down" id="adv-arrow"></i>
+                    </div>
+
+                    <div class="advanced-settings-drawer" id="advanced-drawer" style="display: none;">
                         <div class="form-group">
-                            <label for="target-pages-input"><i class="fa-solid fa-file-lines text-emerald"></i> Target Report Length (Pages):</label>
-                            <select id="target-pages-input">
+                            <label for="target-pages-select"><i class="fa-solid fa-file-lines text-emerald"></i> Target Report Length</label>
+                            <select id="target-pages-select">
                                 <option value="2">2 Pages (Executive Summary)</option>
                                 <option value="4" selected>4 Pages (Standard Comprehensive - Default)</option>
                                 <option value="6">6 Pages (In-depth Research Monograph)</option>
                                 <option value="8">8 Pages (Exhaustive Academic Paper)</option>
                             </select>
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label>Execution Speed & Depth Mode:</label>
-                            <div class="speed-mode-toggle" id="speed-mode-group">
-                                <button type="button" class="speed-btn active" data-mode="turbo" title="Fast 15-20 second synthesis">⚡ Turbo (~15s)</button>
-                                <button type="button" class="speed-btn" data-mode="standard" title="Balanced 30-45 second research">🚀 Standard (~30s)</button>
-                                <button type="button" class="speed-btn" data-mode="deep" title="Exhaustive multi-round academic audit">🔬 Deep (~1.5m)</button>
-                            </div>
-                        </div>
+                    <button type="submit" class="btn-launch-hero" id="btn-launch">
+                        <i class="fa-solid fa-rocket"></i> Launch Research Engine
+                    </button>
+                </form>
 
-                        <div class="quick-presets">
-                            <span class="preset-label">Try an example topic:</span>
-                            <button type="button" class="chip-preset" onclick="loadPreset('Sustainable Agriculture in Tamil Nadu')">🌾 Tamil Nadu Agri</button>
-                            <button type="button" class="chip-preset" onclick="loadPreset('Energy-Efficient Deep Learning on Edge Devices')">⚡ Edge AI</button>
-                        </div>
-
-                        <button type="submit" id="btn-start" class="btn-launch-research">
-                            <i class="fa-solid fa-rocket"></i> Launch Research Engine
-                        </button>
-                    </form>
+                <!-- RECENT SAVED SESSIONS -->
+                <div class="sidebar-section-title" style="margin-top: 1.5rem;">
+                    <i class="fa-solid fa-clock-rotate-left text-blue"></i> Your Saved Research
                 </div>
-
-                <!-- LIVE RESEARCH TELEMETRY TIMELINE -->
-                <div class="studio-card flex-fill">
-                    <div class="card-title justify-between">
-                        <span><i class="fa-solid fa-list-check"></i> Live Progress Log</span>
-                        <span class="status-indicator-dot" id="status-dot"></span>
-                    </div>
-
-                    <div class="telemetry-timeline" id="telemetry-log">
-                        <div class="timeline-step done">
-                            <div class="step-icon"><i class="fa-solid fa-check"></i></div>
-                            <div class="step-content">
-                                <span class="step-title">System Ready</span>
-                                <span class="step-desc">Enter any topic above to start research.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RECENT SESSIONS -->
-                <div class="studio-card">
-                    <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Past Research Reports</div>
-                    <div class="recent-sessions-list" id="recent-sessions-list">
-                        <div class="session-history-item active" data-session-id="latest">
-                            <i class="fa-solid fa-file-contract"></i>
-                            <span class="session-name" id="recent-title-display">Sustainable Agriculture T...</span>
-                        </div>
-                    </div>
+                <div class="recent-sessions-list" id="recent-sessions-list">
+                    <div class="text-muted" style="font-size:0.8rem; padding:0.5rem;">Sign in to load your previous research tasks.</div>
                 </div>
 
             </aside>
 
-            <!-- RIGHT MAIN CANVAS & TABBED RESULT INSPECTOR -->
+            <!-- MAIN CONTENT CANVAS -->
             <main class="studio-canvas">
                 
-                <!-- WORKSPACE TABS HEADER -->
-                <div class="canvas-tab-bar">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" data-tab="tab-report" title="Read the complete step-by-step research paper with citations">
-                            <i class="fa-solid fa-book-open"></i> 📜 1. Full Research Report
-                        </button>
-                        <button class="tab-btn" data-tab="tab-evidence" title="View all verified numbers, sample sizes, and statistics in a table">
-                            <i class="fa-solid fa-table-list"></i> 📊 2. Key Data & Verified Facts
-                        </button>
-                        <button class="tab-btn" data-tab="tab-matrix" title="See where research studies agree or differ">
-                            <i class="fa-solid fa-scale-balanced"></i> ⚔️ 3. Where Sources Agree & Differ
-                        </button>
-                        <button class="tab-btn" data-tab="tab-export" title="Save report as a PDF Document or Markdown Text">
-                            <i class="fa-solid fa-download"></i> 📥 4. Download Files
-                        </button>
-                    </div>
+                <!-- NAVIGATION TABS -->
+                <nav class="studio-tabs-bar">
+                    <button class="tab-btn active" data-tab="report"><i class="fa-solid fa-book-open"></i> 1. Full Research Report</button>
+                    <button class="tab-btn" data-tab="evidence"><i class="fa-solid fa-table-list"></i> 2. Key Data & Verified Facts</button>
+                    <button class="tab-btn" data-tab="matrix"><i class="fa-solid fa-scale-unbalanced-flip"></i> 3. Where Sources Agree & Differ</button>
+                    <button class="tab-btn" data-tab="export"><i class="fa-solid fa-file-arrow-down"></i> 4. Download Files</button>
+                </nav>
 
-                    <div class="tab-meta-badge" id="audit-score-badge" style="display: none;">
-                        <i class="fa-solid fa-trophy text-amber"></i> Accuracy Score: <strong>9.4 / 10 Stamped</strong>
-                    </div>
-                </div>
-
-                <!-- TAB 1: FULL EXECUTIVE REPORT -->
+                <!-- TAB 1: FULL REPORT -->
                 <div class="tab-content-pane active" id="tab-report">
-                    <!-- Hero State when empty -->
                     <div class="hero-empty-state" id="hero-empty-state">
                         <div class="hero-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Autonomous AI Lead Researcher</div>
-                        <h2>Enter any research topic above to generate a 100% verified report</h2>
-                        <p style="margin-bottom: 2rem;">DeepResearch Studio automatically searches academic journals, university trial data, and government portals — cross-checking every fact with zero fake information.</p>
-
-                        <!-- EASY 3-STEP GUIDE FOR EVERYONE -->
-                        <div class="user-guide-steps">
-                            <div class="guide-step-card">
-                                <div class="step-number">1</div>
-                                <h4>Ask a Question</h4>
-                                <p>Type any topic in the box on the left (e.g., Agriculture, AI, Medicine, Economics).</p>
-                            </div>
-
-                            <div class="guide-step-card">
-                                <div class="step-number">2</div>
-                                <h4>AI Searches & Reads</h4>
-                                <p>The AI searches official websites, parses research studies, and extracts real numerical data.</p>
-                            </div>
-
-                            <div class="guide-step-card">
-                                <div class="step-number">3</div>
-                                <h4>Get Verified Paper</h4>
-                                <p>Receive a clear research paper with source citations, data tables, and PDF download.</p>
-                            </div>
-                        </div>
+                        <h2 id="report-title-heading">Enter any research topic above to generate a 100% verified report</h2>
+                        <p>DeepResearch Studio autonomously breaks down questions, executes multi-round web searches, extracts atomic claims, cross-checks facts across verified academic and official sources, and writes a publication-grade cited paper.</p>
                     </div>
 
-                    <!-- Ultra-Professional Studio Report Header with PDF Download & Word Editor Suite -->
-                    <div class="report-top-bar" id="report-top-bar" style="display: none;">
-                        <div class="report-meta">
-                            <span class="badge-pill" id="report-status-badge">
-                                <i class="fa-solid fa-circle-check text-emerald"></i> Publication Ready
-                            </span>
-                            <span class="report-stat-chip" id="report-word-count-chip">
-                                <i class="fa-solid fa-file-lines"></i> <span id="report-words-val">0</span> words
-                            </span>
-                            <button type="button" class="btn-edit-toggle" id="btn-toggle-edit" title="Click to edit words, headings, or numbers directly in the report">
-                                <i class="fa-solid fa-pen-to-square"></i> <span id="edit-btn-text">Edit Words</span>
-                            </button>
-                            <button type="button" class="btn-save-edit" id="btn-save-edit" style="display: none;" title="Save your edited text and automatically regenerate PDF">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Changes
-                            </button>
+                    <!-- REPORT TOOLBAR -->
+                    <div class="report-action-header" id="report-action-header" style="display: none;">
+                        <div class="report-meta-info">
+                            <span class="report-badge" id="stage-badge">READY</span>
+                            <span class="report-badge" id="status-badge" style="background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3);">IDLE</span>
+                            <span id="current-action-text" style="font-size:0.82rem; color:#94a3b8;">Awaiting new query...</span>
                         </div>
-                        <div class="report-actions">
+                        <div class="report-controls-group">
                             <button type="button" class="btn-copy-md" id="btn-copy-report" title="Copy full report as Markdown to clipboard">
                                 <i class="fa-solid fa-copy"></i> Copy
                             </button>
-                            <a href="#" id="btn-download-pdf-top" class="btn-download-pdf-hero" target="_blank" title="Download publication-grade formatted PDF with topic name">
+                            <a href="#" id="btn-download-pdf-top" class="btn-download-pdf-hero" target="_blank" title="Download publication-grade formatted PDF">
                                 <i class="fa-solid fa-file-pdf"></i> Download as a PDF
                             </a>
                         </div>
-                    </div>
-
-                    <!-- Live Edit Mode User Guide Hint -->
-                    <div class="edit-hint-banner" id="edit-hint-banner" style="display: none;">
-                        <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
-                        <span><strong>Live Edit Mode Active:</strong> You can click anywhere to modify text, headers, and tables directly. When finished, click <strong>Save Changes</strong> above to update your PDF download!</span>
                     </div>
 
                     <!-- Rendered Report -->
@@ -2124,10 +2445,6 @@ body.studio-theme {
                                 <h3><i class="fa-solid fa-database"></i> Verified Facts & Numerical Data Points</h3>
                                 <span class="badge-pill" id="evidence-count-tag">0 Claims</span>
                             </div>
-                            <div class="table-search-input">
-                                <i class="fa-solid fa-magnifying-glass text-muted"></i>
-                                <input type="text" id="claims-search-input" placeholder="Filter facts by keyword or source..." />
-                            </div>
                         </div>
                         <div class="table-scroll-wrapper">
                             <table class="studio-table" id="claims-table">
@@ -2136,7 +2453,7 @@ body.studio-theme {
                                         <th>Official Source & Link</th>
                                         <th>Extracted Key Fact / Finding</th>
                                         <th>Supporting Exact Quote</th>
-                                        <th>Category Tag</th>
+                                        <th>Confidence</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -2169,7 +2486,6 @@ body.studio-theme {
                                 <i class="fa-solid fa-download"></i> Save PDF File
                             </a>
                         </div>
-
                         <div class="export-tile">
                             <div class="tile-icon md-theme"><i class="fa-solid fa-file-code"></i></div>
                             <h4>Download Markdown File (.md)</h4>
@@ -2181,91 +2497,36 @@ body.studio-theme {
                     </div>
                 </div>
 
-                <!-- FLOATING FOLLOW-UP PROMPT BAR -->
-                <div class="studio-followup-bar">
-                    <div class="followup-inner">
-                        <i class="fa-solid fa-comment-dots text-muted"></i>
-                        <input type="text" id="followup-input" placeholder="Ask a question or request a summary of this report in simple language..." />
-                        <button id="btn-send-followup" class="btn-circle-send" title="Send Follow-up Question"><i class="fa-solid fa-arrow-up"></i></button>
-                    </div>
-                </div>
-
             </main>
 
         </div>
 
-        <!-- ENGINE SETTINGS MODAL -->
-        <div class="studio-modal-backdrop" id="settings-modal">
-            <div class="studio-modal">
-                <div class="modal-header">
-                    <h3><i class="fa-solid fa-sliders"></i> AI Research Engine Settings</h3>
-                    <button class="btn-close-modal" id="btn-close-settings">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="fast-model">Fast AI Model (Used for Query Planning & Searching)</label>
-                        <select id="fast-model">
-                            <option value="meta/llama-3.1-8b-instruct">Loading 97+ NVIDIA Models...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="strong-model">Strong AI Model (Used for Writing Report & Deep Synthesis)</label>
-                        <select id="strong-model">
-                            <option value="meta/llama-3.3-70b-instruct">Loading 97+ NVIDIA Models...</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="max-rounds">Research Depth (Search Rounds)</label>
-                            <input type="number" id="max-rounds" value="2" min="1" max="6">
-                        </div>
-                        <div class="form-group">
-                            <label for="max-sources">Maximum Sources to Read</label>
-                            <input type="number" id="max-sources" value="15" min="5" max="50">
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-top: 0.8rem;">
-                        <label for="modal-target-pages"><i class="fa-solid fa-file-lines text-emerald"></i> Target Report Length (No. of Pages)</label>
-                        <select id="modal-target-pages">
-                            <option value="2">2 Pages (Executive Summary)</option>
-                            <option value="4" selected>4 Pages (Standard Comprehensive - Default)</option>
-                            <option value="6">6 Pages (In-depth Research Monograph)</option>
-                            <option value="8">8 Pages (Exhaustive Academic Paper)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: 0.8rem;">
-                        <label for="modal-suggestions-input"><i class="fa-solid fa-lightbulb text-warning"></i> Custom Research Focus / Suggestions</label>
-                        <textarea id="modal-suggestions-input" rows="2" placeholder="e.g. Focus on economic impact, Indian agricultural datasets, and cost-benefit analysis"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer" style="padding: 1rem 1.2rem; border-top: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; background: var(--bg-card);">
-                    <button class="btn-studio-action btn-outline" id="btn-cancel-settings">Cancel</button>
-                    <button class="btn-studio-action btn-primary-gradient" id="btn-confirm-launch">
-                        <i class="fa-solid fa-play"></i> Confirm & Start Research
-                    </button>
-                </div>
-            </div>
-        </div>
+    </div>
 
-        
-        <!-- GOOGLE ONE-TAP WIDGET -->
-        <div class="google-onetap-widget" id="google-onetap-widget" style="display: none;">
-            <div class="google-onetap-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
-                    <span>Sign in to deepresearch.ai with Google</span>
-                </div>
-                <button type="button" id="btn-close-onetap" style="background:none; border:none; color:#9aa0a6; cursor:pointer; font-size:1.1rem;">&times;</button>
+    <!-- =======================================================================
+         AUTHENTIC GOOGLE ACCOUNT CHOOSER DIALOG (1-Click Google Login)
+         ======================================================================= -->
+    <div class="auth-overlay-gate" id="google-chooser-modal" style="display: none; z-index: 1000000;">
+        <div class="google-chooser-window">
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="button" id="btn-close-google-modal" style="background:none; border:none; color:#9aa0a6; font-size:1.4rem; cursor:pointer;">&times;</button>
             </div>
-            <div class="google-onetap-accounts" id="google-onetap-accounts">
-                <div class="google-onetap-item" data-email="727824tuam033@skct.edu.in" data-name="727824TUAM033 PRASATH S">
+            <div class="google-dialog-header">
+                <svg width="40" height="40" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+                <h2 class="google-dialog-title">Choose an account</h2>
+                <p class="google-dialog-sub">to continue to <strong>DeepResearch Studio</strong></p>
+            </div>
+
+            <div class="google-account-list">
+                <div class="google-account-row btn-select-google-account" data-email="727824tuam033@skct.edu.in" data-name="727824TUAM033 PRASATH S">
                     <div class="google-avatar-circle" style="background: #e65100;">P</div>
                     <div class="google-user-meta">
                         <div class="google-user-name">727824TUAM033 PRASATH S</div>
                         <div class="google-user-email">727824tuam033@skct.edu.in</div>
                     </div>
                 </div>
-                <div class="google-onetap-item" data-email="prasathsubramani8098@gmail.com" data-name="Prasath">
+
+                <div class="google-account-row btn-select-google-account" data-email="prasathsubramani8098@gmail.com" data-name="Prasath">
                     <div class="google-avatar-circle" style="background: #2e7d32;">P</div>
                     <div class="google-user-meta">
                         <div class="google-user-name">Prasath</div>
@@ -2273,51 +2534,22 @@ body.studio-theme {
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- GOOGLE OFFICIAL ACCOUNT CHOOSER MODAL -->
-        <div class="studio-modal-backdrop" id="google-chooser-modal">
-            <div class="studio-modal google-chooser-window">
-                <div class="google-dialog-header">
-                    <svg width="36" height="36" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
-                    <h2 class="google-dialog-title">Choose an account</h2>
-                    <p class="google-dialog-sub">to continue to <strong>DeepResearch Studio</strong></p>
-                </div>
+            <div class="google-use-another" id="btn-google-custom-account">
+                <i class="fa-solid fa-circle-user" style="font-size: 1.3rem;"></i>
+                <span>Use another Google account</span>
+            </div>
 
-                <div class="google-account-list">
-                    <div class="google-account-row google-select-account" data-email="727824tuam033@skct.edu.in" data-name="727824TUAM033 PRASATH S">
-                        <div class="google-avatar-circle" style="background: #e65100;">P</div>
-                        <div class="google-user-meta">
-                            <div class="google-user-name">727824TUAM033 PRASATH S</div>
-                            <div class="google-user-email">727824tuam033@skct.edu.in</div>
-                        </div>
-                    </div>
-                    <div class="google-account-row google-select-account" data-email="prasathsubramani8098@gmail.com" data-name="Prasath">
-                        <div class="google-avatar-circle" style="background: #2e7d32;">P</div>
-                        <div class="google-user-meta">
-                            <div class="google-user-name">Prasath</div>
-                            <div class="google-user-email">prasathsubramani8098@gmail.com</div>
-                        </div>
-                    </div>
-                    <div class="google-account-row google-select-account" data-email="arunprasath27022007@gmail.com" data-name="Arunprasath Arunprasath">
-                        <div class="google-avatar-circle" style="background: #1565c0;">A</div>
-                        <div class="google-user-meta">
-                            <div class="google-user-name">Arunprasath Arunprasath</div>
-                            <div class="google-user-email">arunprasath27022007@gmail.com</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="google-use-another" id="btn-google-use-custom">
-                    <i class="fa-solid fa-circle-user" style="font-size: 1.4rem;"></i>
-                    <span>Use another Google account</span>
-                </div>
+            <div id="google-custom-input-box" style="display:none; margin-top: 1rem;">
+                <input type="email" id="custom-google-email" class="auth-input-control" placeholder="Enter your Google email..." style="margin-bottom:0.6rem;" />
+                <button type="button" id="btn-submit-custom-google" class="auth-btn-primary" style="padding:0.6rem;"><i class="fa-solid fa-check"></i> Continue</button>
             </div>
         </div>
+    </div>
 
-        <!-- AUTHENTICATION MODAL -->
-        
-    <!-- PRODUCTION AUTHENTICATION MODAL & OVERLAY SYSTEM -->
+    <!-- =======================================================================
+         AUTHENTICATION OVERLAY GATE (Glassmorphic Modal)
+         ======================================================================= -->
     <div class="auth-overlay-gate" id="auth-gate-overlay">
         <div class="auth-master-card" id="auth-card-container">
             
@@ -2504,7 +2736,7 @@ body.studio-theme {
                         <label class="auth-field-label" for="reset-code">6-Digit Reset Code</label>
                         <div class="auth-input-wrapper">
                             <i class="fa-solid fa-key auth-input-icon"></i>
-                            <input type="text" id="reset-code" class="auth-input-control" placeholder="123456" maxlength="6" required style="font-family:var(--font-mono); letter-spacing:4px;" />
+                            <input type="text" id="reset-code" class="auth-input-control" placeholder="123456" maxlength="6" required style="font-family:'JetBrains Mono', monospace; letter-spacing:4px;" />
                         </div>
                     </div>
 
@@ -2539,1853 +2771,7 @@ body.studio-theme {
         </div>
     </div>
 
-    </div>
-    <style>
-/* DEEPRESEARCH STUDIO — MODERN ACADEMIC AGENT CSS THEME */
-:root {
-    --bg-dark-app: #090d16;
-    --bg-sidebar: #0f172a;
-    --bg-card: rgba(15, 23, 42, 0.9);
-    --bg-canvas: #f8fafc;
-    --bg-table-header: #f1f5f9;
-    
-    --border-subtle: #e2e8f0;
-    --border-dark: #1e293b;
-    --border-accent: rgba(16, 185, 129, 0.4);
-    
-    --text-primary: #0f172a;
-    --text-secondary: #334155;
-    --text-muted: #64748b;
-    --text-dark-head: #f8fafc;
-    --text-dark-muted: #94a3b8;
-    
-    --emerald-accent: #10b981;
-    --emerald-glow: rgba(16, 185, 129, 0.3);
-    --indigo-accent: #6366f1;
-    --amber-accent: #f59e0b;
-    --blue-accent: #3b82f6;
-    
-    --font-heading: 'Outfit', 'Inter', -apple-system, sans-serif;
-    --font-sans: 'Inter', -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    
-    --sidebar-width: 350px;
-    --navbar-height: 64px;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --radius-full: 9999px;
-    
-    --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --shadow-floating: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.25);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body.studio-theme {
-    background-color: var(--bg-dark-app);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.5;
-    height: 100vh;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-}
-
-.studio-app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-/* ==========================================================================
-   HEADER NAVBAR
-   ========================================================================== */
-.studio-navbar {
-    height: var(--navbar-height);
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-dark);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.5rem;
-    flex-shrink: 0;
-    z-index: 20;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.navbar-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.studio-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-}
-
-.brand-logo-icon {
-    width: 38px;
-    height: 38px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    box-shadow: 0 0 16px var(--emerald-glow);
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.brand-titles {
-    display: flex;
-    flex-direction: column;
-}
-
-.brand-name {
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.brand-badge-tag {
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--emerald-accent);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    vertical-align: middle;
-    margin-left: 0.3rem;
-}
-
-.brand-sub {
-    font-size: 0.72rem;
-    color: var(--text-dark-muted);
-}
-
-.navbar-center {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.telemetry-pill {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-dark-muted);
-    font-size: 0.78rem;
-    padding: 0.35rem 0.8rem;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.telemetry-pill strong {
-    color: #ffffff;
-}
-
-.text-success { color: var(--emerald-accent); }
-.text-warning { color: var(--amber-accent); }
-.text-amber { color: var(--amber-accent); }
-.text-muted { color: var(--text-muted); }
-
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.btn-studio-action {
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.15s ease;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--border-dark);
-    color: var(--text-dark-muted);
-}
-
-.btn-outline:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.btn-primary-gradient {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border: none;
-    color: #ffffff;
-    box-shadow: 0 0 15px var(--emerald-glow);
-}
-
-.btn-primary-gradient:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
-
-/* ==========================================================================
-   WORKSPACE DUAL PANEL LAYOUT
-   ========================================================================== */
-.studio-workspace {
-    display: flex;
-    flex: 1;
-    height: calc(100vh - var(--navbar-height));
-    overflow: hidden;
-}
-
-/* Left Sidebar */
-.studio-sidebar {
-    width: var(--sidebar-width);
-    background: var(--bg-sidebar);
-    border-right: 1px solid var(--border-dark);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1.2rem;
-    overflow-y: auto;
-    flex-shrink: 0;
-}
-
-.studio-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-dark);
-    border-radius: var(--radius-md);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-}
-
-.studio-card.flex-fill {
-    flex: 1;
-    min-height: 200px;
-}
-
-.card-title {
-    font-family: var(--font-heading);
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-dark-head);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.card-title.justify-between {
-    justify-content: space-between;
-}
-
-.status-indicator-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--emerald-accent);
-    border-radius: var(--radius-full);
-    box-shadow: 0 0 8px var(--emerald-accent);
-}
-
-/* Form Controls */
-.studio-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-}
-
-.speed-mode-toggle {
-    display: flex;
-    background: #0f172a;
-    border: 1px solid var(--border-dark);
-    border-radius: var(--radius-sm);
-    padding: 0.2rem;
-    gap: 0.2rem;
-}
-
-.speed-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 0.76rem;
-    font-weight: 600;
-    padding: 0.35rem 0.4rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.speed-btn.active {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    font-weight: 700;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.form-group label {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-dark-muted);
-    margin-bottom: 0.3rem;
-}
-
-.form-group textarea, .form-group select, .form-group input {
-    width: 100%;
-    background: #0f172a;
-    border: 1px solid var(--border-dark);
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 0.88rem;
-    padding: 0.6rem 0.8rem;
-    border-radius: var(--radius-sm);
-    outline: none;
-}
-
-.form-group textarea:focus, .form-group select:focus {
-    border-color: var(--emerald-accent);
-}
-
-.quick-presets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
-}
-
-.preset-label {
-    font-size: 0.72rem;
-    color: var(--text-dark-muted);
-}
-
-.chip-preset {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-dark-muted);
-    font-size: 0.72rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.chip-preset:hover {
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--emerald-accent);
-    border-color: var(--emerald-accent);
-}
-
-.btn-launch-research {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    border: none;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 0.9rem;
-    padding: 0.7rem 1rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    box-shadow: 0 0 12px var(--emerald-glow);
-    transition: all 0.15s ease;
-}
-
-.btn-launch-research:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
-
-/* Telemetry Timeline */
-.telemetry-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    overflow-y: auto;
-    max-height: 240px;
-    padding-right: 0.3rem;
-}
-
-.timeline-step {
-    display: flex;
-    gap: 0.6rem;
-    font-size: 0.78rem;
-    color: var(--text-dark-muted);
-    padding: 0.4rem;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.timeline-step.done {
-    color: #f8fafc;
-}
-
-.step-icon {
-    width: 20px;
-    height: 20px;
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--emerald-accent);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
-    flex-shrink: 0;
-}
-
-.step-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.step-title { font-weight: 600; }
-.step-desc { font-size: 0.72rem; color: var(--text-dark-muted); word-break: break-all; }
-
-/* Recent Sessions */
-.recent-sessions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-.session-history-item {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-sm);
-    color: var(--text-dark-muted);
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-
-.session-history-item:hover, .session-history-item.active {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: var(--emerald-accent);
-    color: #ffffff;
-}
-
-/* ==========================================================================
-   RIGHT MAIN CANVAS
-   ========================================================================== */
-.studio-canvas {
-    flex: 1;
-    background-color: var(--bg-canvas);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Tab Bar */
-.canvas-tab-bar {
-    background: #ffffff;
-    border-bottom: 1px solid var(--border-subtle);
-    padding: 0 1.5rem;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-}
-
-.tab-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.tab-btn {
-    background: transparent;
-    border: none;
-    font-family: var(--font-sans);
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    padding: 0.8rem 1rem;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.15s ease;
-}
-
-.tab-btn:hover {
-    color: var(--text-primary);
-}
-
-.tab-btn.active {
-    color: var(--emerald-accent);
-    border-bottom-color: var(--emerald-accent);
-    font-weight: 600;
-}
-
-.tab-meta-badge {
-    background: #fffbebfb;
-    border: 1px solid #fef3c7;
-    color: #b45309;
-    font-size: 0.82rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: var(--radius-full);
-}
-
-/* Tab Content Panes */
-.tab-content-pane {
-    display: none;
-    flex: 1;
-    overflow-y: auto;
-    padding: 2rem 3rem 6rem 3rem;
-}
-
-.tab-content-pane.active {
-    display: block;
-}
-
-/* Live Progress Bar & ETA Container */
-.live-progress-container {
-    width: 100%;
-    max-width: 540px;
-    margin: 1.5rem auto;
-    background: #ffffff;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 1.2rem 1.5rem;
-    box-shadow: var(--shadow-subtle);
-}
-
-.progress-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-}
-
-.progress-stage-title {
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: var(--text-primary);
-}
-
-.progress-percent-text {
-    font-weight: 800;
-    font-size: 0.92rem;
-    color: var(--emerald-accent);
-}
-
-.progress-bar-track {
-    width: 100%;
-    height: 10px;
-    background: #e2e8f0;
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    margin-bottom: 0.75rem;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-    width: 0%;
-    border-radius: var(--radius-full);
-    transition: width 0.4s ease;
-}
-
-.progress-footer-stats {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.eta-badge-pill {
-    background: #fef3c7;
-    border: 1px solid #fde68a;
-    color: #92400e;
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--radius-full);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.elapsed-badge-pill {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    color: #047857;
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--radius-full);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.center-telemetry-box {
-    margin-top: 1.2rem;
-    background: #0f172a;
-    border: 1px solid var(--border-dark);
-    border-radius: var(--radius-sm);
-    text-align: left;
-    overflow: hidden;
-}
-
-.telemetry-box-header {
-    background: #1e293b;
-    color: #cbd5e1;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.4rem 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #334155;
-}
-
-.center-log-feed {
-    padding: 0.6rem 0.8rem;
-    max-height: 160px;
-    overflow-y: auto;
-    font-family: var(--font-mono);
-    font-size: 0.76rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.center-log-row {
-    color: #94a3b8;
-    line-height: 1.4;
-    word-break: break-word;
-}
-
-.log-tag {
-    color: var(--emerald-accent);
-    font-weight: 600;
-    margin-right: 0.4rem;
-}
-
-.log-msg {
-    color: #f1f5f9;
-}
-
-/* Report Action Header & Prominent Download PDF Button */
-.report-top-bar {
-    max-width: 960px;
-    margin: 0 auto 1.2rem auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 0.9rem 1.6rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
-    position: sticky;
-    top: 0.5rem;
-    z-index: 100;
-}
-
-.report-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.report-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.report-stat-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #64748b;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-full);
-}
-
-.btn-download-pdf-hero {
-    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-    color: #ffffff !important;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.92rem;
-    padding: 0.6rem 1.4rem;
-    border-radius: var(--radius-full);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    letter-spacing: 0.01em;
-}
-
-.btn-download-pdf-hero:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(220, 38, 38, 0.45);
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-}
-
-.btn-pdf-accent {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: #ffffff !important;
-    border: none;
-    font-weight: 700;
-}
-
-.btn-pdf-accent:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-}
-
-.btn-edit-toggle {
-    background: #f8fafc;
-    color: #1e293b;
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius-full);
-    padding: 0.45rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    transition: all 0.2s ease;
-}
-
-.btn-edit-toggle:hover {
-    background: #e2e8f0;
-    border-color: #94a3b8;
-}
-
-.btn-edit-toggle.active {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: #ffffff;
-    border-color: #1d4ed8;
-    box-shadow: 0 0 16px rgba(37, 99, 235, 0.4);
-}
-
-.btn-save-edit {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: var(--radius-full);
-    padding: 0.45rem 1.1rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-    transition: all 0.2s ease;
-    animation: pulseSave 2s infinite ease-in-out;
-}
-
-@keyframes pulseSave {
-    0%, 100% { box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
-    50% { box-shadow: 0 4px 22px rgba(16, 185, 129, 0.65); }
-}
-
-.btn-save-edit:hover {
-    background: #047857;
-    transform: translateY(-1px);
-}
-
-.btn-copy-md {
-    background: #f8fafc;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius-full);
-    padding: 0.5rem 1rem;
-    font-size: 0.84rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
-}
-
-.btn-copy-md:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-    border-color: #94a3b8;
-}
-
-/* Edit Mode Banner */
-.edit-hint-banner {
-    max-width: 960px;
-    margin: -0.5rem auto 1.2rem auto;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border: 1px solid #bfdbfe;
-    color: #1e40af;
-    padding: 0.75rem 1.4rem;
-    border-radius: var(--radius-md);
-    font-size: 0.88rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
-    animation: fadeInSlide 0.3s ease-out;
-}
-
-@keyframes fadeInSlide {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.markdown-article-view[contenteditable="true"] {
-    outline: 2px dashed #2563eb !important;
-    outline-offset: 8px;
-    background: #ffffff;
-    cursor: text;
-    border-radius: var(--radius-md);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
-}
-
-/* Empty Hero State & 3-Step Guide */
-.hero-empty-state {
-    text-align: center;
-    max-width: 780px;
-    margin: 3rem auto 0 auto;
-}
-
-.user-guide-steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.2rem;
-    margin-top: 2rem;
-    text-align: left;
-}
-
-.guide-step-card {
-    background: #ffffff;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 1.2rem;
-    box-shadow: var(--shadow-subtle);
-    position: relative;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.guide-step-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-}
-
-.step-number {
-    width: 28px;
-    height: 28px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 0.85rem;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.8rem;
-}
-
-.guide-step-card h4 {
-    font-family: var(--font-heading);
-    font-size: 0.98rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.35rem;
-}
-
-.guide-step-card p {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 0;
-}
-
-.hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #ecfdf5;
-    color: #047857;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.4rem 0.9rem;
-    border-radius: var(--radius-full);
-    margin-bottom: 1.2rem;
-}
-
-.hero-empty-state h2 {
-    font-family: var(--font-heading);
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.8rem;
-}
-
-.hero-empty-state p {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-/* Markdown Article View */
-.markdown-article-view {
-    max-width: 900px;
-    margin: 0 auto;
-    color: var(--text-primary);
-    font-size: 1.02rem;
-    line-height: 1.8;
-    background: #ffffff;
-    padding: 2.5rem 3rem;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--border-subtle);
-}
-
-.markdown-article-view h1 {
-    font-family: var(--font-heading);
-    font-size: 2.1rem;
-    font-weight: 800;
-    margin: 0.5rem 0 1.5rem 0;
-    color: #0f172a;
-    letter-spacing: -0.025em;
-    border-bottom: 3px solid var(--emerald-accent);
-    padding-bottom: 0.75rem;
-}
-
-.markdown-article-view h2 {
-    font-family: var(--font-heading);
-    font-size: 1.45rem;
-    font-weight: 700;
-    margin: 2.2rem 0 1rem 0;
-    color: #1e293b;
-    letter-spacing: -0.015em;
-    border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: 0.4rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.markdown-article-view h3 {
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 1.5rem 0 0.75rem 0;
-    color: #334155;
-}
-
-.markdown-article-view p {
-    margin-bottom: 1.25rem;
-    color: #334155;
-}
-
-.markdown-article-view table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 1.8rem 0;
-    font-size: 0.88rem;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    border: 1px solid var(--border-subtle);
-}
-
-.markdown-article-view th, .markdown-article-view td {
-    padding: 0.8rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.markdown-article-view th {
-    background: #f8fafc;
-    font-weight: 700;
-    color: #0f172a;
-    text-transform: uppercase;
-    font-size: 0.76rem;
-    letter-spacing: 0.05em;
-}
-
-.markdown-article-view tr:hover td {
-    background: #f8fafc;
-}
-
-/* Callout Alert Blocks */
-.markdown-article-view blockquote {
-    border-left: 4px solid var(--emerald-accent);
-    padding: 1.2rem 1.5rem;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-    border-radius: var(--radius-md);
-    margin: 1.5rem 0;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
-}
-
-.markdown-article-view blockquote h3 {
-    margin-top: 0;
-    color: #047857;
-}
-
-/* Table & Claims View */
-.table-container-card {
-    background: #ffffff;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-subtle);
-    padding: 1.5rem;
-}
-
-.table-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.table-title-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.table-search-input {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #f8fafc;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    padding: 0.4rem 0.85rem;
-    width: 280px;
-    transition: all 0.2s ease;
-}
-
-.table-search-input:focus-within {
-    border-color: var(--emerald-accent);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-    background: #ffffff;
-}
-
-.table-search-input input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 0.82rem;
-    width: 100%;
-    color: var(--text-primary);
-}
-
-.badge-pill {
-    background: #ecfdf5;
-    color: #047857;
-    border: 1px solid #a7f3d0;
-    font-size: 0.78rem;
-    font-weight: 700;
-    padding: 0.3rem 0.7rem;
-    border-radius: var(--radius-full);
-}
-
-.table-scroll-wrapper {
-    overflow-x: auto;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
-}
-
-.studio-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-}
-
-.studio-table th, .studio-table td {
-    padding: 0.85rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.studio-table th {
-    background: var(--bg-table-header);
-    font-weight: 700;
-    color: var(--text-primary);
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.studio-table tr:hover td {
-    background: #f8fafc;
-}
-
-/* Export Studio */
-.export-studio-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    max-width: 750px;
-    margin: 2rem auto;
-}
-
-.export-tile {
-    background: #ffffff;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 1.8rem;
-    text-align: center;
-    box-shadow: var(--shadow-subtle);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.tile-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.pdf-theme { background: #fef2f2; color: #ef4444; }
-.md-theme { background: #ecfdf5; color: var(--emerald-accent); }
-
-.export-tile h4 { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; }
-.export-tile p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
-
-.btn-tile-download {
-    width: 100%;
-    background: var(--emerald-accent);
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 0.7rem 1rem;
-    border-radius: var(--radius-sm);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: background 0.15s ease;
-}
-
-.btn-tile-download.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-.btn-tile-download:hover { background: #059669; }
-
-/* Floating Followup Bar */
-.studio-followup-bar {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 720px;
-    z-index: 50;
-}
-
-.followup-inner {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-floating);
-    padding: 0.4rem 0.6rem 0.4rem 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.followup-inner input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-family: var(--font-sans);
-    font-size: 0.92rem;
-    color: var(--text-primary);
-}
-
-.btn-circle-send {
-    width: 36px;
-    height: 36px;
-    background: var(--emerald-accent);
-    color: #ffffff;
-    border: none;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-}
-
-/* User Auth Bar in Navbar */
-.user-auth-wrapper {
-    display: flex;
-    align-items: center;
-}
-
-.btn-user-auth {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-}
-
-.btn-user-auth:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.user-profile-menu {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.user-info-chip {
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #ffffff;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.btn-logout {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #f87171;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.82rem;
-}
-
-.btn-logout:hover {
-    background: rgba(239, 68, 68, 0.3);
-    color: #ffffff;
-}
-
-/* Mobile View Switcher */
-.mobile-view-switcher {
-    display: none;
-    background: #0f172a;
-    border-bottom: 1px solid var(--border-dark);
-    padding: 0.4rem 0.6rem;
-    gap: 0.4rem;
-    width: 100%;
-}
-
-.mobile-switch-btn {
-    flex: 1;
-    background: transparent;
-    border: 1px solid transparent;
-    color: #94a3b8;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.45rem 0.5rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
-}
-
-.mobile-switch-btn.active {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-/* Auth Modal Specifics */
-.auth-modal-card {
-    background: #0f172a !important;
-    border: 1px solid var(--border-dark);
-    color: #ffffff;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    padding: 1.5rem !important;
-}
-
-.auth-tabs {
-    display: flex;
-    background: #090d16;
-    border: 1px solid var(--border-dark);
-    border-radius: var(--radius-sm);
-    padding: 0.2rem;
-    gap: 0.2rem;
-}
-
-.auth-tab-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.auth-tab-btn.active {
-    background: var(--emerald-accent);
-    color: #ffffff;
-}
-
-.btn-google-auth {
-    width: 100%;
-    background: #ffffff;
-    color: #1f2937;
-    border: 1px solid #e5e7eb;
-    border-radius: var(--radius-sm);
-    padding: 0.65rem 1rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.btn-google-auth:hover {
-    background: #f9fafb;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-.auth-divider {
-    display: flex;
-    align-items: center;
-    margin: 1rem 0;
-    color: #64748b;
-    font-size: 0.78rem;
-}
-
-.auth-divider::before, .auth-divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--border-dark);
-}
-
-.auth-divider span {
-    padding: 0 0.75rem;
-}
-
-.auth-error-alert {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #fca5a5;
-    padding: 0.6rem 0.8rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.82rem;
-    margin-bottom: 0.8rem;
-}
-
-.btn-auth-submit {
-    width: 100%;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border: none;
-    color: #ffffff;
-    padding: 0.7rem 1rem;
-    border-radius: var(--radius-sm);
-    font-weight: 700;
-    font-size: 0.92rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    box-shadow: 0 0 15px var(--emerald-glow);
-}
-
-.btn-auth-submit:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
-
-/* Modal backdrop */
-.studio-modal-backdrop {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(6px);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-}
-
-.studio-modal-backdrop.open, .studio-modal-backdrop.active { display: flex; }
-
-.studio-modal {
-    background: #ffffff;
-    border-radius: var(--radius-md);
-    width: 90%;
-    max-width: 480px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-floating);
-}
-
-.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); }
-.btn-close-modal { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-muted); }
-
-/* ==========================================================================
-   MOBILE & TABLET RESPONSIVE STYLES (iOS, Android & Tablets)
-   ========================================================================== */
-
-@media (max-width: 992px) {
-    body.studio-theme {
-        height: auto !important;
-        min-height: 100vh !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-    }
-
-    .studio-app {
-        height: auto !important;
-        min-height: 100vh !important;
-        overflow: visible !important;
-        display: block !important;
-    }
-
-    .studio-navbar {
-        height: auto !important;
-        padding: 0.6rem 0.8rem !important;
-        flex-wrap: wrap !important;
-        gap: 0.5rem !important;
-    }
-
-    .navbar-center {
-        display: none !important;
-    }
-
-    .navbar-right {
-        margin-left: auto !important;
-        flex-wrap: wrap !important;
-        gap: 0.35rem !important;
-    }
-
-    .mobile-view-switcher {
-        display: flex !important;
-        position: sticky;
-        top: 0;
-        z-index: 30;
-    }
-
-    .studio-workspace {
-        display: flex !important;
-        flex-direction: column !important;
-        height: auto !important;
-        overflow: visible !important;
-        width: 100% !important;
-    }
-
-    .studio-sidebar {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: auto !important;
-        border-right: none !important;
-        border-bottom: 2px solid var(--border-dark) !important;
-        overflow: visible !important;
-        padding: 0.8rem !important;
-        flex: none !important;
-    }
-
-    /* When mobile tab 'report' is active, toggle visibility */
-    .studio-workspace.view-report .studio-sidebar {
-        display: none !important;
-    }
-
-    .studio-workspace.view-form .studio-canvas {
-        display: none !important;
-    }
-
-    .studio-canvas {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
-        padding: 0.6rem 0.4rem !important;
-        flex: none !important;
-    }
-
-    .canvas-tab-bar {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        padding-bottom: 0.5rem !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .tab-buttons {
-        flex-wrap: nowrap !important;
-        white-space: nowrap !important;
-        gap: 0.35rem !important;
-        display: flex !important;
-    }
-
-    .tab-btn {
-        padding: 0.45rem 0.65rem !important;
-        font-size: 0.78rem !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-    }
-
-    .report-top-bar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 0.6rem !important;
-        padding: 0.6rem !important;
-        position: relative !important;
-    }
-
-    .report-meta-chips {
-        justify-content: space-between !important;
-        flex-wrap: wrap !important;
-        gap: 0.35rem !important;
-    }
-
-    .report-actions-cluster {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        width: 100% !important;
-        gap: 0.4rem !important;
-    }
-
-    .btn-download-pdf-hero, .btn-edit-toggle, .btn-save-edit, .btn-copy-md {
-        flex: 1 1 45% !important;
-        justify-content: center !important;
-        text-align: center !important;
-        padding: 0.5rem 0.6rem !important;
-        font-size: 0.78rem !important;
-    }
-
-    .report-paper-container {
-        padding: 1rem 0.6rem !important;
-        margin: 0 !important;
-        border-radius: var(--radius-sm) !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-shadow: none !important;
-    }
-
-    .markdown-rendered-content {
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-        width: 100% !important;
-    }
-
-    .markdown-rendered-content table {
-        display: block !important;
-        width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        margin-bottom: 1rem !important;
-    }
-
-    .user-guide-steps {
-        grid-template-columns: 1fr !important;
-        gap: 0.6rem !important;
-    }
-
-    .studio-followup-bar {
-        position: static !important;
-        transform: none !important;
-        width: 100% !important;
-        margin-top: 1.5rem !important;
-        padding: 0 0.2rem !important;
-    }
-
-    .studio-modal {
-        width: 95% !important;
-        max-height: 85vh !important;
-        overflow-y: auto !important;
-        padding: 1rem !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .brand-name {
-        font-size: 0.95rem !important;
-    }
-
-    .brand-sub {
-        display: none !important;
-    }
-
-    .brand-logo-icon {
-        width: 28px !important;
-        height: 28px !important;
-        font-size: 0.85rem !important;
-    }
-
-    .btn-studio-action {
-        font-size: 0.72rem !important;
-        padding: 0.35rem 0.5rem !important;
-    }
-
-    .user-info-chip {
-        max-width: 100px !important;
-        font-size: 0.72rem !important;
-        padding: 0.25rem 0.5rem !important;
-    }
-
-    .speed-btn {
-        font-size: 0.65rem !important;
-        padding: 0.25rem 0.15rem !important;
-    }
-
-    .chip-preset {
-        font-size: 0.68rem !important;
-        padding: 0.2rem 0.4rem !important;
-    }
-
-    .report-paper-container {
-        padding: 0.8rem 0.4rem !important;
-    }
-
-    .markdown-rendered-content h1 {
-        font-size: 1.15rem !important;
-        line-height: 1.3 !important;
-    }
-
-    .markdown-rendered-content h2 {
-        font-size: 1rem !important;
-        line-height: 1.3 !important;
-    }
-
-    .markdown-rendered-content p, 
-    .markdown-rendered-content li {
-        font-size: 0.84rem !important;
-        line-height: 1.45 !important;
-    }
-}
-
-/* ==========================================================================
-   OFFICIAL GOOGLE ACCOUNT CHOOSER & ONE-TAP STYLING
-   ========================================================================== */
-.google-onetap-widget {
-    position: fixed;
-    top: 75px;
-    right: 20px;
-    width: 330px;
-    background: #202124;
-    color: #e8eaed;
-    border-radius: 12px;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
-    border: 1px solid #3c4043;
-    z-index: 99999;
-    padding: 14px 16px;
-    font-family: 'Google Sans', Roboto, Arial, sans-serif;
-    animation: slideInDown 0.3s ease-out;
-}
-
-@keyframes slideInDown {
-    from { opacity: 0; transform: translateY(-15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.google-onetap-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.82rem;
-    color: #9aa0a6;
-    margin-bottom: 12px;
-}
-
-.google-onetap-accounts {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.google-onetap-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    background: #303134;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    border: 1px solid transparent;
-}
-
-.google-onetap-item:hover {
-    background: #3c4043;
-    border-color: #5f6368;
-}
-
-.google-avatar-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: #fff;
-    flex-shrink: 0;
-}
-
-.google-user-meta {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    line-height: 1.3;
-}
-
-.google-user-name {
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.google-user-email {
-    font-size: 0.76rem;
-    color: #9aa0a6;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.google-chooser-window {
-    background: #202124 !important;
-    color: #e8eaed !important;
-    border-radius: 18px !important;
-    width: 440px !important;
-    max-width: 92vw !important;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important;
-    border: 1px solid #3c4043 !important;
-    padding: 2rem !important;
-}
-
-.google-dialog-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.google-dialog-title {
-    font-size: 1.45rem;
-    font-weight: 500;
-    color: #ffffff;
-    margin-top: 0.6rem;
-}
-
-.google-dialog-sub {
-    font-size: 0.9rem;
-    color: #9aa0a6;
-    margin-top: 0.3rem;
-}
-
-.google-account-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    border-top: 1px solid #3c4043;
-    border-bottom: 1px solid #3c4043;
-    padding: 0.5rem 0;
-    margin-bottom: 1.2rem;
-}
-
-.google-account-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-.google-account-row:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.google-use-another {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    color: #8ab4f8;
-    font-size: 0.88rem;
-    font-weight: 500;
-}
-
-.google-use-another:hover {
-    background: rgba(138, 180, 248, 0.08);
-}
-
-
-    </style>
+    <!-- APPLICATION JAVASCRIPT -->
     <script>
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -5265,6 +3651,95 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+});
+
+
+// Google Account Chooser Modal Handlers
+document.addEventListener('DOMContentLoaded', () => {
+    const googleModal = document.getElementById('google-chooser-modal');
+    const btnCloseGoogle = document.getElementById('btn-close-google-modal');
+    const btnCustomGoogle = document.getElementById('btn-google-custom-account');
+    const customBox = document.getElementById('google-custom-input-box');
+    const btnSubmitCustom = document.getElementById('btn-submit-custom-google');
+    const customInput = document.getElementById('custom-google-email');
+
+    document.querySelectorAll('.btn-trigger-google').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (googleModal) googleModal.style.display = 'flex';
+        });
+    });
+
+    if (btnCloseGoogle) {
+        btnCloseGoogle.addEventListener('click', () => {
+            if (googleModal) googleModal.style.display = 'none';
+        });
+    }
+
+    if (btnCustomGoogle) {
+        btnCustomGoogle.addEventListener('click', () => {
+            if (customBox) {
+                customBox.style.display = customBox.style.display === 'none' ? 'block' : 'none';
+                if (customInput) customInput.focus();
+            }
+        });
+    }
+
+    async function selectGoogleAccount(email, name) {
+        try {
+            if (googleModal) googleModal.style.display = 'none';
+            const authAlert = document.getElementById('auth-alert-box');
+            if (authAlert) {
+                authAlert.className = 'auth-status-alert success';
+                authAlert.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Authenticating with Google...</span>';
+                authAlert.style.display = 'flex';
+            }
+
+            const resp = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email,
+                    name: name,
+                    google_id: 'gid_' + btoa(email).replace(/=/g, '')
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail || 'Google sign in failed.');
+
+            localStorage.setItem('deepresearch_auth_token', data.token);
+            const overlay = document.getElementById('auth-gate-overlay');
+            if (overlay) overlay.style.display = 'none';
+            window.location.reload();
+
+        } catch (err) {
+            const authAlert = document.getElementById('auth-alert-box');
+            if (authAlert) {
+                authAlert.className = 'auth-status-alert error';
+                authAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${err.message}</span>`;
+                authAlert.style.display = 'flex';
+            }
+        }
+    }
+
+    document.querySelectorAll('.btn-select-google-account').forEach(row => {
+        row.addEventListener('click', () => {
+            const email = row.getAttribute('data-email');
+            const name = row.getAttribute('data-name');
+            selectGoogleAccount(email, name);
+        });
+    });
+
+    if (btnSubmitCustom && customInput) {
+        btnSubmitCustom.addEventListener('click', () => {
+            const email = customInput.value.trim();
+            if (email && email.includes('@')) {
+                const name = email.split('@')[0];
+                selectGoogleAccount(email, name);
+            }
+        });
+    }
 });
 
     </script>

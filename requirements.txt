@@ -12,3 +12,4 @@ markdown>=3.5.0
 python-dotenv>=1.0.0
 reportlab>=4.0.0
 tavily-python>=0.3.0
+python-multipart>=0.0.9

@@ -3095,12 +3095,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await resp.json();
                 currentAuthEmail = email;
                 switchAuthView('reset');
-                if (data.dev_code && resetCode) {
-                    resetCode.value = data.dev_code;
-                    showAuthAlert(`Reset code: ${data.dev_code} (SMTP simulation mode active)`, 'success');
-                } else {
-                    showAuthAlert(data.message || 'If an account exists, a 6-digit reset code has been sent.', 'success');
-                }
+                if (resetCode) resetCode.value = '';
+                showAuthAlert(data.message || 'A 6-digit password reset code has been sent to your email. Please check your inbox.', 'success');
             } catch (err) {
                 showAuthAlert(err.message, 'error');
             } finally {

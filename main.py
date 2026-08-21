@@ -216,7 +216,6 @@ def auth_signup(payload: SignupRequest):
         "masked_email": masked_email,
         "message": f"Verification code dispatched to {masked_email}.",
         "resend_cooldown": 60,
-        "dev_code": otp_code
     }
 
 @app.post("/api/auth/verify-email")
@@ -327,7 +326,6 @@ def auth_resend_otp(payload: ResendOtpRequest):
         "status": "success",
         "message": f"New verification code sent to {email}.",
         "resend_cooldown": 60,
-        "dev_code": otp_code
     }
 
 @app.post("/api/auth/login")
@@ -366,7 +364,6 @@ def auth_login(payload: LoginRequest, response: Response):
                 "needs_verification": True,
                 "email": email,
                 "masked_email": masked_email,
-                "dev_code": otp_code
             }
         )
 
@@ -595,7 +592,6 @@ def auth_forgot_password(payload: ForgotPasswordRequest):
     return {
         "status": "success",
         "message": "If an account exists with that email, a 6-digit password reset code has been sent.",
-        "dev_code": MEMORY_RESET_CACHE.get(email, {}).get("raw_code")
     }
 
 @app.post("/api/auth/reset-password")

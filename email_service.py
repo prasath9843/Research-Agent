@@ -4,14 +4,20 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 
-SMTP_SERVER = os.getenv("SMTP_SERVER", "")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASS = os.getenv("SMTP_PASS", "")
-SMTP_FROM = os.getenv("SMTP_FROM", os.getenv("SMTP_USER", "noreply@deepresearch.studio"))
+from dotenv import load_dotenv
+load_dotenv()
+
+def get_smtp_config():
+    server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    port = int(os.getenv("SMTP_PORT", "587"))
+    user = os.getenv("SMTP_USER", "").strip()
+    password = os.getenv("SMTP_PASS", "").replace(" ", "").strip()
+    from_email = os.getenv("SMTP_FROM", user or "noreply@deepresearch.studio").strip()
+    return server, port, user, password, from_email
 
 def is_smtp_configured() -> bool:
-    return bool(SMTP_SERVER and SMTP_USER and SMTP_PASS)
+    server, port, user, password, _ = get_smtp_config()
+    return bool(server and user and password)
 
 def send_email(to_email: str, subject: str, html_content: str, text_content: Optional[str] = None) -> bool:
     if not is_smtp_configured():
@@ -20,20 +26,21 @@ def send_email(to_email: str, subject: str, html_content: str, text_content: Opt
             print(f"[EMAIL CONTENT]\n{text_content}\n")
         return True
 
+    server_host, port, user, password, from_email = get_smtp_config()
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"DeepResearch Studio <{SMTP_FROM}>"
+        msg["From"] = f"DeepResearch Studio <{from_email}>"
         msg["To"] = to_email
 
         if text_content:
             msg.attach(MIMEText(text_content, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10) as server:
+        with smtplib.SMTP(server_host, port, timeout=10) as server:
             server.starttls()
-            server.login(SMTP_USER, SMTP_PASS)
-            server.sendmail(SMTP_FROM, [to_email], msg.as_string())
+            server.login(user, password)
+            server.sendmail(from_email, [to_email], msg.as_string())
         print(f"[EMAIL SENT] Successfully dispatched email to {to_email}")
         return True
     except Exception as e:

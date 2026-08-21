@@ -138,13 +138,10 @@ def get_current_active_user(request: Request) -> dict:
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     index_file = BASE_DIR / "templates" / "index.html"
-    if index_file.exists():
+    if index_file.is_file():
         with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    try:
-        return templates.TemplateResponse(request=request, name="index.html")
-    except Exception:
-        return templates.TemplateResponse("index.html", {"request": request})
+            return HTMLResponse(content=f.read(), status_code=200)
+    return HTMLResponse(content="<h1>DeepResearch Studio Loading...</h1>", status_code=200)
 
 @app.get("/health")
 @app.head("/health")

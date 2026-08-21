@@ -39,6 +39,13 @@ BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(title="DeepResearch Studio API", version="2.0.0")
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    err_trace = traceback.format_exc()
+    print(f"[UNHANDLED ERROR] {err_trace}")
+    return HTMLResponse(content=f"<div style='font-family:sans-serif;padding:2rem;background:#0f172a;color:#f8fafc;'><h2>Server Debug Error</h2><pre style='background:#1e293b;padding:1rem;border-radius:8px;color:#ef4444;'>{err_trace}</pre></div>", status_code=500)
+
 # Mount Static & Template directories
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))

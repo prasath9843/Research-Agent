@@ -673,26 +673,20 @@ def start_research(request: Request, payload: ResearchRequest, background_tasks:
     session_id = str(uuid.uuid4())
     user_id = user["id"]
 
-    db_store = EvidenceStore()
     config_dict = {
         "max_rounds": payload.max_rounds,
         "max_sources": payload.max_sources,
         "fast_model": payload.fast_model,
         "strong_model": payload.strong_model,
         "target_pages": payload.target_pages,
-        "custom_suggestions": payload.custom_suggestions
+        "custom_suggestions": payload.custom_suggestions,
+        "user_suggestions": payload.custom_suggestions
     }
-    db_store.create_session(session_id, payload.query, config=config_dict, user_id=user_id)
 
     pipeline = ResearchPipeline(
         session_id=session_id,
-        user_query=payload.query,
-        max_rounds=payload.max_rounds,
-        max_sources=payload.max_sources,
-        fast_model=payload.fast_model,
-        strong_model=payload.strong_model,
-        target_pages=payload.target_pages,
-        custom_suggestions=payload.custom_suggestions,
+        query=payload.query,
+        config_override=config_dict,
         user_id=user_id
     )
 

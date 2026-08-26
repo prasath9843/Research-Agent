@@ -673,11 +673,19 @@ def start_research(request: Request, payload: ResearchRequest, background_tasks:
     session_id = str(uuid.uuid4())
     user_id = user["id"]
 
+    fast_m = payload.fast_model or settings.FAST_MODEL
+    if "3.1" in str(fast_m) or "3b" in str(fast_m) or "70b-instruct" in str(fast_m):
+        fast_m = settings.FAST_MODEL
+
+    strong_m = payload.strong_model or settings.STRONG_MODEL
+    if "3.1" in str(strong_m) or "3b" in str(strong_m) or "70b-instruct" in str(strong_m):
+        strong_m = settings.STRONG_MODEL
+
     config_dict = {
         "max_rounds": payload.max_rounds,
         "max_sources": payload.max_sources,
-        "fast_model": payload.fast_model,
-        "strong_model": payload.strong_model,
+        "fast_model": fast_m,
+        "strong_model": strong_m,
         "target_pages": payload.target_pages,
         "custom_suggestions": payload.custom_suggestions,
         "user_suggestions": payload.custom_suggestions

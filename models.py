@@ -30,7 +30,7 @@ class SearchResultItem(BaseModel):
     title: str
     url: str
     snippet: str
-    domain: str
+    domain: Optional[str] = ""
     domain_score: float = 0.5
 
 class SourceScore(BaseModel):
@@ -80,7 +80,12 @@ class ReportOutput(BaseModel):
     total_citations_count: int = Field(0, description="Total citation attempts")
 
 class CitationVerificationResult(BaseModel):
-    is_valid: bool
+    total_citations: int = 0
+    valid_citations: List[int] = Field(default_factory=list)
+    invalid_citations: List[int] = Field(default_factory=list)
+    is_fully_verified: bool = True
+    corrected_markdown: Optional[str] = None
+    is_valid: bool = True
     source_url: Optional[str] = None
     claim_supported: bool = True
     note: Optional[str] = None
@@ -95,8 +100,8 @@ class ResearchRequest(BaseModel):
     query: str
     max_rounds: Optional[int] = 3
     max_sources: Optional[int] = 20
-    fast_model: Optional[str] = "meta/llama-3.1-8b-instruct"
-    strong_model: Optional[str] = "meta/llama-3.1-70b-instruct"
+    fast_model: Optional[str] = "meta/llama-3.2-11b-vision-instruct"
+    strong_model: Optional[str] = "meta/llama-3.2-11b-vision-instruct"
     target_pages: Optional[int] = 4
     custom_suggestions: Optional[str] = ""
 

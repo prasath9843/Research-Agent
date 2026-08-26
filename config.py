@@ -12,8 +12,8 @@ class Settings:
         self.NVIDIA_API_KEY: str = os.getenv("NVIDIA_API_KEY", "")
         self.NVIDIA_BASE_URL: str = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
         
-        self.FAST_MODEL: str = os.getenv("FAST_MODEL", "meta/llama-3.1-8b-instruct")
-        self.STRONG_MODEL: str = os.getenv("STRONG_MODEL", "meta/llama-3.1-70b-instruct")
+        self.FAST_MODEL: str = os.getenv("FAST_MODEL", "meta/llama-3.2-11b-vision-instruct")
+        self.STRONG_MODEL: str = os.getenv("STRONG_MODEL", "meta/llama-3.2-11b-vision-instruct")
         
         self.PRIMARY_SEARCH: str = os.getenv("PRIMARY_SEARCH", "ddgs")
         self.SEARXNG_URL: str = os.getenv("SEARXNG_URL", "http://localhost:8080")

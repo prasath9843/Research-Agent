@@ -10,13 +10,17 @@ class SubQuestion(BaseModel):
     text: str = Field(..., description="The sub-question text")
     category: str = Field("core", description="Category: core, nuance, counter_argument, methodology")
 
+    @property
+    def id(self) -> str:
+        return self.tag
+
 class SearchQuery(BaseModel):
     query_text: str = Field(..., description="Specific search engine query string")
     sub_question_tag: str = Field(..., description="Tag of the sub-question this query addresses")
 
 class QueryPlannerOutput(BaseModel):
-    sub_questions: List[SubQuestion] = Field(..., min_items=3, max_items=8)
-    search_queries: List[SearchQuery] = Field(..., min_items=3, max_items=12)
+    sub_questions: List[SubQuestion] = Field(..., min_items=2, max_items=8)
+    search_queries: List[SearchQuery] = Field(default_factory=list)
 
 # ==========================================
 # 2. Source Scoring & Scraping Models

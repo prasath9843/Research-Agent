@@ -79,22 +79,25 @@ class SearchEngine:
         results = []
         def _do_ddg():
             res = []
-            with DDGS(timeout=4) as ddgs:
-                for item in ddgs.text(query, max_results=max_results):
-                    res.append({
-                        "url": item.get("href", ""),
-                        "title": item.get("title", ""),
-                        "snippet": item.get("body", "")
-                    })
+            try:
+                with DDGS(timeout=2) as ddgs:
+                    for item in ddgs.text(query, max_results=max_results):
+                        res.append({
+                            "url": item.get("href", ""),
+                            "title": item.get("title", ""),
+                            "snippet": item.get("body", "")
+                        })
+            except Exception:
+                pass
             return res
 
         from concurrent.futures import ThreadPoolExecutor
         try:
             with ThreadPoolExecutor(max_workers=1) as exec:
                 fut = exec.submit(_do_ddg)
-                results = fut.result(timeout=5.0)
+                results = fut.result(timeout=2.5)
         except Exception as e:
-            print(f"[SearchEngine] DDGS search timeout/error for '{query}': {e}")
+            pass
         return results
 
     def search_searxng(self, query: str, max_results: int = 5) -> List[Dict[str, str]]:

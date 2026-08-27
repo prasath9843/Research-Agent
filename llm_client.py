@@ -20,7 +20,7 @@ class LLMClient:
         return OpenAI(
             base_url=base_url,
             api_key=api_key if api_key else "dummy_key_for_init",
-            timeout=60.0  # 60-second timeout for full academic paper synthesis
+            timeout=180.0  # 180-second timeout for full academic paper synthesis
         )
 
     def _clean_json_response(self, text: str) -> str:
@@ -69,6 +69,7 @@ class LLMClient:
         
         fallback_models = [
             selected_model,
+            "meta/llama-3.2-90b-vision-instruct",
             "meta/llama-3.2-11b-vision-instruct"
         ]
         # Remove duplicates preserving order

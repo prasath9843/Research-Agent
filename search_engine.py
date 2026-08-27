@@ -150,6 +150,53 @@ class SearchEngine:
             pass
         return results
 
+    def search_arxiv(self, query: str, max_results: int = 5) -> List[Dict[str, str]]:
+        results = []
+        try:
+            clean_q = re.sub(r"[^\w\s]", " ", query).strip()
+            url = f"https://export.arxiv.org/api/query?search_query=all:{requests.utils.quote(clean_q[:60])}&start=0&max_results={max_results}"
+            resp = requests.get(url, timeout=3.0)
+            if resp.status_code == 200:
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(resp.text)
+                for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
+                    title_elem = entry.find('{http://www.w3.org/2005/Atom}title')
+                    id_elem = entry.find('{http://www.w3.org/2005/Atom}id')
+                    summary_elem = entry.find('{http://www.w3.org/2005/Atom}summary')
+                    if title_elem is not None and id_elem is not None:
+                        results.append({
+                            "url": id_elem.text.strip(),
+                            "title": title_elem.text.strip().replace("\n", " "),
+                            "snippet": summary_elem.text.strip().replace("\n", " ")[:300] if summary_elem is not None else ""
+                        })
+        except Exception:
+            pass
+        return results
+
+    def search_wikipedia(self, query: str, max_results: int = 4) -> List[Dict[str, str]]:
+        results = []
+        try:
+            clean_q = re.sub(r"[^\w\s]", " ", query).strip()
+            url = "https://en.wikipedia.org/w/api.php"
+            params = {
+                "action": "opensearch",
+                "search": clean_q[:50],
+                "limit": max_results,
+                "namespace": 0,
+                "format": "json"
+            }
+            resp = requests.get(url, params=params, timeout=2.5)
+            if resp.status_code == 200:
+                data = resp.json()
+                if len(data) >= 4:
+                    titles, snippets, urls = data[1], data[2], data[3]
+                    for t, s, u in zip(titles, snippets, urls):
+                        if u:
+                            results.append({"url": u, "title": t, "snippet": s or t})
+        except Exception:
+            pass
+        return results
+
     def search(self, query: str, sub_question_id: str, max_results: int = 5) -> List[SearchResultItem]:
         raw_results = []
         
@@ -164,6 +211,12 @@ class SearchEngine:
                 raw_results = self.search_ddgs(query, max_results)
         else:  # Default to ddgs
             raw_results = self.search_ddgs(query, max_results)
+
+        # Robust Fallback to ArXiv & Wikipedia if DDG was rate-limited
+        if not raw_results or len(raw_results) < 2:
+            arxiv_res = self.search_arxiv(query, max_results)
+            wiki_res = self.search_wikipedia(query, max_results)
+            raw_results = (raw_results or []) + arxiv_res + wiki_res
 
         items = []
         for res in raw_results:

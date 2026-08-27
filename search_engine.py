@@ -80,14 +80,15 @@ class SearchEngine:
         def _do_ddg():
             res = []
             try:
-                with DDGS(timeout=2) as ddgs:
+                with DDGS(timeout=3) as ddgs:
                     for item in ddgs.text(query, max_results=max_results):
-                        res.append({
-                            "url": item.get("href", ""),
-                            "title": item.get("title", ""),
-                            "snippet": item.get("body", "")
-                        })
-            except Exception:
+                        if item.get("href"):
+                            res.append({
+                                "url": item.get("href", ""),
+                                "title": item.get("title", ""),
+                                "snippet": item.get("body", "")
+                            })
+            except Exception as e:
                 pass
             return res
 
@@ -95,20 +96,22 @@ class SearchEngine:
         try:
             with ThreadPoolExecutor(max_workers=1) as exec:
                 fut = exec.submit(_do_ddg)
-                results = fut.result(timeout=2.5)
+                results = fut.result(timeout=4.0)
         except Exception as e:
             pass
         return results
 
     def search_searxng(self, query: str, max_results: int = 5) -> List[Dict[str, str]]:
         results = []
+        if not self.searxng_url or "localhost:8080" in self.searxng_url:
+            return results
         try:
             params = {
                 "q": query,
                 "format": "json"
             }
             url = f"{self.searxng_url.rstrip('/')}/search"
-            resp = requests.get(url, params=params, timeout=5)
+            resp = requests.get(url, params=params, timeout=2.5)
             if resp.status_code == 200:
                 data = resp.json()
                 for item in data.get("results", [])[:max_results]:
@@ -118,7 +121,7 @@ class SearchEngine:
                         "snippet": item.get("content", "")
                     })
         except Exception as e:
-            print(f"[SearchEngine] SearxNG search error for '{query}': {e}")
+            pass
         return results
 
     def search_tavily(self, query: str, max_results: int = 5) -> List[Dict[str, str]]:
@@ -133,7 +136,7 @@ class SearchEngine:
                     "query": query,
                     "max_results": max_results
                 },
-                timeout=5
+                timeout=3.0
             )
             if resp.status_code == 200:
                 data = resp.json()
@@ -144,7 +147,7 @@ class SearchEngine:
                         "snippet": item.get("content", "")
                     })
         except Exception as e:
-            print(f"[SearchEngine] Tavily search error for '{query}': {e}")
+            pass
         return results
 
     def search(self, query: str, sub_question_id: str, max_results: int = 5) -> List[SearchResultItem]:
@@ -161,8 +164,6 @@ class SearchEngine:
                 raw_results = self.search_ddgs(query, max_results)
         else:  # Default to ddgs
             raw_results = self.search_ddgs(query, max_results)
-            if not raw_results:
-                raw_results = self.search_searxng(query, max_results)
 
         items = []
         for res in raw_results:

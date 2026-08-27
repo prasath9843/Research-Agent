@@ -22,6 +22,7 @@ __pycache__/
 # Exports / Generated Reports
 exports/
 *.pdf
+latest_generated_report.md
 !templates/*.html
 
 # IDE & OS files

@@ -62,6 +62,9 @@ class LLMClient:
         max_tokens: int = 2500
     ) -> str:
         selected_model = model or self.fast_model
+        if not selected_model or any(k in str(selected_model).lower() for k in ["70b-instruct", "3.1", "3b", "r1", "mistral"]):
+            selected_model = "meta/llama-3.2-11b-vision-instruct"
+
         client = self._get_client()
         
         fallback_models = [
@@ -74,7 +77,7 @@ class LLMClient:
         last_exception = None
 
         for attempt, current_model in enumerate(fallback_models):
-            for conn_try in range(3):
+            for conn_try in range(4):
                 try:
                     if attempt > 0 or conn_try > 0:
                         print(f"[LLMClient] Completion with model '{current_model}' (Attempt {attempt+1}, Try {conn_try+1})...")
@@ -93,10 +96,9 @@ class LLMClient:
                         return res_content
                 except Exception as err:
                     last_exception = err
-                    err_msg = str(err)
-                    print(f"[LLMClient] Warning: Model '{current_model}' (try {conn_try+1}) error: {err_msg}")
-                    if conn_try < 2 and ("Connection error" in err_msg or "timeout" in err_msg.lower()):
-                        time.sleep(1.0)
+                    print(f"[LLMClient] Warning: Model '{current_model}' (try {conn_try+1}) error: {err}")
+                    if conn_try < 3:
+                        time.sleep(1.0 * (conn_try + 1))
                         continue
                     break
 

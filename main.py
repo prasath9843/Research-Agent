@@ -665,6 +665,26 @@ def auth_logout(response: Response):
     response.delete_cookie("deepresearch_token")
     return {"status": "success", "message": "Logged out successfully."}
 
+@app.get("/api/engine/models")
+@app.get("/api/nvidia/models")
+def get_engine_models():
+    return [
+        {
+            "id": "meta/llama-3.2-11b-vision-instruct",
+            "name": "Meta Llama 3.2 11B Vision Instruct",
+            "context_length": "128k",
+            "is_default": True,
+            "badge": "Ultra-Fast & Accurate"
+        },
+        {
+            "id": "meta/llama-3.2-90b-vision-instruct",
+            "name": "Meta Llama 3.2 90B Vision Instruct",
+            "context_length": "128k",
+            "is_default": False,
+            "badge": "Deep Academic Reasoning"
+        }
+    ]
+
 # --- Protected Research Endpoints ---
 
 @app.post("/api/research")
@@ -674,11 +694,11 @@ def start_research(request: Request, payload: ResearchRequest, background_tasks:
     user_id = user["id"]
 
     fast_m = payload.fast_model or settings.FAST_MODEL
-    if "3.1" in str(fast_m) or "3b" in str(fast_m) or "70b-instruct" in str(fast_m):
+    if any(k in str(fast_m).lower() for k in ["70b-instruct", "3.1", "3b", "r1", "mistral"]):
         fast_m = settings.FAST_MODEL
 
     strong_m = payload.strong_model or settings.STRONG_MODEL
-    if "3.1" in str(strong_m) or "3b" in str(strong_m) or "70b-instruct" in str(strong_m):
+    if any(k in str(strong_m).lower() for k in ["70b-instruct", "3.1", "3b", "r1", "mistral"]):
         strong_m = settings.STRONG_MODEL
 
     config_dict = {
@@ -688,7 +708,10 @@ def start_research(request: Request, payload: ResearchRequest, background_tasks:
         "strong_model": strong_m,
         "target_pages": payload.target_pages,
         "custom_suggestions": payload.custom_suggestions,
-        "user_suggestions": payload.custom_suggestions
+        "user_suggestions": payload.custom_suggestions,
+        "search_provider": payload.search_provider or "ddgs",
+        "academic_filter": payload.academic_filter or "verified_academic",
+        "temperature": payload.temperature if payload.temperature is not None else 0.2
     }
 
     pipeline = ResearchPipeline(

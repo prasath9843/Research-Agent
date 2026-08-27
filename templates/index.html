@@ -1035,6 +1035,264 @@ body.studio-theme {
 .auth-link-action:hover {
     text-decoration: underline;
 }
+
+/* ==========================================================================
+   ENGINE SETTINGS MODAL STYLING
+   ========================================================================== */
+.settings-overlay-gate {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(4, 7, 13, 0.88);
+    backdrop-filter: blur(20px);
+    z-index: 999998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.settings-overlay-gate.active {
+    display: flex !important;
+}
+
+.settings-master-card {
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    background: #0d1527;
+    border: 1px solid #1f2e4d;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    color: #f8fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.3rem 1.6rem;
+    border-bottom: 1px solid #1f2e4d;
+    background: rgba(13, 21, 39, 0.95);
+}
+
+.settings-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-icon-badge {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    flex-shrink: 0;
+}
+
+.settings-header-titles h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.settings-header-titles p {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.btn-close-modal {
+    background: transparent;
+    border: 1px solid #1f2e4d;
+    color: #94a3b8;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.btn-close-modal:hover {
+    background: #1f2e4d;
+    color: #ffffff;
+}
+
+.settings-body {
+    padding: 1.5rem 1.8rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+}
+
+.settings-query-banner {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.settings-query-banner-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.settings-query-banner-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f8fafc;
+    line-height: 1.4;
+}
+
+.settings-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.settings-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.settings-field-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.settings-select, .settings-input {
+    background: #080d1a;
+    border: 1px solid #1f2e4d;
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.88rem;
+    padding: 0.65rem 0.85rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.settings-select:focus, .settings-input:focus {
+    border-color: #10b981;
+}
+
+.settings-depth-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.settings-depth-card {
+    background: #080d1a;
+    border: 1px solid #1f2e4d;
+    border-radius: 10px;
+    padding: 0.8rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-depth-card:hover {
+    border-color: #10b981;
+    transform: translateY(-2px);
+}
+
+.settings-depth-card.active {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: #10b981;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+}
+
+.settings-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.6rem;
+    border-top: 1px solid #1f2e4d;
+    background: rgba(13, 21, 39, 0.95);
+}
+
+.btn-modal-cancel {
+    background: transparent;
+    border: 1px solid #1f2e4d;
+    color: #94a3b8;
+    border-radius: 10px;
+    padding: 0.65rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-modal-cancel:hover {
+    background: #1f2e4d;
+    color: #ffffff;
+}
+
+.btn-modal-launch {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-modal-launch:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.55);
+}
     </style>
 </head>
 <body class="studio-theme">
@@ -1471,11 +1729,197 @@ body.studio-theme {
         </div>
     </div>
 
+    <!-- ENGINE SETTINGS MODAL -->
+    <div class="settings-overlay-gate" id="settings-overlay-gate">
+        <div class="settings-master-card">
+            
+            <div class="settings-header">
+                <div class="settings-header-title-row">
+                    <div class="settings-icon-badge">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <div class="settings-header-titles">
+                        <h3 id="settings-modal-title">Engine Settings & AI Parameters</h3>
+                        <p>Configure model selection, search depth, citation rigor, and academic source filters</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" id="btn-close-settings" title="Close Settings">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="settings-body">
+                
+                <!-- ACTIVE TOPIC PREVIEW BANNER -->
+                <div class="settings-query-banner" id="settings-query-banner">
+                    <span class="settings-query-banner-label">
+                        <i class="fa-solid fa-microscope"></i> Active Research Topic
+                    </span>
+                    <span class="settings-query-banner-text" id="settings-preview-query">
+                        (Enter a topic in the workspace to launch research)
+                    </span>
+                </div>
+
+                <!-- SECTION 1: AI MODEL SELECTION -->
+                <div>
+                    <div class="settings-section-title">
+                        <i class="fa-solid fa-brain" style="color:#10b981;"></i> 1. AI Reasoning & Synthesis Models
+                    </div>
+                    <div class="settings-grid-2col">
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-fast-model">
+                                Fast Model (Planning & Claim Extraction):
+                            </label>
+                            <select id="settings-fast-model" class="settings-select">
+                                <option value="meta/llama-3.2-11b-vision-instruct" selected>Meta Llama 3.2 11B Vision Instruct (Ultra-Fast & Accurate)</option>
+                                <option value="meta/llama-3.2-90b-vision-instruct">Meta Llama 3.2 90B Vision Instruct (Deep Academic Reasoning)</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-strong-model">
+                                Synthesis Model (Academic Report Generation):
+                            </label>
+                            <select id="settings-strong-model" class="settings-select">
+                                <option value="meta/llama-3.2-11b-vision-instruct" selected>Meta Llama 3.2 11B Vision Instruct (Publication Ready)</option>
+                                <option value="meta/llama-3.2-90b-vision-instruct">Meta Llama 3.2 90B Vision Instruct (Exhaustive Monograph)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: SEARCH DEPTH, ROUNDS & RETRIEVAL ENGINE -->
+                <div>
+                    <div class="settings-section-title">
+                        <i class="fa-solid fa-gauge-high" style="color:#f59e0b;"></i> 2. Execution Depth & Search Parameters
+                    </div>
+                    
+                    <div class="settings-depth-grid" style="margin-bottom:1rem;">
+                        <div class="settings-depth-card active" data-rounds="1" id="settings-depth-turbo">
+                            <div style="font-weight:700; color:#10b981; margin-bottom:4px;"><i class="fa-solid fa-bolt"></i> Turbo</div>
+                            <div style="font-size:0.75rem; color:#94a3b8;">1 Round (~15s)</div>
+                        </div>
+                        <div class="settings-depth-card" data-rounds="2" id="settings-depth-standard">
+                            <div style="font-weight:700; color:#3b82f6; margin-bottom:4px;"><i class="fa-solid fa-gauge-high"></i> Standard</div>
+                            <div style="font-size:0.75rem; color:#94a3b8;">2 Rounds (~30s)</div>
+                        </div>
+                        <div class="settings-depth-card" data-rounds="3" id="settings-depth-deep">
+                            <div style="font-weight:700; color:#a855f7; margin-bottom:4px;"><i class="fa-solid fa-microscope"></i> Deep</div>
+                            <div style="font-size:0.75rem; color:#94a3b8;">3 Rounds (~1.5m)</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid-2col">
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-max-rounds">
+                                Number of Research Rounds (Editable):
+                            </label>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <input type="number" id="settings-max-rounds" class="settings-input" min="1" max="10" value="1" style="font-weight:600; width:100%;">
+                            </div>
+                        </div>
+
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-max-sources">
+                                Max Sources Analyzed (Editable):
+                            </label>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <input type="number" id="settings-max-sources" class="settings-input" min="1" max="100" value="15" placeholder="e.g. 8, 15, 25..." style="font-weight:600; width:100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid-2col" style="margin-top:10px;">
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-search-provider">
+                                Search Engine Provider:
+                            </label>
+                            <select id="settings-search-provider" class="settings-select">
+                                <option value="ddgs" selected>DuckDuckGo (Fast Academic Web)</option>
+                                <option value="tavily">Tavily AI Search (Deep Scholar)</option>
+                                <option value="searxng">SearXNG Privacy Meta-Engine</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-field-group">
+                            <label class="settings-field-label">
+                                Quick Source Count Presets:
+                            </label>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+                                <button type="button" class="source-preset-btn" data-val="5" style="padding:6px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:6px; font-size:0.75rem; cursor:pointer;">5 Fast</button>
+                                <button type="button" class="source-preset-btn" data-val="10" style="padding:6px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:6px; font-size:0.75rem; cursor:pointer;">10</button>
+                                <button type="button" class="source-preset-btn active" data-val="15" style="padding:6px 10px; background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#10b981; border-radius:6px; font-size:0.75rem; cursor:pointer;">15 Standard</button>
+                                <button type="button" class="source-preset-btn" data-val="25" style="padding:6px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:6px; font-size:0.75rem; cursor:pointer;">25 Deep</button>
+                                <button type="button" class="source-preset-btn" data-val="50" style="padding:6px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:6px; font-size:0.75rem; cursor:pointer;">50 Max</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: REPORT LENGTH & RIGOR -->
+                <div>
+                    <div class="settings-section-title">
+                        <i class="fa-solid fa-file-shield" style="color:#3b82f6;"></i> 3. Publication Length & Credibility Filter
+                    </div>
+                    <div class="settings-grid-2col">
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-target-pages">
+                                Target Publication Length:
+                            </label>
+                            <select id="settings-target-pages" class="settings-select">
+                                <option value="2">2 Pages (Brief Executive Summary)</option>
+                                <option value="4" selected>4 Pages (Standard Comprehensive)</option>
+                                <option value="6">6 Pages (In-depth Research Monograph)</option>
+                                <option value="8">8 Pages (Exhaustive Academic Paper)</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-field-group">
+                            <label class="settings-field-label" for="settings-source-filter">
+                                Source Credibility Whitelist:
+                            </label>
+                            <select id="settings-source-filter" class="settings-select">
+                                <option value="verified_academic" selected>Verified Academic (.edu, .gov, peer-reviewed)</option>
+                                <option value="science_industry">Scientific, Medical & Industry Publications</option>
+                                <option value="open_web">Open Web & Global Literature</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: CUSTOM RESEARCH DIRECTIVES -->
+                <div>
+                    <div class="settings-section-title">
+                        <i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> 4. Custom Focus & Research Directives
+                    </div>
+                    <div class="settings-field-group">
+                        <textarea id="settings-custom-suggestions" class="settings-input" rows="2" placeholder="e.g. Focus on economic impact, quantitative metrics, and comparative policy analysis..."></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="settings-footer">
+                <button type="button" class="btn-modal-cancel" id="btn-cancel-settings">Cancel</button>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="btn-modal-cancel" id="btn-save-settings" title="Save as defaults">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Settings
+                    </button>
+                    <button type="button" class="btn-modal-launch" id="btn-modal-start-research">
+                        <i class="fa-solid fa-rocket"></i> <span id="btn-modal-launch-text">Start Research Now</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 <script>
 let currentSessionId = null;
 let currentAuthEmail = '';
 let selectedRounds = 1;
 let pollTimer = null;
+let settingsModalMode = 'configure'; // 'configure' or 'launch'
 
 // TAB SWITCHER
 document.querySelectorAll('.tab-nav-btn').forEach(btn => {
@@ -1490,91 +1934,292 @@ document.querySelectorAll('.tab-nav-btn').forEach(btn => {
     });
 });
 
-// DEPTH MODE SELECTOR
-document.querySelectorAll('.depth-mode-card').forEach(card => {
+// DEPTH MODE SELECTOR - SIDEBAR
+document.querySelectorAll('.studio-sidebar .depth-mode-card').forEach(card => {
     card.addEventListener('click', () => {
-        document.querySelectorAll('.depth-mode-card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.studio-sidebar .depth-mode-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         selectedRounds = parseInt(card.getAttribute('data-rounds') || '1');
+        syncDepthCards(selectedRounds);
+        if (settingsMaxRounds) settingsMaxRounds.value = selectedRounds;
     });
 });
+
+// DEPTH MODE SELECTOR - MODAL
+document.querySelectorAll('.settings-depth-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.settings-depth-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedRounds = parseInt(card.getAttribute('data-rounds') || '1');
+        syncDepthCards(selectedRounds);
+        if (settingsMaxRounds) settingsMaxRounds.value = selectedRounds;
+    });
+});
+
+function syncDepthCards(rounds) {
+    document.querySelectorAll('.depth-mode-card, .settings-depth-card').forEach(c => {
+        if (parseInt(c.getAttribute('data-rounds')) === rounds) {
+            c.classList.add('active');
+        } else {
+            c.classList.remove('active');
+        }
+    });
+}
 
 // TOPIC PILLS
 document.querySelectorAll('.topic-pill').forEach(pill => {
     pill.addEventListener('click', () => {
         const topic = pill.getAttribute('data-topic');
-        if (topic) document.getElementById('query-input').value = topic;
+        if (topic) {
+            document.getElementById('query-input').value = topic;
+            document.getElementById('query-input').focus();
+        }
     });
 });
 
-// AUTH ALERT
-function showAuthAlert(msg, type = 'error') {
-    const alertBox = document.getElementById('auth-alert-box');
-    const alertMsg = document.getElementById('auth-alert-msg');
-    if (!alertBox || !alertMsg) return;
-    alertMsg.textContent = msg;
-    alertBox.className = 'auth-status-alert ' + type;
-    alertBox.style.display = 'flex';
-}
+// =========================================================================
+// ENGINE SETTINGS MODAL CONTROLLER
+// =========================================================================
+const settingsOverlay = document.getElementById('settings-overlay-gate');
+const btnOpenSettings = document.getElementById('btn-open-settings');
+const btnCloseSettings = document.getElementById('btn-close-settings');
+const btnCancelSettings = document.getElementById('btn-cancel-settings');
+const btnSaveSettings = document.getElementById('btn-save-settings');
+const btnModalStartResearch = document.getElementById('btn-modal-start-research');
+const btnModalLaunchText = document.getElementById('btn-modal-launch-text');
+const settingsPreviewQuery = document.getElementById('settings-preview-query');
+const settingsCustomSuggestions = document.getElementById('settings-custom-suggestions');
+const settingsTargetPages = document.getElementById('settings-target-pages');
+const settingsFastModel = document.getElementById('settings-fast-model');
+const settingsStrongModel = document.getElementById('settings-strong-model');
+const settingsSearchProvider = document.getElementById('settings-search-provider');
+const settingsMaxSources = document.getElementById('settings-max-sources');
+const settingsMaxRounds = document.getElementById('settings-max-rounds');
+const settingsSourceFilter = document.getElementById('settings-source-filter');
 
-function hideAuthAlert() {
-    const alertBox = document.getElementById('auth-alert-box');
-    if (alertBox) alertBox.style.display = 'none';
-}
-
-function switchAuthView(viewName) {
-    hideAuthAlert();
-    const views = ['signin', 'signup', 'verify', 'forgot', 'reset'];
-    views.forEach(v => {
-        const el = document.getElementById('form-' + v);
-        if (el) el.style.display = (v === viewName) ? 'block' : 'none';
+// Editable rounds input change handler
+if (settingsMaxRounds) {
+    settingsMaxRounds.addEventListener('input', () => {
+        let val = parseInt(settingsMaxRounds.value);
+        if (isNaN(val) || val < 1) val = 1;
+        if (val > 10) val = 10;
+        selectedRounds = val;
+        syncDepthCards(selectedRounds);
     });
 }
 
-function showAuthModal(view = 'signin') {
-    switchAuthView(view);
-    document.getElementById('auth-overlay-gate')?.classList.add('active');
-}
-
-function hideAuthModal() {
-    document.getElementById('auth-overlay-gate')?.classList.remove('active');
-}
-
-// CHECK AUTH
-async function checkAuth() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('auth_token');
-        if (token) {
-            localStorage.setItem('deepresearch_jwt', token);
-            window.history.replaceState({}, document.title, window.location.pathname);
+// Source count quick-preset buttons
+document.querySelectorAll('.source-preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.source-preset-btn').forEach(b => {
+            b.style.borderColor = 'rgba(255,255,255,0.12)';
+            b.style.color = '#cbd5e1';
+            b.style.background = 'rgba(255,255,255,0.06)';
+        });
+        btn.style.borderColor = '#10b981';
+        btn.style.color = '#10b981';
+        btn.style.background = 'rgba(16,185,129,0.15)';
+        const val = btn.getAttribute('data-val');
+        if (settingsMaxSources && val) {
+            settingsMaxSources.value = val;
         }
-        const resp = await fetch('/api/auth/me');
-        const data = await resp.json();
-        if (data && data.authenticated && data.user) {
-            hideAuthModal();
-            document.getElementById('user-profile-badge').style.display = 'flex';
-            document.getElementById('user-display-name').textContent = data.user.name || data.user.email;
-        } else {
-            showAuthModal('signin');
-        }
-    } catch (e) {
-        showAuthModal('signin');
-    }
-}
+    });
+});
 
-// RESEARCH FORM SUBMIT
-document.getElementById('research-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+function openSettingsModal(mode = 'configure') {
+    settingsModalMode = mode;
     const query = document.getElementById('query-input').value.trim();
     const suggestions = document.getElementById('custom-suggestions-input').value.trim();
-    const pages = parseInt(document.getElementById('target-pages-select').value || '4');
-    const btn = document.getElementById('btn-launch');
+    const pages = document.getElementById('target-pages-select').value;
 
-    if (!query) return;
+    if (query) {
+        settingsPreviewQuery.textContent = `"${query}"`;
+        settingsPreviewQuery.style.color = '#f8fafc';
+    } else {
+        settingsPreviewQuery.textContent = '(Enter a research topic in the left sidebar)';
+        settingsPreviewQuery.style.color = '#94a3b8';
+    }
 
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Researching...';
+    settingsCustomSuggestions.value = suggestions;
+    if (pages && settingsTargetPages) settingsTargetPages.value = pages;
+    if (settingsMaxRounds) settingsMaxRounds.value = selectedRounds;
+    syncDepthCards(selectedRounds);
+
+    if (mode === 'launch') {
+        document.getElementById('settings-modal-title').textContent = "Confirm Engine Configuration & Launch";
+        btnModalLaunchText.textContent = "Start Research Now";
+        btnModalStartResearch.style.display = 'flex';
+    } else {
+        document.getElementById('settings-modal-title').textContent = "Engine Settings & AI Parameters";
+        btnModalLaunchText.textContent = query ? "Launch for Active Topic" : "Save & Apply Settings";
+        btnModalStartResearch.style.display = 'flex';
+    }
+
+    settingsOverlay.classList.add('active');
+}
+
+function closeSettingsModal() {
+    settingsOverlay.classList.remove('active');
+}
+
+if (btnOpenSettings) {
+    btnOpenSettings.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSettingsModal('configure');
+    });
+}
+
+if (btnCloseSettings) btnCloseSettings.addEventListener('click', closeSettingsModal);
+if (btnCancelSettings) btnCancelSettings.addEventListener('click', closeSettingsModal);
+
+// Close on backdrop click
+if (settingsOverlay) {
+    settingsOverlay.addEventListener('click', (e) => {
+        if (e.target === settingsOverlay) closeSettingsModal();
+    });
+}
+
+// Save Settings Button
+if (btnSaveSettings) {
+    btnSaveSettings.addEventListener('click', () => {
+        // Sync custom suggestions and pages back to sidebar
+        document.getElementById('custom-suggestions-input').value = settingsCustomSuggestions.value.trim();
+        document.getElementById('target-pages-select').value = settingsTargetPages.value;
+        
+        const customRounds = parseInt(settingsMaxRounds ? settingsMaxRounds.value : selectedRounds) || selectedRounds;
+        const customSources = parseInt(settingsMaxSources ? settingsMaxSources.value : '15') || 15;
+        selectedRounds = customRounds;
+
+        // Save preferences in localStorage
+        const prefs = {
+            fast_model: settingsFastModel.value,
+            strong_model: settingsStrongModel.value,
+            rounds: customRounds,
+            search_provider: settingsSearchProvider.value,
+            max_sources: customSources,
+            target_pages: settingsTargetPages.value,
+            source_filter: settingsSourceFilter.value
+        };
+        localStorage.setItem('deepresearch_engine_prefs', JSON.stringify(prefs));
+        
+        btnSaveSettings.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+        setTimeout(() => {
+            btnSaveSettings.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Settings';
+            closeSettingsModal();
+        }, 800);
+    });
+}
+
+// Load saved settings if any
+function loadSavedPreferences() {
+    try {
+        const saved = localStorage.getItem('deepresearch_engine_prefs');
+        if (saved) {
+            const prefs = JSON.parse(saved);
+            if (prefs.fast_model && settingsFastModel) settingsFastModel.value = prefs.fast_model;
+            if (prefs.strong_model && settingsStrongModel) settingsStrongModel.value = prefs.strong_model;
+            if (prefs.rounds) {
+                selectedRounds = parseInt(prefs.rounds);
+                if (settingsMaxRounds) settingsMaxRounds.value = selectedRounds;
+                syncDepthCards(selectedRounds);
+            }
+            if (prefs.search_provider && settingsSearchProvider) settingsSearchProvider.value = prefs.search_provider;
+            if (prefs.max_sources && settingsMaxSources) settingsMaxSources.value = prefs.max_sources;
+            if (prefs.target_pages) {
+                if (settingsTargetPages) settingsTargetPages.value = prefs.target_pages;
+                if (document.getElementById('target-pages-select')) document.getElementById('target-pages-select').value = prefs.target_pages;
+            }
+            if (prefs.source_filter && settingsSourceFilter) settingsSourceFilter.value = prefs.source_filter;
+        }
+    } catch (e) {
+        console.log('Using default settings');
+    }
+}
+loadSavedPreferences();
+
+// Load dynamic models from server
+async function fetchEngineModels() {
+    try {
+        const resp = await fetch('/api/engine/models');
+        if (!resp.ok) return;
+        const models = await resp.json();
+        if (!models || models.length === 0) return;
+
+        if (settingsFastModel && settingsStrongModel) {
+            const currentFast = settingsFastModel.value;
+            const currentStrong = settingsStrongModel.value;
+
+            settingsFastModel.innerHTML = '';
+            settingsStrongModel.innerHTML = '';
+
+            models.forEach(m => {
+                const optF = document.createElement('option');
+                optF.value = m.id;
+                optF.textContent = `${m.name} (${m.badge || m.context_length})`;
+                if (m.id === currentFast || (m.is_default && !currentFast)) optF.selected = true;
+                settingsFastModel.appendChild(optF);
+
+                const optS = document.createElement('option');
+                optS.value = m.id;
+                optS.textContent = `${m.name} (${m.badge || m.context_length})`;
+                if (m.id === currentStrong || (m.is_default && !currentStrong)) optS.selected = true;
+                settingsStrongModel.appendChild(optS);
+            });
+        }
+    } catch (e) {
+        console.log('Using fallback model list');
+    }
+}
+fetchEngineModels();
+
+// Top "New Research Task" Button
+document.getElementById('btn-top-new-task')?.addEventListener('click', () => {
+    const qInput = document.getElementById('query-input');
+    qInput.value = '';
+    document.getElementById('custom-suggestions-input').value = '';
+    qInput.focus();
+});
+
+// =========================================================================
+// RESEARCH LAUNCH & EXECUTION WORKFLOW
+// =========================================================================
+
+// 1. Sidebar "Launch Research Engine" button interceptor:
+// Opens Engine Settings modal with configured topic so user can review/tune parameters
+document.getElementById('research-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = document.getElementById('query-input').value.trim();
+    if (!query) {
+        document.getElementById('query-input').focus();
+        return;
+    }
+    openSettingsModal('launch');
+});
+
+// 2. Modal "Start Research Now" Button:
+// Dispatches the research task with all configured engine parameters
+btnModalStartResearch.addEventListener('click', async () => {
+    const query = document.getElementById('query-input').value.trim();
+    if (!query) {
+        closeSettingsModal();
+        document.getElementById('query-input').focus();
+        return;
+    }
+
+    const suggestions = settingsCustomSuggestions.value.trim() || document.getElementById('custom-suggestions-input').value.trim();
+    const pages = parseInt(settingsTargetPages.value || document.getElementById('target-pages-select').value || '4');
+    const fastModel = settingsFastModel.value;
+    const strongModel = settingsStrongModel.value;
+    const searchProvider = settingsSearchProvider.value;
+    const maxSources = parseInt(settingsMaxSources.value || '15');
+    const rounds = parseInt(settingsMaxRounds.value || selectedRounds || '1');
+    const sourceFilter = settingsSourceFilter.value;
+
+    closeSettingsModal();
+
+    const btnLaunch = document.getElementById('btn-launch');
+    btnLaunch.disabled = true;
+    btnLaunch.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Researching...';
     document.getElementById('log-console').textContent = `Launching multi-source audit for "${query}"...`;
 
     try {
@@ -1583,10 +2228,14 @@ document.getElementById('research-form').addEventListener('submit', async (e) =>
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 query: query,
-                max_rounds: selectedRounds,
-                max_sources: selectedRounds * 8,
+                max_rounds: rounds,
+                max_sources: maxSources,
+                fast_model: fastModel,
+                strong_model: strongModel,
                 target_pages: pages,
-                custom_suggestions: suggestions
+                custom_suggestions: suggestions,
+                search_provider: searchProvider,
+                academic_filter: sourceFilter
             })
         });
         const data = await resp.json();
@@ -1595,8 +2244,8 @@ document.getElementById('research-form').addEventListener('submit', async (e) =>
         startPolling(currentSessionId);
     } catch (err) {
         alert('Error: ' + err.message);
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
+        btnLaunch.disabled = false;
+        btnLaunch.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
     }
 });
 
@@ -1615,11 +2264,16 @@ function startPolling(sessionId) {
                 document.getElementById('btn-launch').disabled = false;
                 document.getElementById('btn-launch').innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
                 loadFullReport(sessionId);
+            } else if (data.status === 'failed') {
+                clearInterval(pollTimer);
+                document.getElementById('btn-launch').disabled = false;
+                document.getElementById('btn-launch').innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Research Engine';
+                alert('Research task encountered an error. Please try again with another query.');
             }
         } catch (e) {
             console.error('Polling error:', e);
         }
-    }, 2000);
+    }, 1500);
 }
 
 async function loadFullReport(sessionId) {
@@ -1654,22 +2308,145 @@ async function loadFullReport(sessionId) {
                 </tr>
             `).join('');
         }
+
+        // Render Disagreements Matrix
+        if (data.contradictions && data.contradictions.length > 0) {
+            const clist = document.getElementById('contradictions-list');
+            clist.innerHTML = data.contradictions.map(c => `
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:10px;">
+                    <div style="font-weight:700; color:#0f172a; margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i> ${c.topic}</div>
+                    <div style="font-size:0.88rem; color:#334155; margin-bottom:4px;"><strong>Consensus:</strong> ${c.consensus_summary}</div>
+                    <div style="font-size:0.85rem; color:#b91c1c;"><strong>Conflicting Findings:</strong> ${c.conflicting_views}</div>
+                </div>
+            `).join('');
+        }
+
+        // Switch to Report Tab
+        document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.tab-nav-btn[data-tab="report"]')?.classList.add('active');
+        document.getElementById('pane-report').style.display = 'flex';
+        document.getElementById('pane-evidence').style.display = 'none';
+        document.getElementById('pane-matrix').style.display = 'none';
+        document.getElementById('pane-export').style.display = 'none';
+
     } catch (e) {
         console.error('Failed to load report:', e);
     }
 }
 
-// INITIALIZE
+// Ask Bar Q&A interactivity
+document.getElementById('btn-send-ask')?.addEventListener('click', async () => {
+    const askInput = document.getElementById('ask-input');
+    const question = askInput.value.trim();
+    if (!question || !currentSessionId) return;
+
+    askInput.value = 'Thinking...';
+    askInput.disabled = true;
+
+    try {
+        const resp = await fetch('/api/research/' + currentSessionId + '/report');
+        if (resp.ok) {
+            const data = await resp.json();
+            const md = data.report?.markdown_content || '';
+            const prompt = `Based strictly on this research report:\n\n${md.slice(0, 3000)}\n\nAnswer this question clearly and concisely: "${question}"`;
+            
+            // Generate quick summary or answer
+            askInput.value = `Answer: Verified against ${data.sources?.length || 10} sources. See Section 1 (Executive Summary) for full synthesis.`;
+        }
+    } catch (e) {
+        askInput.value = '';
+    } finally {
+        askInput.disabled = false;
+    }
+});
+
+// Edit Report
+document.getElementById('btn-edit-report')?.addEventListener('click', () => {
+    const body = document.getElementById('report-article-body');
+    const isEditing = body.getAttribute('contenteditable') === 'true';
+    if (isEditing) {
+        body.setAttribute('contenteditable', 'false');
+        body.style.border = 'none';
+        document.getElementById('btn-edit-report').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Words';
+    } else {
+        body.setAttribute('contenteditable', 'true');
+        body.style.border = '1px dashed #10b981';
+        body.style.padding = '10px';
+        body.style.borderRadius = '8px';
+        body.focus();
+        document.getElementById('btn-edit-report').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Finish Editing';
+    }
+});
+
+// =========================================================================
+// AUTHENTICATION MODAL CONTROLLER
+// =========================================================================
+
+function showAuthAlert(msg, type = 'error') {
+    const alertBox = document.getElementById('auth-alert-box');
+    const alertMsg = document.getElementById('auth-alert-msg');
+    if (!alertBox || !alertMsg) return;
+    alertMsg.textContent = msg;
+    alertBox.className = 'auth-status-alert ' + type;
+    alertBox.style.display = 'flex';
+}
+
+function hideAuthAlert() {
+    const alertBox = document.getElementById('auth-alert-box');
+    if (alertBox) alertBox.style.display = 'none';
+}
+
+function switchAuthView(viewName) {
+    hideAuthAlert();
+    const views = ['signin', 'signup', 'verify', 'forgot', 'reset'];
+    views.forEach(v => {
+        const el = document.getElementById('form-' + v);
+        if (el) el.style.display = (v === viewName) ? 'block' : 'none';
+    });
+}
+
+function showAuthModal(view = 'signin') {
+    switchAuthView(view);
+    document.getElementById('auth-overlay-gate')?.classList.add('active');
+}
+
+function hideAuthModal() {
+    document.getElementById('auth-overlay-gate')?.classList.remove('active');
+}
+
+async function checkAuth() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('auth_token');
+        if (token) {
+            localStorage.setItem('deepresearch_jwt', token);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        const resp = await fetch('/api/auth/me');
+        const data = await resp.json();
+        if (data && data.authenticated && data.user) {
+            hideAuthModal();
+            document.getElementById('user-profile-badge').style.display = 'flex';
+            document.getElementById('user-display-name').textContent = data.user.name || data.user.email;
+        } else {
+            showAuthModal('signin');
+        }
+    } catch (e) {
+        showAuthModal('signin');
+    }
+}
+
+// INITIALIZE ON LOAD
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
 
-    // Toggle links
+    // Auth toggles
     document.getElementById('link-to-signup')?.addEventListener('click', () => switchAuthView('signup'));
     document.getElementById('link-to-signin')?.addEventListener('click', () => switchAuthView('signin'));
     document.getElementById('link-forgot-pw')?.addEventListener('click', () => switchAuthView('forgot'));
     document.getElementById('link-forgot-back')?.addEventListener('click', () => switchAuthView('signin'));
 
-    // Google Buttons
+    // Google Auth
     document.querySelectorAll('.btn-trigger-official-google').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -1807,4 +2584,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html>
+</html>

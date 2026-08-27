@@ -199,16 +199,27 @@ class EvidenceStore:
         conn = get_db_connection()
         cursor = conn.cursor()
         for item in contradictions:
+            topic = getattr(item, 'topic', None) or (item.get('topic') if isinstance(item, dict) else '')
+            consensus = getattr(item, 'consensus_summary', None) or (item.get('consensus_summary') if isinstance(item, dict) else '')
+            
+            conflicting = getattr(item, 'conflicting_views', None)
+            if conflicting is None and isinstance(item, dict):
+                conflicting = item.get('conflicting_views')
+            if not isinstance(conflicting, str):
+                conflicting = json.dumps(conflicting or [])
+                
+            affected = getattr(item, 'affected_sources', None) or getattr(item, 'affected_source_ids', None)
+            if affected is None and isinstance(item, dict):
+                affected = item.get('affected_sources') or item.get('affected_source_ids', [])
+            if not isinstance(affected, str):
+                affected = json.dumps(affected or [])
+
             cursor.execute(
                 """
                 INSERT INTO contradictions (session_id, topic, consensus_summary, conflicting_views, affected_source_ids)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (sid,
-                 item.topic if hasattr(item, 'topic') else item['topic'],
-                 item.consensus_summary if hasattr(item, 'consensus_summary') else item['consensus_summary'],
-                 json.dumps(item.conflicting_views if hasattr(item, 'conflicting_views') else item['conflicting_views']),
-                 json.dumps(item.affected_source_ids if hasattr(item, 'affected_source_ids') else item['affected_source_ids']))
+                (sid, topic, consensus, conflicting, affected)
             )
         conn.commit()
         conn.close()

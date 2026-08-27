@@ -486,13 +486,14 @@ def auth_google_callback(request: Request, code: Optional[str] = None, state: Op
 
     token = create_auth_token(user_id, email)
     resp = RedirectResponse(url=f"/?auth_token={token}")
+    is_secure = ("onrender.com" in str(request.base_url)) or (request.headers.get("x-forwarded-proto") == "https")
     resp.set_cookie(
         key="deepresearch_token",
         value=token,
         max_age=30 * 86400,
         httponly=True,
         samesite="lax",
-        secure=False
+        secure=is_secure
     )
     return resp
 

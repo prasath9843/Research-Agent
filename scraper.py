@@ -11,18 +11,12 @@ class ContentScraper:
         }
 
     def fetch_static(self, url: str) -> Optional[str]:
-        # Fast 3-second timeout static fetch
+        # Fast 2.0-second non-blocking fetch
         if url.endswith('.pdf'):
             return None
         try:
-            downloaded = trafilatura.fetch_url(url)
-            if downloaded:
-                extracted = trafilatura.extract(downloaded, include_links=False, include_images=False)
-                if extracted and len(extracted.strip()) > 150:
-                    return extracted.strip()
-            
-            resp = requests.get(url, headers=self.headers, timeout=3)
-            if resp.status_code == 200:
+            resp = requests.get(url, headers=self.headers, timeout=2.0)
+            if resp.status_code == 200 and resp.text:
                 extracted = trafilatura.extract(resp.text, include_links=False, include_images=False)
                 if extracted and len(extracted.strip()) > 150:
                     return extracted.strip()

@@ -199,8 +199,8 @@ class ResearchPipeline:
                         all_results.append(item)
                         self.log("FOUND_URL", f"Discovered source URL: {item.url} ('{item.title}')")
 
-        # Limit total sources (ensure at least 15 for rich references)
-        max_sources = max(int(self.config.get("max_sources", 15) or 15), 12)
+        # Limit total sources according to user config
+        max_sources = max(int(self.config.get("max_sources", 15) or 15), 5)
         all_results = all_results[:max_sources]
         self.log("SEARCH_DONE", f"Found {len(all_results)} unique relevant URLs across parallel queries.")
         return all_results
@@ -217,8 +217,8 @@ class ResearchPipeline:
             if not any(clean_title == et or (len(clean_title) > 25 and clean_title[:30] in et) for et in existing_titles):
                 candidates.append(item)
 
-        # Fast parallel fetch (10 workers, 3s timeout)
-        scraped_batch = scraper.fetch_batch_parallel(candidates, max_workers=10)
+        # Fast parallel fetch (12 workers, 2s non-blocking timeout)
+        scraped_batch = scraper.fetch_batch_parallel(candidates, max_workers=12)
 
         for res in scraped_batch:
             item = res["item"]
@@ -239,7 +239,7 @@ class ResearchPipeline:
             added_count += 1
             self.log("APPROVED_SOURCE", f"Approved full-text source #{source_id}: '{item.title}'")
 
-        # Fallback snippet ingestion: ensure remaining high-relevance search results are also ingested
+        # Fallback snippet ingestion: ensure remaining search results are also ingested
         for item in candidates:
             clean_title = item.title.lower().strip()
             if not any(clean_title == et or (len(clean_title) > 25 and clean_title[:30] in et) for et in existing_titles):
@@ -276,8 +276,13 @@ class ResearchPipeline:
             if not conn_claims:
                 sources_to_extract.append(src)
 
+        # In Turbo/Fast mode, prioritize top 8 richest full-text sources for sub-30s claim extraction
+        is_turbo = self.config.get("max_rounds", 1) <= 1
+        limit_extract = 8 if is_turbo else 15
+        sources_to_extract = sources_to_extract[:limit_extract]
+
         def _extract_source_claims(src):
-            text_sample = src["clean_text"][:3500]
+            text_sample = src["clean_text"][:2500]
             extraction_prompt = (
                 f"Extract key atomic factual claims from the following source article.\n"
                 f"Research Topic: {self.query}\n"
@@ -306,9 +311,9 @@ class ResearchPipeline:
                 self.log("EXTRACT_ERR", f"Failed extracting claims for source #{src['id']}: {e}")
                 return src["id"], []
 
-        # Run claim extraction concurrently with 6 worker threads
+        # Run claim extraction concurrently with 8 worker threads
         if sources_to_extract:
-            with ThreadPoolExecutor(max_workers=6) as executor:
+            with ThreadPoolExecutor(max_workers=8) as executor:
                 extraction_results = executor.map(_extract_source_claims, sources_to_extract)
                 for src_id, valid_claims in extraction_results:
                     accepted_claims = []

@@ -163,16 +163,16 @@ class EvidenceStore:
         conn = get_db_connection()
         cursor = conn.cursor()
         for c in claims:
+            c_text = c.claim if hasattr(c, 'claim') else (c.claim_text if hasattr(c, 'claim_text') else (c.get('claim') or c.get('claim_text', '')))
+            q_text = c.quote_or_paraphrase if hasattr(c, 'quote_or_paraphrase') else c.get('quote_or_paraphrase', '')
+            sq_tag = c.sub_question_tag if hasattr(c, 'sub_question_tag') else c.get('sub_question_tag', 'SQ1')
+            conf = c.confidence if hasattr(c, 'confidence') else c.get('confidence', 1.0)
             cursor.execute(
                 """
                 INSERT INTO claims (session_id, source_id, claim_text, quote_or_paraphrase, sub_question_tag, confidence)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (sid, source_id,
-                 c.claim if hasattr(c, 'claim') else c['claim'],
-                 c.quote_or_paraphrase if hasattr(c, 'quote_or_paraphrase') else c['quote_or_paraphrase'],
-                 c.sub_question_tag if hasattr(c, 'sub_question_tag') else c['sub_question_tag'],
-                 c.confidence if hasattr(c, 'confidence') else c.get('confidence', 1.0))
+                (sid, source_id, c_text, q_text, sq_tag, conf)
             )
         conn.commit()
         conn.close()

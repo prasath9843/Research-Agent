@@ -74,27 +74,31 @@ class LLMClient:
         last_exception = None
 
         for attempt, current_model in enumerate(fallback_models):
-            try:
-                if attempt > 0:
-                    print(f"[LLMClient] Fast retry completion with model '{current_model}' (Attempt {attempt+1}/3)...")
+            for conn_try in range(3):
+                try:
+                    if attempt > 0 or conn_try > 0:
+                        print(f"[LLMClient] Completion with model '{current_model}' (Attempt {attempt+1}, Try {conn_try+1})...")
 
-                response = client.chat.completions.create(
-                    model=current_model,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=temperature,
-                    max_tokens=max_tokens
-                )
-                res_content = response.choices[0].message.content or ""
-                if res_content.strip():
-                    return res_content
-            except Exception as err:
-                last_exception = err
-                err_msg = str(err)
-                print(f"[LLMClient] Warning: Model '{current_model}' returned error: {err_msg}")
-                continue
+                    response = client.chat.completions.create(
+                        model=current_model,
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=temperature,
+                        max_tokens=max_tokens
+                    )
+                    res_content = response.choices[0].message.content or ""
+                    if res_content.strip():
+                        return res_content
+                except Exception as err:
+                    last_exception = err
+                    err_msg = str(err)
+                    print(f"[LLMClient] Warning: Model '{current_model}' (try {conn_try+1}) error: {err_msg}")
+                    if conn_try < 2 and ("Connection error" in err_msg or "timeout" in err_msg.lower()):
+                        time.sleep(1.0)
+                        continue
+                    break
 
         if last_exception:
             raise last_exception

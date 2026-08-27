@@ -43,10 +43,18 @@ class SourceScore(BaseModel):
 # ==========================================
 
 class AtomicClaim(BaseModel):
+    model_config = {"extra": "allow"}
     claim_text: str = Field(..., description="Extracted factual, quantitative, or causal claim")
     quote_or_paraphrase: str = Field(..., description="Exact quote or tight paraphrase from source")
     sub_question_tag: str = Field(..., description="Which sub-question this addresses")
     confidence: float = Field(1.0, ge=0.0, le=1.0, description="Confidence in extraction accuracy")
+    source_url: Optional[str] = None
+    source_title: Optional[str] = None
+    source_id: Optional[int] = None
+
+    @property
+    def claim(self) -> str:
+        return self.claim_text
 
 class ClaimsExtractionOutput(BaseModel):
     claims: List[AtomicClaim] = Field(default_factory=list)

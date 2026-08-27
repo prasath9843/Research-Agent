@@ -276,10 +276,42 @@ class ResearchPipeline:
             if not conn_claims:
                 sources_to_extract.append(src)
 
-        # In Turbo/Fast mode, prioritize top 8 richest full-text sources for sub-30s claim extraction
+        # In Turbo/Fast mode, extract claims from all sources in a single high-speed batched LLM call (~3s total)
         is_turbo = self.config.get("max_rounds", 1) <= 1
-        limit_extract = 8 if is_turbo else 15
-        sources_to_extract = sources_to_extract[:limit_extract]
+        if is_turbo and sources_to_extract:
+            selected_sources = sources_to_extract[:6]
+            combined_context = "\n\n".join([
+                f"[Source ID {src['id']}] Title: {src['title']} (URL: {src['url']})\nExcerpt: {src['clean_text'][:1200]}"
+                for src in selected_sources
+            ])
+            batch_prompt = (
+                f"Extract 2-3 key atomic factual claims for each of the following sources regarding '{self.query}'.\n"
+                f"Available Sub-question tags: {sq_tags}\n\n"
+                f"SOURCES LIST:\n{combined_context}\n\n"
+                f"Output JSON matching ClaimsExtractionOutput with concise factual assertions, quotes, and valid tags from {sq_tags}."
+            )
+            try:
+                extracted_obj = llm_client.structured_output(
+                    prompt=batch_prompt,
+                    response_model=ClaimsExtractionOutput,
+                    model=self.config["fast_model"]
+                )
+                source_url_to_id = {s["url"]: s["id"] for s in selected_sources}
+                default_sid = selected_sources[0]["id"]
+                for claim in extracted_obj.claims:
+                    sid = source_url_to_id.get(claim.source_url, default_sid)
+                    c_norm = claim.claim.lower().strip()
+                    if c_norm not in existing_claims_texts:
+                        existing_claims_texts.add(c_norm)
+                        self.store.add_claims(sid, [claim])
+                        total_claims_added += 1
+                        self.log("CLAIM", f"Extracted atomic claim: '{claim.claim}'")
+                return total_claims_added
+            except Exception as e:
+                self.log("EXTRACT_ERR", f"Batch claim extraction fallback: {e}")
+
+        # Standard / Deep mode: Concurrent extraction per source
+        sources_to_extract = sources_to_extract[:10]
 
         def _extract_source_claims(src):
             text_sample = src["clean_text"][:2500]

@@ -10,8 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Marked JS for Markdown rendering -->
+    <!-- Marked JS & Turndown JS for Markdown rendering and editing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/turndown/dist/turndown.js"></script>
     <style>
 /* ==========================================================================
    DEEPRESEARCH STUDIO — MODERN ACADEMIC AGENT CSS THEME
@@ -2366,22 +2367,92 @@ document.getElementById('btn-send-ask')?.addEventListener('click', async () => {
     }
 });
 
-// Edit Report
-document.getElementById('btn-edit-report')?.addEventListener('click', () => {
+// Save and sync edited report to SQLite backend
+async function saveEditedReport() {
+    if (!currentSessionId) return;
+    const body = document.getElementById('report-article-body');
+    if (!body) return;
+
+    let updatedMd = '';
+    try {
+        if (typeof TurndownService !== 'undefined') {
+            const td = new TurndownService({
+                headingStyle: 'atx',
+                codeBlockStyle: 'fenced'
+            });
+            updatedMd = td.turndown(body.innerHTML);
+        } else {
+            updatedMd = body.innerText;
+        }
+    } catch (err) {
+        updatedMd = body.innerText;
+    }
+
+    if (!updatedMd || updatedMd.trim().length === 0) return;
+
+    const words = updatedMd.split(/\s+/).length;
+    document.getElementById('report-word-count').innerHTML = `<i class="fa-solid fa-file-lines"></i> ${words.toLocaleString()} words <span style="color:#10b981; font-weight:600;">(Saved)</span>`;
+
+    try {
+        await fetch(`/api/research/${currentSessionId}/report`, {
+            method: 'PUT',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            credentials: 'include',
+            body: JSON.stringify({ markdown_content: updatedMd })
+        });
+    } catch (e) {
+        console.error('Failed to sync edited report:', e);
+    }
+}
+
+// Edit Report Button Toggle
+document.getElementById('btn-edit-report')?.addEventListener('click', async () => {
     const body = document.getElementById('report-article-body');
     const isEditing = body.getAttribute('contenteditable') === 'true';
     if (isEditing) {
         body.setAttribute('contenteditable', 'false');
         body.style.border = 'none';
         document.getElementById('btn-edit-report').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Words';
+        await saveEditedReport();
     } else {
         body.setAttribute('contenteditable', 'true');
-        body.style.border = '1px dashed #10b981';
-        body.style.padding = '10px';
+        body.style.border = '2px dashed #10b981';
+        body.style.padding = '12px';
         body.style.borderRadius = '8px';
         body.focus();
         document.getElementById('btn-edit-report').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Finish Editing';
     }
+});
+
+// PDF & Markdown Download Interceptors (Guarantees edited words are synced before download)
+async function triggerFileDownload(format) {
+    if (!currentSessionId) return;
+    const body = document.getElementById('report-article-body');
+    if (body && body.getAttribute('contenteditable') === 'true') {
+        body.setAttribute('contenteditable', 'false');
+        body.style.border = 'none';
+        document.getElementById('btn-edit-report').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Words';
+    }
+    // Auto-save edited words immediately to database before downloading
+    await saveEditedReport();
+    window.location.href = `/api/export/${currentSessionId}/${format}`;
+}
+
+document.getElementById('btn-top-pdf-download')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerFileDownload('pdf');
+});
+document.getElementById('btn-download-pdf-hero')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerFileDownload('pdf');
+});
+document.getElementById('export-pdf-action')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerFileDownload('pdf');
+});
+document.getElementById('export-md-action')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerFileDownload('md');
 });
 
 // =========================================================================

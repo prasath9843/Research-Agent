@@ -395,14 +395,18 @@ def auth_login(payload: LoginRequest, response: Response):
 @app.get("/api/auth/google/url")
 def auth_google_url(request: Request):
     client_id = GOOGLE_CLIENT_ID
+    if not client_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Google Sign-In is not configured. Please add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your Render Environment variables."
+        )
     state = secrets.token_urlsafe(16)
     
     # Dynamically determine redirect URI based on current host (localhost or Render)
     base_url = str(request.base_url).rstrip("/")
-    # If Render is terminating SSL behind proxy
-    if "onrender.com" in base_url and not base_url.startswith("https://"):
+    if "onrender.com" in base_url or request.headers.get("x-forwarded-proto") == "https":
         base_url = base_url.replace("http://", "https://")
-    redirect_uri = f"{base_url}/api/auth/google/callback"
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or f"{base_url}/api/auth/google/callback"
     
     url = (
         f"https://accounts.google.com/o/oauth2/v2/auth?"
@@ -422,12 +426,12 @@ def auth_google_callback(request: Request, code: Optional[str] = None, state: Op
         return RedirectResponse(url=f"/?auth_error={error or 'google_cancelled'}")
 
     base_url = str(request.base_url).rstrip("/")
-    if "onrender.com" in base_url and not base_url.startswith("https://"):
+    if "onrender.com" in base_url or request.headers.get("x-forwarded-proto") == "https":
         base_url = base_url.replace("http://", "https://")
-    redirect_uri = f"{base_url}/api/auth/google/callback"
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or f"{base_url}/api/auth/google/callback"
     
-    client_id = GOOGLE_CLIENT_ID
-    client_secret = GOOGLE_CLIENT_SECRET
+    client_id = GOOGLE_CLIENT_ID or os.getenv("GOOGLE_CLIENT_ID", "")
+    client_secret = GOOGLE_CLIENT_SECRET or os.getenv("GOOGLE_CLIENT_SECRET", "")
 
     email = None
     name = "Google User"

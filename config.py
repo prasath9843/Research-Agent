@@ -23,5 +23,10 @@ class Settings:
         self.MAX_SOURCES: int = int(os.getenv("MAX_SOURCES", "15"))
         self.DUPLICATE_CLAIM_THRESHOLD: float = float(os.getenv("DUPLICATE_CLAIM_THRESHOLD", "0.70"))
         self.DB_PATH: str = os.getenv("DB_PATH", str(BASE_DIR / "research_agent.db"))
+        
+        self.AUTH_SECRET: str = os.getenv("AUTH_SECRET", "deepresearch-studio-secret-auth-key-2026")
+        self.GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+        self.GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+        self.GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "")
 
 settings = Settings()
